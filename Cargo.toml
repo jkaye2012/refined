@@ -1,0 +1,15 @@
+[package]
+name = "refined"
+version = "0.0.0"
+edition = "2021"
+description = "Simple refinement types; parse, don't validate!"
+license = "MIT"
+license-file = "LICENSE.txt"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.215", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0.133"
