@@ -20,9 +20,17 @@ struct Refined<T>(T);
 #[serde(try_from = "Refined<T>")]
 pub struct Refinement<T, P: Predicate<T>>(T, #[serde(skip)] PhantomData<P>);
 
+// TODO: replace result types here with something better
 impl<T, P: Predicate<T>> Refinement<T, P> {
     pub fn refine(value: T) -> Result<Self, String> {
         Self::try_from(Refined(value))
+    }
+
+    pub fn modify<F>(self, fun: F) -> Result<Self, String>
+    where
+        F: Fn(T) -> T,
+    {
+        Self::refine(fun(self.0))
     }
 }
 
@@ -38,18 +46,18 @@ impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
     }
 }
 
-impl<F, T, Type> Covers<Refinement<Type, T>> for Refinement<Type, F>
-where
-    F: Predicate<Type> + Covers<T>,
-    T: Predicate<Type>,
-{
-    fn covered(self) -> Refinement<Type, T> {
-        Refinement(self.0, PhantomData)
-    }
+pub trait Implies<T> {
+    fn imply(self) -> T;
 }
 
-pub trait Covers<T> {
-    fn covered(self) -> T;
+impl<F, T, Type> Implies<Refinement<Type, T>> for Refinement<Type, F>
+where
+    F: Predicate<Type> + Implies<T>,
+    T: Predicate<Type>,
+{
+    fn imply(self) -> Refinement<Type, T> {
+        Refinement(self.0, PhantomData)
+    }
 }
 
 pub(crate) enum Assert<const CHECK: bool> {}

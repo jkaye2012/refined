@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::Predicate;
+use crate::{Implies, Predicate};
 
 pub struct True;
 
@@ -23,6 +23,16 @@ pub struct And<P1, P2>(PhantomData<P1>, PhantomData<P2>);
 impl<T, P1: Predicate<T>, P2: Predicate<T>> Predicate<T> for And<P1, P2> {
     fn test(t: &T) -> bool {
         P1::test(t) && P2::test(t)
+    }
+}
+
+impl<F1, T1, F2, T2> Implies<And<T1, T2>> for And<F1, F2>
+where
+    F1: Implies<T1>,
+    F2: Implies<T2>,
+{
+    fn imply(self) -> And<T1, T2> {
+        And::<T1, T2>(PhantomData, PhantomData)
     }
 }
 
