@@ -1,4 +1,7 @@
 use crate::boolean::*;
+use crate::Assert;
+use crate::Covers;
+use crate::IsTrue;
 use crate::Predicate;
 
 pub trait Boundable {
@@ -105,6 +108,15 @@ pub type GT<const MIN: isize> = GreaterThan<MIN>;
 impl<T: Boundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() > MIN
+    }
+}
+
+impl<const F: isize, const T: isize> Covers<GreaterThan<T>> for GreaterThan<F>
+where
+    Assert<{ F > T }>: IsTrue,
+{
+    fn covered(self) -> GreaterThan<T> {
+        GreaterThan::<T>
     }
 }
 

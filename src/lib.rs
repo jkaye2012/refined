@@ -1,3 +1,6 @@
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
 use std::marker::PhantomData;
 
 use serde::Deserialize;
@@ -34,3 +37,23 @@ impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
         }
     }
 }
+
+impl<F, T, Type> Covers<Refinement<Type, T>> for Refinement<Type, F>
+where
+    F: Predicate<Type> + Covers<T>,
+    T: Predicate<Type>,
+{
+    fn covered(self) -> Refinement<Type, T> {
+        Refinement(self.0, PhantomData)
+    }
+}
+
+pub trait Covers<T> {
+    fn covered(self) -> T;
+}
+
+pub(crate) enum Assert<const CHECK: bool> {}
+
+pub(crate) trait IsTrue {}
+
+impl IsTrue for Assert<true> {}
