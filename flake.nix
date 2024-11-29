@@ -2,12 +2,15 @@
   description = "Simple refinement types for Rust with Serde support";
 
   inputs = {
+    nixpkgs.url = "nixpkgs/nixos-24.05";
     fenix = {
       url = "github:nix-community/fenix/monthly";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "nixpkgs/nixos-24.05";
-    devenv.url = "github:jkaye2012/devenv";
+    devenv = {
+      url = "github:jkaye2012/devenv";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     naersk.url = "github:nix-community/naersk";
   };
 

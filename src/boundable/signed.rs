@@ -1,5 +1,5 @@
 use crate::boolean::*;
-use crate::{Assert, Implies, IsTrue, Predicate};
+use crate::Predicate;
 
 pub trait Boundable {
     fn bounding_value(&self) -> isize;
@@ -108,17 +108,6 @@ impl<T: Boundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
     }
 }
 
-impl<const F: isize, const T: isize> Implies<GreaterThan<T>> for GreaterThan<F>
-where
-    Assert<{ F > T }>: IsTrue,
-{
-    fn imply(self) -> GreaterThan<T> {
-        GreaterThan::<T>
-    }
-}
-
-// TODO: GTE implication, other implications as well
-
 pub struct GreaterThanEqual<const MIN: isize>;
 
 pub type GTE<const MIN: isize> = GreaterThanEqual<MIN>;
@@ -126,15 +115,6 @@ pub type GTE<const MIN: isize> = GreaterThanEqual<MIN>;
 impl<T: Boundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() >= MIN
-    }
-}
-
-impl<const F: isize, const T: isize> Implies<GreaterThanEqual<T>> for GreaterThanEqual<F>
-where
-    Assert<{ F > T }>: IsTrue,
-{
-    fn imply(self) -> GreaterThanEqual<T> {
-        GreaterThanEqual::<T>
     }
 }
 
@@ -148,15 +128,6 @@ impl<T: Boundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
     }
 }
 
-impl<const F: isize, const T: isize> Implies<LessThan<T>> for LessThan<F>
-where
-    Assert<{ F < T }>: IsTrue,
-{
-    fn imply(self) -> LessThan<T> {
-        LessThan::<T>
-    }
-}
-
 pub struct LessThanEqual<const MAX: isize>;
 
 pub type LTE<const MAX: isize> = LessThanEqual<MAX>;
@@ -164,15 +135,6 @@ pub type LTE<const MAX: isize> = LessThanEqual<MAX>;
 impl<T: Boundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
     fn test(value: &T) -> bool {
         value.bounding_value() <= MAX
-    }
-}
-
-impl<const F: isize, const T: isize> Implies<LessThanEqual<T>> for LessThanEqual<F>
-where
-    Assert<{ F < T }>: IsTrue,
-{
-    fn imply(self) -> LessThanEqual<T> {
-        LessThanEqual::<T>
     }
 }
 
@@ -187,42 +149,6 @@ pub struct Equals<const VAL: isize>;
 impl<T: Boundable, const VAL: isize> Predicate<T> for Equals<VAL> {
     fn test(value: &T) -> bool {
         value.bounding_value() == VAL
-    }
-}
-
-impl<const VAL: isize, const MIN: isize> Implies<GreaterThan<MIN>> for Equals<VAL>
-where
-    Assert<{ VAL > MIN }>: IsTrue,
-{
-    fn imply(self) -> GreaterThan<MIN> {
-        GreaterThan::<MIN>
-    }
-}
-
-impl<const VAL: isize, const MIN: isize> Implies<GreaterThanEqual<MIN>> for Equals<VAL>
-where
-    Assert<{ VAL >= MIN }>: IsTrue,
-{
-    fn imply(self) -> GreaterThanEqual<MIN> {
-        GreaterThanEqual::<MIN>
-    }
-}
-
-impl<const VAL: isize, const MAX: isize> Implies<LessThan<MAX>> for Equals<VAL>
-where
-    Assert<{ VAL < MAX }>: IsTrue,
-{
-    fn imply(self) -> LessThan<MAX> {
-        LessThan::<MAX>
-    }
-}
-
-impl<const VAL: isize, const MAX: isize> Implies<LessThanEqual<MAX>> for Equals<VAL>
-where
-    Assert<{ VAL <= MAX }>: IsTrue,
-{
-    fn imply(self) -> LessThanEqual<MAX> {
-        LessThanEqual::<MAX>
     }
 }
 

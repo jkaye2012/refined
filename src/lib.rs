@@ -7,6 +7,10 @@ use serde::Deserialize;
 
 pub mod boolean;
 pub mod boundable;
+#[cfg(feature = "implication")]
+pub mod implication;
+#[cfg(feature = "implication")]
+pub use implication::*;
 
 pub trait Predicate<T> {
     fn test(value: &T) -> bool;
@@ -45,23 +49,3 @@ impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
         }
     }
 }
-
-pub trait Implies<T> {
-    fn imply(self) -> T;
-}
-
-impl<F, T, Type> Implies<Refinement<Type, T>> for Refinement<Type, F>
-where
-    F: Predicate<Type> + Implies<T>,
-    T: Predicate<Type>,
-{
-    fn imply(self) -> Refinement<Type, T> {
-        Refinement(self.0, PhantomData)
-    }
-}
-
-pub(crate) enum Assert<const CHECK: bool> {}
-
-pub(crate) trait IsTrue {}
-
-impl IsTrue for Assert<true> {}
