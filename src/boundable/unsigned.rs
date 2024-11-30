@@ -1,3 +1,11 @@
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+use std::collections::BinaryHeap;
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::collections::LinkedList;
+use std::collections::VecDeque;
+
 use crate::boolean::*;
 use crate::Predicate;
 
@@ -109,7 +117,14 @@ macro_rules! boundable_via_len {
 }
 
 boundable_via_len!(String);
+boundable_via_len!(BinaryHeap<T>);
+boundable_via_len!(BTreeMap<K, V>);
+boundable_via_len!(BTreeSet<T>);
+boundable_via_len!(HashMap<K, V>);
+boundable_via_len!(HashSet<T>);
+boundable_via_len!(LinkedList<T>);
 boundable_via_len!(Vec<T>);
+boundable_via_len!(VecDeque<T>);
 
 impl<T> Boundable for [T] {
     fn bounding_value(&self) -> usize {
