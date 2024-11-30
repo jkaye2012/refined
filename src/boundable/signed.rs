@@ -138,9 +138,13 @@ impl<T: Boundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
     }
 }
 
-pub type Between<const MIN: isize, const MAX: isize> = And<GTE<MIN>, LT<MAX>>;
+pub type OpenInterval<const MIN: isize, const MAX: isize> = And<GT<MIN>, LT<MAX>>;
 
-// TODO: implement open/closed ranges instead
+pub type OpenClosedInterval<const MIN: isize, const MAX: isize> = And<GT<MIN>, LTE<MAX>>;
+
+pub type ClosedOpenInterval<const MIN: isize, const MAX: isize> = And<GTE<MIN>, LT<MAX>>;
+
+pub type ClosedInterval<const MIN: isize, const MAX: isize> = And<GTE<MIN>, LTE<MAX>>;
 
 pub struct Modulo<const DIV: isize, const MOD: isize>;
 
@@ -214,11 +218,43 @@ mod tests {
     }
 
     #[test]
-    fn test_between() {
-        type Test = Refinement<i32, Between<5, 10>>;
+    fn test_open_interval() {
+        type Test = Refinement<i8, OpenInterval<5, 10>>;
+        assert!(Test::refine(6).is_ok());
+        assert!(Test::refine(9).is_ok());
+        assert!(Test::refine(5).is_err());
+        assert!(Test::refine(10).is_err());
+        assert!(Test::refine(4).is_err());
+        assert!(Test::refine(11).is_err());
+    }
+
+    #[test]
+    fn test_open_closed_interval() {
+        type Test = Refinement<i16, OpenClosedInterval<5, 10>>;
+        assert!(Test::refine(6).is_ok());
+        assert!(Test::refine(9).is_ok());
+        assert!(Test::refine(5).is_err());
+        assert!(Test::refine(10).is_ok());
+        assert!(Test::refine(4).is_err());
+        assert!(Test::refine(11).is_err());
+    }
+
+    #[test]
+    fn test_closed_open_interval() {
+        type Test = Refinement<i32, ClosedOpenInterval<5, 10>>;
         assert!(Test::refine(5).is_ok());
         assert!(Test::refine(6).is_ok());
         assert!(Test::refine(10).is_err());
+        assert!(Test::refine(4).is_err());
+        assert!(Test::refine(11).is_err());
+    }
+
+    #[test]
+    fn test_closed_interval() {
+        type Test = Refinement<i64, ClosedInterval<5, 10>>;
+        assert!(Test::refine(5).is_ok());
+        assert!(Test::refine(6).is_ok());
+        assert!(Test::refine(10).is_ok());
         assert!(Test::refine(4).is_err());
         assert!(Test::refine(11).is_err());
     }
