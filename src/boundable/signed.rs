@@ -142,7 +142,19 @@ pub type Between<const MIN: isize, const MAX: isize> = And<GTE<MIN>, LT<MAX>>;
 
 // TODO: implement open/closed ranges instead
 
-// TODO: Modulo, Divisible, Even, Odd
+pub struct Modulo<const DIV: isize, const MOD: isize>;
+
+impl<T: Boundable, const DIV: isize, const MOD: isize> Predicate<T> for Modulo<DIV, MOD> {
+    fn test(value: &T) -> bool {
+        value.bounding_value() % DIV == MOD
+    }
+}
+
+pub type Divisible<const DIV: isize> = Modulo<DIV, 0>;
+
+pub type Even = Modulo<2, 0>;
+
+pub type Odd = Not<Even>;
 
 pub struct Equals<const VAL: isize>;
 
@@ -265,5 +277,41 @@ mod tests {
         assert!(Test::refine(1).is_ok());
         assert!(Test::refine(0).is_ok());
         assert!(Test::refine(-1).is_err());
+    }
+
+    #[test]
+    fn test_modulo() {
+        type Test = Refinement<isize, Modulo<4, 2>>;
+        assert!(Test::refine(6).is_ok());
+        assert!(Test::refine(10).is_ok());
+        assert!(Test::refine(4).is_err());
+    }
+
+    #[test]
+    fn test_divisible() {
+        type Test = Refinement<isize, Divisible<4>>;
+        assert!(Test::refine(4).is_ok());
+        assert!(Test::refine(-4).is_ok());
+        assert!(Test::refine(5).is_err());
+    }
+
+    #[test]
+    fn test_even() {
+        type Test = Refinement<isize, Even>;
+        assert!(Test::refine(4).is_ok());
+        assert!(Test::refine(-4).is_ok());
+        assert!(Test::refine(0).is_ok());
+        assert!(Test::refine(5).is_err());
+        assert!(Test::refine(-5).is_err());
+    }
+
+    #[test]
+    fn test_odd() {
+        type Test = Refinement<isize, Odd>;
+        assert!(Test::refine(5).is_ok());
+        assert!(Test::refine(-3).is_ok());
+        assert!(Test::refine(4).is_err());
+        assert!(Test::refine(0).is_err());
+        assert!(Test::refine(-2).is_err());
     }
 }
