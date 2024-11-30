@@ -98,6 +98,24 @@ impl Boundable for std::num::NonZeroU64 {
     }
 }
 
+macro_rules! boundable_via_len {
+    ($t:ident $(<$($ts:ident),+>)?) => {
+        impl $(<$($ts),+>)? Boundable for $t $(<$($ts),+>)? {
+            fn bounding_value(&self) -> usize {
+                self.len()
+            }
+        }
+    };
+}
+
+boundable_via_len!(String);
+boundable_via_len!(Vec<T>);
+
+impl<T> Boundable for [T] {
+    fn bounding_value(&self) -> usize {
+        self.len()
+    }
+}
 pub struct GreaterThan<const MIN: usize>;
 
 pub type GT<const MIN: usize> = GreaterThan<MIN>;
