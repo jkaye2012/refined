@@ -7,6 +7,7 @@ use serde::Deserialize;
 
 pub mod boolean;
 pub mod boundable;
+pub mod character;
 #[cfg(feature = "implication")]
 pub mod implication;
 #[cfg(feature = "implication")]
