@@ -10,6 +10,7 @@ pub mod boundable;
 pub mod character;
 #[cfg(feature = "implication")]
 pub mod implication;
+pub mod string;
 #[cfg(feature = "implication")]
 pub use implication::*;
 
