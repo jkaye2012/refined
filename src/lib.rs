@@ -8,9 +8,10 @@ use serde::Deserialize;
 pub mod boolean;
 pub mod boundable;
 pub mod character;
+pub mod string;
+
 #[cfg(feature = "implication")]
 pub mod implication;
-pub mod string;
 #[cfg(feature = "implication")]
 pub use implication::*;
 
@@ -22,8 +23,10 @@ pub trait Predicate<T> {
 #[serde(transparent)]
 struct Refined<T>(T);
 
-#[derive(Deserialize)]
-#[serde(try_from = "Refined<T>")]
+// TODO: serde should be behind a feature, implement Serialize properly
+
+#[derive(Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[serde(try_from = "Refined<T>", into = "T")]
 pub struct Refinement<T, P: Predicate<T>>(T, #[serde(skip)] PhantomData<P>);
 
 // TODO: replace result types here with something better

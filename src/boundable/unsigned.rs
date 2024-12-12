@@ -131,6 +131,7 @@ impl<T> Boundable for [T] {
         self.len()
     }
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct GreaterThan<const MIN: usize>;
 
 pub type GT<const MIN: usize> = GreaterThan<MIN>;
@@ -141,6 +142,7 @@ impl<T: Boundable, const MIN: usize> Predicate<T> for GreaterThan<MIN> {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct GreaterThanEqual<const MIN: usize>;
 
 pub type GTE<const MIN: usize> = GreaterThanEqual<MIN>;
@@ -151,6 +153,7 @@ impl<T: Boundable, const MIN: usize> Predicate<T> for GreaterThanEqual<MIN> {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct LessThan<const MAX: usize>;
 
 pub type LT<const MAX: usize> = LessThan<MAX>;
@@ -161,6 +164,7 @@ impl<T: Boundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct LessThanEqual<const MAX: usize>;
 
 pub type LTE<const MAX: usize> = LessThanEqual<MAX>;
@@ -179,6 +183,7 @@ pub type ClosedOpenInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, 
 
 pub type ClosedInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LTE<MAX>>;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Modulo<const DIV: usize, const MOD: usize>;
 
 impl<T: Boundable, const DIV: usize, const MOD: usize> Predicate<T> for Modulo<DIV, MOD> {
@@ -193,6 +198,7 @@ pub type Even = Modulo<2, 0>;
 
 pub type Odd = Not<Even>;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Equals<const VAL: usize>;
 
 impl<T: Boundable, const VAL: usize> Predicate<T> for Equals<VAL> {
