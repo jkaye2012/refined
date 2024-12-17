@@ -5,10 +5,10 @@ use crate::{Predicate, Refinement};
 
 use super::Implies;
 
-impl<F, T, Type> Implies<Refinement<Type, T>> for Refinement<Type, F>
+impl<F, T, Type: Clone> Implies<Refinement<Type, T>> for Refinement<Type, F>
 where
-    F: Predicate<Type> + Implies<T>,
-    T: Predicate<Type>,
+    F: Predicate<Type> + Implies<T> + Clone,
+    T: Predicate<Type> + Clone,
 {
     fn imply(self) -> Refinement<Type, T> {
         Refinement(self.0, PhantomData)

@@ -15,3 +15,4 @@ serde_json = "1.0.133"
 
 [features]
 implication = []
+serde = []

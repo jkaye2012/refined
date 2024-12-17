@@ -3,7 +3,7 @@
 
 use std::marker::PhantomData;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub mod boolean;
 pub mod boundable;
@@ -19,18 +19,24 @@ pub trait Predicate<T> {
     fn test(value: &T) -> bool;
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(transparent)]
 struct Refined<T>(T);
 
-// TODO: serde should be behind a feature, implement Serialize properly
+impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
+    fn from(value: Refinement<T, P>) -> Self {
+        Refined(value.0)
+    }
+}
 
-#[derive(Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[serde(try_from = "Refined<T>", into = "T")]
-pub struct Refinement<T, P: Predicate<T>>(T, #[serde(skip)] PhantomData<P>);
+#[derive(
+    Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize,
+)]
+#[serde(try_from = "Refined<T>", into = "Refined<T>")]
+pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, #[serde(skip)] PhantomData<P>);
 
 // TODO: replace result types here with something better
-impl<T, P: Predicate<T>> Refinement<T, P> {
+impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
     pub fn refine(value: T) -> Result<Self, String> {
         Self::try_from(Refined(value))
     }
@@ -43,7 +49,7 @@ impl<T, P: Predicate<T>> Refinement<T, P> {
     }
 }
 
-impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
+impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P> {
     type Error = String;
 
     fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
@@ -53,4 +59,9 @@ impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
             Err(format!("Value out of bounds."))
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    // Test all serde, properly put behind feature flags
 }
