@@ -37,7 +37,7 @@ impl<T, P: Predicate<T>> Refinement<T, P> {
 
     pub fn modify<F>(self, fun: F) -> Result<Self, String>
     where
-        F: Fn(T) -> T,
+        F: FnOnce(T) -> T,
     {
         Self::refine(fun(self.0))
     }
