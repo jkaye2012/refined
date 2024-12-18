@@ -19,8 +19,7 @@ pub trait Predicate<T> {
     fn test(value: &T) -> bool;
 }
 
-#[derive(Deserialize, Serialize)]
-#[serde(transparent)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize), serde(transparent))]
 struct Refined<T>(T);
 
 impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
@@ -29,11 +28,13 @@ impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
     }
 }
 
-#[derive(
-    Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize,
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(try_from = "Refined<T>", into = "Refined<T>")
 )]
-#[serde(try_from = "Refined<T>", into = "Refined<T>")]
-pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, #[serde(skip)] PhantomData<P>);
+pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
 
 // TODO: replace result types here with something better
 impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
@@ -49,6 +50,14 @@ impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
     }
 }
 
+impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P> {
     type Error = String;
 
@@ -61,7 +70,29 @@ impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P>
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "serde"))]
 mod tests {
-    // Test all serde, properly put behind feature flags
+    use crate::*;
+
+    #[test]
+    fn test_refinement_deserialize_success() {
+        let value =
+            serde_json::from_str::<Refinement<u8, boundable::unsigned::LessThan<5>>>("4").unwrap();
+        assert_eq!(*value, 4);
+    }
+
+    // TODO: can `path-to-error` be somehow integrated natively?
+
+    #[test]
+    fn test_refinement_deserialize_failure() {
+        let value = serde_json::from_str::<Refinement<u8, boundable::unsigned::LessThan<5>>>("5");
+        assert!(value.is_err());
+    }
+
+    #[test]
+    fn test_refinement_serialize() {
+        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
+        let serialized = serde_json::to_string(&value).unwrap();
+        assert_eq!(serialized, "4");
+    }
 }

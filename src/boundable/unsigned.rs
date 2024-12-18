@@ -106,6 +106,7 @@ impl Boundable for std::num::NonZeroU64 {
     }
 }
 
+#[macro_export]
 macro_rules! boundable_via_len {
     ($t:ident $(<$($ts:ident),+>)?) => {
         impl $(<$($ts),+>)? Boundable for $t $(<$($ts),+>)? {
