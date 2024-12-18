@@ -1,8 +1,9 @@
-#![allow(incomplete_features)]
-#![feature(generic_const_exprs)]
+#![cfg_attr(feature = "implication", allow(incomplete_features))]
+#![cfg_attr(feature = "implication", feature(generic_const_exprs))]
 
 use std::marker::PhantomData;
 
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 pub mod boolean;
