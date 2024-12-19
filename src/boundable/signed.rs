@@ -1,98 +1,99 @@
+//! Boundable refinement via signed values.
 use crate::boolean::*;
 use crate::Predicate;
 
-pub trait Boundable {
+pub trait SignedBoundable {
     fn bounding_value(&self) -> isize;
 }
 
-impl Boundable for i8 {
+impl SignedBoundable for i8 {
     fn bounding_value(&self) -> isize {
         *self as isize
     }
 }
 
-impl Boundable for std::num::Saturating<i8> {
+impl SignedBoundable for std::num::Saturating<i8> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
-impl Boundable for std::num::NonZeroI8 {
+impl SignedBoundable for std::num::NonZeroI8 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
 }
 
-impl Boundable for i16 {
+impl SignedBoundable for i16 {
     fn bounding_value(&self) -> isize {
         *self as isize
     }
 }
 
-impl Boundable for std::num::Saturating<i16> {
+impl SignedBoundable for std::num::Saturating<i16> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
-impl Boundable for std::num::NonZeroI16 {
+impl SignedBoundable for std::num::NonZeroI16 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
 }
 
-impl Boundable for i32 {
+impl SignedBoundable for i32 {
     fn bounding_value(&self) -> isize {
         *self as isize
     }
 }
 
-impl Boundable for std::num::Saturating<i32> {
+impl SignedBoundable for std::num::Saturating<i32> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
-impl Boundable for std::num::NonZeroI32 {
+impl SignedBoundable for std::num::NonZeroI32 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
 }
 
-impl Boundable for isize {
+impl SignedBoundable for isize {
     fn bounding_value(&self) -> isize {
         *self
     }
 }
 
-impl Boundable for std::num::Saturating<isize> {
+impl SignedBoundable for std::num::Saturating<isize> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
-impl Boundable for std::num::NonZeroIsize {
+impl SignedBoundable for std::num::NonZeroIsize {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl Boundable for i64 {
+impl SignedBoundable for i64 {
     fn bounding_value(&self) -> isize {
         *self as isize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl Boundable for std::num::Saturating<i64> {
+impl SignedBoundable for std::num::Saturating<i64> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl Boundable for std::num::NonZeroI64 {
+impl SignedBoundable for std::num::NonZeroI64 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
@@ -103,7 +104,7 @@ pub struct GreaterThan<const MIN: isize>;
 
 pub type GT<const MIN: isize> = GreaterThan<MIN>;
 
-impl<T: Boundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
+impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() > MIN
     }
@@ -114,7 +115,7 @@ pub struct GreaterThanEqual<const MIN: isize>;
 
 pub type GTE<const MIN: isize> = GreaterThanEqual<MIN>;
 
-impl<T: Boundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN> {
+impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() >= MIN
     }
@@ -125,7 +126,7 @@ pub struct LessThan<const MAX: isize>;
 
 pub type LT<const MAX: isize> = LessThan<MAX>;
 
-impl<T: Boundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
+impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
     fn test(value: &T) -> bool {
         value.bounding_value() < MAX
     }
@@ -136,7 +137,7 @@ pub struct LessThanEqual<const MAX: isize>;
 
 pub type LTE<const MAX: isize> = LessThanEqual<MAX>;
 
-impl<T: Boundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
+impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
     fn test(value: &T) -> bool {
         value.bounding_value() <= MAX
     }
@@ -153,7 +154,7 @@ pub type ClosedInterval<const MIN: isize, const MAX: isize> = And<GTE<MIN>, LTE<
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Modulo<const DIV: isize, const MOD: isize>;
 
-impl<T: Boundable, const DIV: isize, const MOD: isize> Predicate<T> for Modulo<DIV, MOD> {
+impl<T: SignedBoundable, const DIV: isize, const MOD: isize> Predicate<T> for Modulo<DIV, MOD> {
     fn test(value: &T) -> bool {
         value.bounding_value() % DIV == MOD
     }
@@ -168,7 +169,7 @@ pub type Odd = Not<Even>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Equals<const VAL: isize>;
 
-impl<T: Boundable, const VAL: isize> Predicate<T> for Equals<VAL> {
+impl<T: SignedBoundable, const VAL: isize> Predicate<T> for Equals<VAL> {
     fn test(value: &T) -> bool {
         value.bounding_value() == VAL
     }

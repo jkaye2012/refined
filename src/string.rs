@@ -1,3 +1,4 @@
+//! [String] refinement.
 use std::marker::PhantomData;
 
 use crate::Predicate;

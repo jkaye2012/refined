@@ -1,3 +1,4 @@
+//! Boundable refinement via unsigned values.
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::collections::BinaryHeap;
@@ -9,107 +10,107 @@ use std::collections::VecDeque;
 use crate::boolean::*;
 use crate::Predicate;
 
-pub trait Boundable {
+pub trait UnsignedBoundable {
     fn bounding_value(&self) -> usize;
 }
 
-impl Boundable for u8 {
+impl UnsignedBoundable for u8 {
     fn bounding_value(&self) -> usize {
         *self as usize
     }
 }
 
-impl Boundable for std::num::Saturating<u8> {
+impl UnsignedBoundable for std::num::Saturating<u8> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
-impl Boundable for std::num::NonZeroU8 {
+impl UnsignedBoundable for std::num::NonZeroU8 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
 }
 
-impl Boundable for u16 {
+impl UnsignedBoundable for u16 {
     fn bounding_value(&self) -> usize {
         *self as usize
     }
 }
 
-impl Boundable for std::num::Saturating<u16> {
+impl UnsignedBoundable for std::num::Saturating<u16> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
-impl Boundable for std::num::NonZeroU16 {
+impl UnsignedBoundable for std::num::NonZeroU16 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
 }
 
-impl Boundable for u32 {
+impl UnsignedBoundable for u32 {
     fn bounding_value(&self) -> usize {
         *self as usize
     }
 }
 
-impl Boundable for std::num::Saturating<u32> {
+impl UnsignedBoundable for std::num::Saturating<u32> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
-impl Boundable for std::num::NonZeroU32 {
+impl UnsignedBoundable for std::num::NonZeroU32 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
 }
 
-impl Boundable for usize {
+impl UnsignedBoundable for usize {
     fn bounding_value(&self) -> usize {
         *self
     }
 }
 
-impl Boundable for std::num::Saturating<usize> {
+impl UnsignedBoundable for std::num::Saturating<usize> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
-impl Boundable for std::num::NonZeroUsize {
+impl UnsignedBoundable for std::num::NonZeroUsize {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl Boundable for u64 {
+impl UnsignedBoundable for u64 {
     fn bounding_value(&self) -> usize {
         *self as usize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl Boundable for std::num::Saturating<u64> {
+impl UnsignedBoundable for std::num::Saturating<u64> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl Boundable for std::num::NonZeroU64 {
+impl UnsignedBoundable for std::num::NonZeroU64 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
 }
 
 #[macro_export]
-macro_rules! boundable_via_len {
+macro_rules! unsigned_boundable_via_len {
     ($t:ident $(<$($ts:ident),+>)?) => {
-        impl $(<$($ts),+>)? Boundable for $t $(<$($ts),+>)? {
+        impl $(<$($ts),+>)? UnsignedBoundable for $t $(<$($ts),+>)? {
             fn bounding_value(&self) -> usize {
                 self.len()
             }
@@ -117,17 +118,17 @@ macro_rules! boundable_via_len {
     };
 }
 
-boundable_via_len!(String);
-boundable_via_len!(BinaryHeap<T>);
-boundable_via_len!(BTreeMap<K, V>);
-boundable_via_len!(BTreeSet<T>);
-boundable_via_len!(HashMap<K, V>);
-boundable_via_len!(HashSet<T>);
-boundable_via_len!(LinkedList<T>);
-boundable_via_len!(Vec<T>);
-boundable_via_len!(VecDeque<T>);
+unsigned_boundable_via_len!(String);
+unsigned_boundable_via_len!(BinaryHeap<T>);
+unsigned_boundable_via_len!(BTreeMap<K, V>);
+unsigned_boundable_via_len!(BTreeSet<T>);
+unsigned_boundable_via_len!(HashMap<K, V>);
+unsigned_boundable_via_len!(HashSet<T>);
+unsigned_boundable_via_len!(LinkedList<T>);
+unsigned_boundable_via_len!(Vec<T>);
+unsigned_boundable_via_len!(VecDeque<T>);
 
-impl<T> Boundable for [T] {
+impl<T> UnsignedBoundable for [T] {
     fn bounding_value(&self) -> usize {
         self.len()
     }
@@ -137,7 +138,7 @@ pub struct GreaterThan<const MIN: usize>;
 
 pub type GT<const MIN: usize> = GreaterThan<MIN>;
 
-impl<T: Boundable, const MIN: usize> Predicate<T> for GreaterThan<MIN> {
+impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThan<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() > MIN
     }
@@ -148,7 +149,7 @@ pub struct GreaterThanEqual<const MIN: usize>;
 
 pub type GTE<const MIN: usize> = GreaterThanEqual<MIN>;
 
-impl<T: Boundable, const MIN: usize> Predicate<T> for GreaterThanEqual<MIN> {
+impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThanEqual<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() >= MIN
     }
@@ -159,7 +160,7 @@ pub struct LessThan<const MAX: usize>;
 
 pub type LT<const MAX: usize> = LessThan<MAX>;
 
-impl<T: Boundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
+impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
     fn test(value: &T) -> bool {
         value.bounding_value() < MAX
     }
@@ -170,7 +171,7 @@ pub struct LessThanEqual<const MAX: usize>;
 
 pub type LTE<const MAX: usize> = LessThanEqual<MAX>;
 
-impl<T: Boundable, const MAX: usize> Predicate<T> for LessThanEqual<MAX> {
+impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThanEqual<MAX> {
     fn test(value: &T) -> bool {
         value.bounding_value() <= MAX
     }
@@ -187,7 +188,7 @@ pub type ClosedInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LTE<
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Modulo<const DIV: usize, const MOD: usize>;
 
-impl<T: Boundable, const DIV: usize, const MOD: usize> Predicate<T> for Modulo<DIV, MOD> {
+impl<T: UnsignedBoundable, const DIV: usize, const MOD: usize> Predicate<T> for Modulo<DIV, MOD> {
     fn test(value: &T) -> bool {
         value.bounding_value() % DIV == MOD
     }
@@ -202,7 +203,7 @@ pub type Odd = Not<Even>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Equals<const VAL: usize>;
 
-impl<T: Boundable, const VAL: usize> Predicate<T> for Equals<VAL> {
+impl<T: UnsignedBoundable, const VAL: usize> Predicate<T> for Equals<VAL> {
     fn test(value: &T) -> bool {
         value.bounding_value() == VAL
     }

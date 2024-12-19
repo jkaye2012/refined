@@ -1,3 +1,4 @@
+//! [char] refinement.
 use crate::Predicate;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
