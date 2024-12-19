@@ -10,6 +10,7 @@ use std::collections::VecDeque;
 use crate::boolean::*;
 use crate::Predicate;
 
+/// Types that can be reduced to an unsigned size so that they can be bounded.
 pub trait UnsignedBoundable {
     fn bounding_value(&self) -> usize;
 }
@@ -107,6 +108,23 @@ impl UnsignedBoundable for std::num::NonZeroU64 {
     }
 }
 
+/// Creates an [UnsignedBoundable] implementation for a struct that has a `len` method.
+///
+/// # Example
+///
+/// ```
+/// use refined::{unsigned_boundable_via_len, UnsignedBoundable};
+/// use std::collections::HashMap;
+///
+/// struct Wrapper<K, V> { inner: HashMap<K, V> };
+///
+/// impl<K, V> Wrapper<K, V> {
+///   pub fn len(&self) -> usize { self.inner.len() }
+/// }
+///
+/// unsigned_boundable_via_len!(Wrapper<K, V>);
+/// // `Wrapper<K, V> now implements `UnsignedBoundable`
+/// ```
 #[macro_export]
 macro_rules! unsigned_boundable_via_len {
     ($t:ident $(<$($ts:ident),+>)?) => {

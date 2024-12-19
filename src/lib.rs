@@ -3,7 +3,15 @@
 //! In addition to the [Predicate] implementations provided for the standard library, `refined` also
 //! provides a simple mechanism for defining your own refinement types.
 //!
+//! Most users will be interested primarily in the [Refinement] struct, which allows a [Predicate] to be
+//! applied to values of a type and ensures that the predicate always holds.
+//!
 //! # Features
+//!
+//! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
+//!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
+//!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
+//! * `serde`: enabling serde allows [Refinement] to be serialized and deserialized using the `serde` library
 //!
 //! # Examples
 #![cfg_attr(feature = "implication", allow(incomplete_features))]
@@ -21,6 +29,7 @@ pub mod string;
 
 pub use boundable::signed::SignedBoundable;
 pub use boundable::unsigned::UnsignedBoundable;
+pub use string::TypeString;
 
 #[cfg(feature = "implication")]
 pub mod implication;

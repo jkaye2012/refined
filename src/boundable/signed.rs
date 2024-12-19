@@ -2,6 +2,7 @@
 use crate::boolean::*;
 use crate::Predicate;
 
+/// Types that can be reduced to a signed size so that they can be bounded.
 pub trait SignedBoundable {
     fn bounding_value(&self) -> isize;
 }
