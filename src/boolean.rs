@@ -29,6 +29,10 @@ impl<T> Predicate<T> for True {
     fn test(_: &T) -> bool {
         true
     }
+
+    fn error() -> String {
+        String::from("true predicate")
+    }
 }
 
 /// Always `false`.
@@ -38,6 +42,10 @@ pub struct False;
 impl<T> Predicate<T> for False {
     fn test(_: &T) -> bool {
         false
+    }
+
+    fn error() -> String {
+        String::from("false predicate")
     }
 }
 
@@ -49,6 +57,10 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
     fn test(t: &T) -> bool {
         A::test(t) && B::test(t)
     }
+
+    fn error() -> String {
+        format!("{} and {}", A::error(), B::error())
+    }
 }
 
 /// Logical disjunction of two [predicates](Predicate).
@@ -58,6 +70,10 @@ pub struct Or<A, B>(PhantomData<A>, PhantomData<B>);
 impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
     fn test(t: &T) -> bool {
         A::test(t) || B::test(t)
+    }
+
+    fn error() -> String {
+        format!("{} or {}", A::error(), B::error())
     }
 }
 
@@ -69,6 +85,10 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
     fn test(t: &T) -> bool {
         A::test(t) ^ B::test(t)
     }
+
+    fn error() -> String {
+        format!("{} xor {}", A::error(), B::error())
+    }
 }
 
 /// Logical negation of a [predicate](Predicate).
@@ -78,6 +98,10 @@ pub struct Not<P>(PhantomData<P>);
 impl<T, P: Predicate<T>> Predicate<T> for Not<P> {
     fn test(t: &T) -> bool {
         !P::test(t)
+    }
+
+    fn error() -> String {
+        format!("not {}", P::error())
     }
 }
 

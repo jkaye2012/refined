@@ -42,6 +42,10 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
     fn test(s: &T) -> bool {
         s.as_ref().starts_with(Prefix::VALUE)
     }
+
+    fn error() -> String {
+        format!("must start with '{}'", Prefix::VALUE)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -50,6 +54,10 @@ pub struct EndsWith<Suffix: TypeString>(PhantomData<Suffix>);
 impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
     fn test(s: &T) -> bool {
         s.as_ref().ends_with(Suffix::VALUE)
+    }
+
+    fn error() -> String {
+        format!("must end with '{}'", Suffix::VALUE)
     }
 }
 
@@ -60,6 +68,10 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
     fn test(s: &T) -> bool {
         s.as_ref().contains(Substr::VALUE)
     }
+
+    fn error() -> String {
+        format!("must contain '{}'", Substr::VALUE)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -68,6 +80,10 @@ pub struct Trimmed;
 impl<T: AsRef<str>> Predicate<T> for Trimmed {
     fn test(s: &T) -> bool {
         s.as_ref().trim() == s.as_ref()
+    }
+
+    fn error() -> String {
+        String::from("must not start or end with whitespace")
     }
 }
 

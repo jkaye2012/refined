@@ -109,6 +109,10 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() > MIN
     }
+
+    fn error() -> String {
+        format!("must be greater than {}", MIN)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -119,6 +123,10 @@ pub type GTE<const MIN: isize> = GreaterThanEqual<MIN>;
 impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN> {
     fn test(value: &T) -> bool {
         value.bounding_value() >= MIN
+    }
+
+    fn error() -> String {
+        format!("must be greater than or equal to {}", MIN)
     }
 }
 
@@ -131,6 +139,10 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
     fn test(value: &T) -> bool {
         value.bounding_value() < MAX
     }
+
+    fn error() -> String {
+        format!("must be less than {}", MAX)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -141,6 +153,10 @@ pub type LTE<const MAX: isize> = LessThanEqual<MAX>;
 impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
     fn test(value: &T) -> bool {
         value.bounding_value() <= MAX
+    }
+
+    fn error() -> String {
+        format!("must be less than or equal to {}", MAX)
     }
 }
 
@@ -159,6 +175,10 @@ impl<T: SignedBoundable, const DIV: isize, const MOD: isize> Predicate<T> for Mo
     fn test(value: &T) -> bool {
         value.bounding_value() % DIV == MOD
     }
+
+    fn error() -> String {
+        format!("must be divisible by {} with a remainder of {}", DIV, MOD)
+    }
 }
 
 pub type Divisible<const DIV: isize> = Modulo<DIV, 0>;
@@ -173,6 +193,10 @@ pub struct Equals<const VAL: isize>;
 impl<T: SignedBoundable, const VAL: isize> Predicate<T> for Equals<VAL> {
     fn test(value: &T) -> bool {
         value.bounding_value() == VAL
+    }
+
+    fn error() -> String {
+        format!("must be equal to {}", VAL)
     }
 }
 

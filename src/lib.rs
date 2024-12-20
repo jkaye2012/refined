@@ -35,11 +35,15 @@ pub use string::TypeString;
 pub mod implication;
 #[cfg(feature = "implication")]
 pub use implication::*;
+use thiserror::Error;
 
 /// An assertion that must hold for an instance of a type to be considered refined.
 pub trait Predicate<T> {
     /// Whether a value satisfies the predicate.
     fn test(value: &T) -> bool;
+
+    /// An error message to display when the predicate doesn't hold.
+    fn error() -> String;
 }
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize), serde(transparent))]
@@ -60,16 +64,25 @@ impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
 )]
 pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
 
-// TODO: replace result types here with something better
+/// An [Error] that can result from failed refinement.
+#[derive(Error, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RefinementError(String);
+
+impl std::fmt::Display for RefinementError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Refinement violated: {}", self.0)
+    }
+}
+
 impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
     /// Attempts to refine a runtime value with the type's imbued predicate.
-    pub fn refine(value: T) -> Result<Self, String> {
+    pub fn refine(value: T) -> Result<Self, RefinementError> {
         Self::try_from(Refined(value))
     }
 
     /// Attempts a modification of a refined value, re-certifying that the predicate
     /// still holds after the modification is complete.
-    pub fn modify<F>(self, fun: F) -> Result<Self, String>
+    pub fn modify<F>(self, fun: F) -> Result<Self, RefinementError>
     where
         F: FnOnce(T) -> T,
     {
@@ -78,7 +91,7 @@ impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
 
     /// Attempts a replacement of a refined value, re-certifying that the predicate
     /// holds for the new value.
-    pub fn replace(self, value: T) -> Result<Self, String> {
+    pub fn replace(self, value: T) -> Result<Self, RefinementError> {
         Self::refine(value)
     }
 
@@ -99,13 +112,13 @@ impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
 }
 
 impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P> {
-    type Error = String;
+    type Error = RefinementError;
 
     fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
         if P::test(&value.0) {
             Ok(Self(value.0, PhantomData))
         } else {
-            Err(format!("Value out of bounds."))
+            Err(RefinementError(P::error()))
         }
     }
 }
@@ -121,12 +134,14 @@ mod tests {
         assert_eq!(*value, 4);
     }
 
-    // TODO: can `path-to-error` be somehow integrated natively?
-
     #[test]
     fn test_refinement_deserialize_failure() {
-        let value = serde_json::from_str::<Refinement<u8, boundable::unsigned::LessThan<5>>>("5");
-        assert!(value.is_err());
+        let err = serde_json::from_str::<Refinement<u8, boundable::unsigned::LessThan<5>>>("5")
+            .unwrap_err();
+        assert_eq!(
+            format!("{}", err),
+            "Refinement violated: must be less than 5"
+        );
     }
 
     #[test]

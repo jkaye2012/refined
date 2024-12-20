@@ -8,6 +8,10 @@ impl Predicate<char> for IsControl {
     fn test(value: &char) -> bool {
         value.is_control()
     }
+
+    fn error() -> String {
+        String::from("must be a control character")
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -16,6 +20,10 @@ pub struct IsDigit;
 impl Predicate<char> for IsDigit {
     fn test(value: &char) -> bool {
         value.is_ascii_digit()
+    }
+
+    fn error() -> String {
+        String::from("must be a digit")
     }
 }
 
@@ -26,6 +34,10 @@ impl Predicate<char> for IsLowercase {
     fn test(value: &char) -> bool {
         value.is_lowercase()
     }
+
+    fn error() -> String {
+        String::from("must be a lowercase character")
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -34,6 +46,10 @@ pub struct IsUppercase;
 impl Predicate<char> for IsUppercase {
     fn test(value: &char) -> bool {
         value.is_uppercase()
+    }
+
+    fn error() -> String {
+        String::from("must be an uppercase character")
     }
 }
 
@@ -44,6 +60,10 @@ impl Predicate<char> for IsNumeric {
     fn test(value: &char) -> bool {
         value.is_numeric()
     }
+
+    fn error() -> String {
+        String::from("must be a numeric character")
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -53,6 +73,10 @@ impl Predicate<char> for IsWhitespace {
     fn test(value: &char) -> bool {
         value.is_whitespace()
     }
+
+    fn error() -> String {
+        String::from("must be a whitespace character")
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -61,6 +85,10 @@ pub struct IsHexDigit;
 impl Predicate<char> for IsHexDigit {
     fn test(value: &char) -> bool {
         value.is_ascii_hexdigit()
+    }
+
+    fn error() -> String {
+        String::from("must be a valid hex character")
     }
 }
 
