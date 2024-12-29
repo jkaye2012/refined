@@ -14,22 +14,38 @@ types is one way to apply the concept of
 Say for example that you are modeling a `Frobnicator` that you expect your users to be able to send to you,
 and that each `Frobnicator` should meet the following domain requirements:
 
-* Has a name that is no more than 255 unicode characters long
+* Has a name that is no more than 100 unicode characters long
 * Has a size between 1 and 10 units
 
 We could model that `Frobnicator` using refinement like so:
 
 ```rust
-use refined::{Refinement, boundable::unsigned::{LessThan, ClosedInterval}};
+use refined::{Refinement, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}};
 
-type FrobnictorName = Refinement<u8, ClosedInterval<1, 10>;
+type FrobnictorName = Refinement<String, ClosedInterval<1, 10>;
 
-type FrobnicatorSize = Refinement<String, LessThan<256>>;
+type FrobnicatorSize = Refinement<u8, LessThanEqual<100>>;
 
 struct Frobnicator {
   name: FrobnicatorName,
   size: FronicatorSize
 }
+
+impl Frobnicator {
+  pub fn new(name: String, size: u8) -> Result<Frobnicator, RefinementError> {
+    let name = FrobnicatorName::refine(name)?;
+    let size = FrobnicatorSize::refine(size)?;
+
+    Self {
+      name,
+      size
+    }
+  }
+}
+
+assert!(Frobnicator::new("Good name".to_string(), 99).is_ok());
+assert!(Frobnicator::new("Bad name, too long".to_string(), 99).is_err());
+assert!(Frobnicator::new("Good name".to_string(), 123).is_err());
 ```
 
 ## Optional features
@@ -41,11 +57,10 @@ struct Frobnicator {
 ## Caveats
 
 It's been argued that [names are not type safety](https://lexi-lambda.github.io/blog/2020/11/01/names-are-not-type-safety/).
-Strictly speaking, the refinement types implemented in this crate are really refinement in name only, but Rust also doesn't
-have the same number of "holes" that Haskell does as referred to in that article. I also feel that refinement of core types
-is a pragmatic and performant approach relative to trying to work with [Church encoding](https://en.wikipedia.org/wiki/Church_encoding)
-or other similar ideas.
-
-So, while it's true that names might not be _as_ type safe as a "first principles" encoding of the invariant, I certainly
-think they're safe enough!
+Strictly speaking, the refinement types implemented in this crate are really refinement
+in name only, but refinement of core types is a pragmatic and performant approach relative to trying to work with
+[Church encoding](https://en.wikipedia.org/wiki/Church_encoding) or other similar ideas. While it's true that names might
+not be _as_ type safe as a "first principles" encoding of the invariant, simple refinement in this manner is certainly
+safe enough for most use cases, especially when we're able to "plug the holes" in the type system through a library
+such as this.
 

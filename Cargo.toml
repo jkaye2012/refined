@@ -17,3 +17,6 @@ serde_json = "1.0.133"
 [features]
 implication = []
 serde = [ "dep:serde" ]
+
+[package.metadata.docs.rs]
+all-features = true

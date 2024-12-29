@@ -8,16 +8,92 @@
 //!
 //! # Features
 //!
+//! * `serde`: enabling serde allows [Refinement] to be serialized and deserialized using the `serde` library
 //! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
 //!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
 //!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
-//! * `serde`: enabling serde allows [Refinement] to be serialized and deserialized using the `serde` library
 //!
 //! # Examples
-#![cfg_attr(feature = "implication", allow(incomplete_features))]
-#![cfg_attr(feature = "implication", feature(generic_const_exprs))]
+//!
+//! ## Basic usage
+//!
+//! ```
+//! use refined::{Refinement, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}};
+//!
+//! type FrobnicatorName = Refinement<String, ClosedInterval<1, 10>>;
+//!
+//! type FrobnicatorSize = Refinement<u8, LessThanEqual<100>>;
+//!
+//! struct Frobnicator {
+//!   name: FrobnicatorName,
+//!   size: FrobnicatorSize
+//! }
+//!
+//! impl Frobnicator {
+//!   pub fn new(name: String, size: u8) -> Result<Frobnicator, RefinementError> {
+//!     let name = FrobnicatorName::refine(name)?;
+//!     let size = FrobnicatorSize::refine(size)?;
+//!
+//!     Ok(Self {
+//!       name,
+//!       size
+//!     })
+//!   }
+//! }
+//!
+//! assert!(Frobnicator::new("Good name".to_string(), 99).is_ok());
+//! assert!(Frobnicator::new("Bad name, too long".to_string(), 99).is_err());
+//! assert!(Frobnicator::new("Good name".to_string(), 123).is_err());
+//! ```
+//!
+//! ## Serde support
+//!
+//! ```
+//! use refined::{Refinement, boundable::unsigned::LessThan};
+//! use serde::{Serialize, Deserialize};
+//! use serde_json::{from_str, to_string};
+//!
+//! #[derive(Debug, Serialize, Deserialize)]
+//! struct Example {
+//!   name: String,
+//!   size: Refinement<u8, LessThan<100>>
+//! }
+//!
+//! let good: Result<Example, _> =  from_str(r#"{"name":"Good example","size":99}"#);
+//! assert!(good.is_ok());
+//! let bad: Result<Example, _> =  from_str(r#"{"name":"Bad example","size":123}"#);
+//! assert!(bad.is_err());
+//! ```
+//!
+//! ## Implication
+//!
+//! Note that enabling `incomplete_features` and `generic_const_exprs` is **required** for
+//! the [Implies] trait bounds to be met.
+//!
+//! ```
+//! #![allow(incomplete_features), feature(generic_const_exprs)]
+//!
+//! use refined::{Refinement, boundable::unsigned::LessThan, Implies};
+//!
+//! fn takes_lt_100(value: Refinement<u8, LessThan<100>>) -> String {
+//!   format!("{}", value)
+//! }
+//!
+//! let lt_50: Refinement<u8, LessThan<50>> = Refinement::refine(49).unwrap();
+//! let ex: Refinement<u8, LessThan<51>> = lt_50.imply();
+//! let result = takes_lt_100(lt_50.imply());
+//! assert_eq!(result, "49");
+//! ```
+#![cfg_attr(
+    feature = "implication",
+    allow(incomplete_features),
+    feature(generic_const_exprs)
+)]
 
+use std::fmt::Display;
 use std::marker::PhantomData;
+
+use thiserror::Error;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -35,7 +111,6 @@ pub use string::TypeString;
 pub mod implication;
 #[cfg(feature = "implication")]
 pub use implication::*;
-use thiserror::Error;
 
 /// An assertion that must hold for an instance of a type to be considered refined.
 pub trait Predicate<T> {
@@ -64,11 +139,28 @@ impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
 )]
 pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
 
+#[cfg(feature = "implication")]
+impl<F, T, Type: Clone> Implies<Refinement<Type, T>> for Refinement<Type, F>
+where
+    F: Predicate<Type> + Implies<T> + Clone,
+    T: Predicate<Type> + Clone,
+{
+    fn imply(self) -> Refinement<Type, T> {
+        Refinement(self.0, PhantomData)
+    }
+}
+
+impl<T: Clone + Display, P: Predicate<T> + Clone> Display for Refinement<T, P> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", &self.0)
+    }
+}
+
 /// An [Error] that can result from failed refinement.
 #[derive(Error, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RefinementError(String);
 
-impl std::fmt::Display for RefinementError {
+impl Display for RefinementError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Refinement violated: {}", self.0)
     }
