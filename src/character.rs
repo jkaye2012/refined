@@ -1,4 +1,15 @@
 //! [char] refinement.
+//!
+//! # Example
+//!
+//! ```
+//! use refined::{Refinement, character::IsDigit};
+//!
+//! type Test = Refinement<char, IsDigit>;
+//!
+//! assert!(Test::refine('0').is_ok());
+//! assert!(Test::refine('a').is_err());
+//! ```
 use crate::Predicate;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]

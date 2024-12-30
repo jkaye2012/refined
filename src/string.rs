@@ -1,4 +1,19 @@
 //! [String] refinement.
+//!
+//! To properly refine strings at the type level, we resort to [TypeString] to lift strings into
+//! the type system. See the [type_string!](crate::type_string) macro for a convenient way to create these types.
+//!
+//! # Example
+//!
+//! ```
+//! use refined::{Refinement, type_string, TypeString, string::StartsWith};
+//!
+//! type_string!(Foo, "foo");
+//! type Test = Refinement<String, StartsWith<Foo>>;
+//!
+//! assert!(Test::refine("foobar".to_string()).is_ok());
+//! assert!(Test::refine("barfoo".to_string()).is_err());
+//! ```
 use std::marker::PhantomData;
 
 use crate::Predicate;
@@ -15,6 +30,8 @@ pub trait TypeString {
 ///
 /// `$name` is the name of a type to create to hold the type-level string.
 /// `$value` is the string that should be lifted into the type system.
+///
+/// Note that use of this macro requires that [TypeString] is in scope.
 ///
 /// # Example
 ///

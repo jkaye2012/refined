@@ -1,5 +1,9 @@
 //! Basic [refinement types](https://en.wikipedia.org/wiki/Refinement_type) for the Rust standard library.
 //!
+//! Refinement is the process of imbuing types with predicates, allowing maintainers to see immediately
+//! that types must be constrained with certain invariants, and ensuring that those invariants hold at
+//! run time.
+//!
 //! In addition to the [Predicate] implementations provided for the standard library, `refined` also
 //! provides a simple mechanism for defining your own refinement types.
 //!
@@ -8,7 +12,9 @@
 //!
 //! # Features
 //!
-//! * `serde`: enabling serde allows [Refinement] to be serialized and deserialized using the `serde` library
+//! * `serde`: enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
+//!   This functionality was actually my main motivation for writing the crate in the first place, but technically
+//!   the serde dependency is not required for the core functionality of the trait, so it can be disabled
 //! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
 //!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
 //!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
