@@ -16,41 +16,7 @@
 //! ```
 use std::marker::PhantomData;
 
-use crate::Predicate;
-
-/// A string lifted into a context where it can be used as a type.
-///
-/// Most string predicates require type-level strings, but currently strings are not supported
-/// as const generic trait bounds. `TypeString` is a workaround for this limitation.
-pub trait TypeString {
-    const VALUE: &'static str;
-}
-
-/// Creates a [type-level string](TypeString).
-///
-/// `$name` is the name of a type to create to hold the type-level string.
-/// `$value` is the string that should be lifted into the type system.
-///
-/// Note that use of this macro requires that [TypeString] is in scope.
-///
-/// # Example
-///
-/// ```
-/// use refined::{type_string, TypeString};
-/// type_string!(FooBar, "very stringy");
-/// assert_eq!(FooBar::VALUE, "very stringy");
-/// ```
-#[macro_export]
-macro_rules! type_string {
-    ($name:ident, $value:literal) => {
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-        pub struct $name;
-
-        impl TypeString for $name {
-            const VALUE: &'static str = $value;
-        }
-    };
-}
+use crate::{Predicate, TypeString};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct StartsWith<Prefix: TypeString>(PhantomData<Prefix>);

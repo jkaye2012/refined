@@ -111,12 +111,45 @@ pub mod string;
 
 pub use boundable::signed::SignedBoundable;
 pub use boundable::unsigned::UnsignedBoundable;
-pub use string::TypeString;
 
 #[cfg(feature = "implication")]
 pub mod implication;
 #[cfg(feature = "implication")]
 pub use implication::*;
+
+/// A string lifted into a context where it can be used as a type.
+///
+/// Most string predicates require type-level strings, but currently strings are not supported
+/// as const generic trait bounds. `TypeString` is a workaround for this limitation.
+pub trait TypeString {
+    const VALUE: &'static str;
+}
+
+/// Creates a [type-level string](TypeString).
+///
+/// `$name` is the name of a type to create to hold the type-level string.
+/// `$value` is the string that should be lifted into the type system.
+///
+/// Note that use of this macro requires that [TypeString] is in scope.
+///
+/// # Example
+///
+/// ```
+/// use refined::{type_string, TypeString};
+/// type_string!(FooBar, "very stringy");
+/// assert_eq!(FooBar::VALUE, "very stringy");
+/// ```
+#[macro_export]
+macro_rules! type_string {
+    ($name:ident, $value:literal) => {
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+        pub struct $name;
+
+        impl TypeString for $name {
+            const VALUE: &'static str = $value;
+        }
+    };
+}
 
 /// An assertion that must hold for an instance of a type to be considered refined.
 pub trait Predicate<T> {
@@ -132,6 +165,14 @@ struct Refined<T>(T);
 
 impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
     fn from(value: Refinement<T, P>) -> Self {
+        Refined(value.0)
+    }
+}
+
+impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> From<NamedRefinement<N, T, P>>
+    for Refined<T>
+{
+    fn from(value: NamedRefinement<N, T, P>) -> Self {
         Refined(value.0)
     }
 }
@@ -159,6 +200,62 @@ where
 impl<T: Clone + Display, P: Predicate<T> + Clone> Display for Refinement<T, P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", &self.0)
+    }
+}
+
+impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+/// A named refinement of a type `T` certifying that the [Predicate] `P` holds.
+///
+/// Named refinements are useful when more precise error messages are required.
+/// When using features like `serde`, this is generally unnecessary because we
+/// can instead rely on tools like [path_to_error](https://github.com/dtolnay/path-to-error)
+/// rather than building the name into the type itself.
+///
+/// # Example
+///
+/// ```
+/// use refined::{type_string, TypeString, NamedRefinement, boundable::unsigned::GreaterThan};
+///
+/// type_string!(Example, "example name");
+///
+/// type BoundedLong = NamedRefinement<Example, u64, GreaterThan<100>>;
+///
+/// assert_eq!(&BoundedLong::refine(99).unwrap_err().to_string(), "Refinement violated: example name must be greater than 100");
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(try_from = "Refined<T>", into = "Refined<T>")
+)]
+pub struct NamedRefinement<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone>(
+    T,
+    PhantomData<P>,
+    PhantomData<N>,
+);
+
+impl<N: TypeString + Clone, T: Clone + Display, P: Predicate<T> + Clone> Display
+    for NamedRefinement<N, T, P>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", &self.0)
+    }
+}
+
+impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> std::ops::Deref
+    for NamedRefinement<N, T, P>
+{
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -201,14 +298,6 @@ impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P> {
     type Error = RefinementError;
 
@@ -217,6 +306,49 @@ impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P>
             Ok(Self(value.0, PhantomData))
         } else {
             Err(RefinementError(P::error()))
+        }
+    }
+}
+
+impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> NamedRefinement<N, T, P> {
+    /// Attempts to refine a runtime value with the type's imbued predicate.
+    pub fn refine(value: T) -> Result<Self, RefinementError> {
+        Self::try_from(Refined(value))
+    }
+
+    /// Attempts a modification of a refined value, re-certifying that the predicate
+    /// still holds after the modification is complete.
+    pub fn modify<F>(self, fun: F) -> Result<Self, RefinementError>
+    where
+        F: FnOnce(T) -> T,
+    {
+        Self::refine(fun(self.0))
+    }
+
+    /// Attempts a replacement of a refined value, re-certifying that the predicate
+    /// holds for the new value.
+    pub fn replace(self, value: T) -> Result<Self, RefinementError> {
+        Self::refine(value)
+    }
+
+    /// Destructively removes the refined value from the `Refinement` wrapper.
+    ///
+    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
+    pub fn extract(self) -> T {
+        self.0
+    }
+}
+
+impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>>
+    for NamedRefinement<N, T, P>
+{
+    type Error = RefinementError;
+
+    fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
+        if P::test(&value.0) {
+            Ok(Self(value.0, PhantomData, PhantomData))
+        } else {
+            Err(RefinementError(format!("{} {}", N::VALUE, P::error())))
         }
     }
 }
