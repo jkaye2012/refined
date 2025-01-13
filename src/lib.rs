@@ -357,6 +357,8 @@ impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T
 mod tests {
     use crate::*;
 
+    type_string!(Test, "test");
+
     #[test]
     fn test_refinement_deserialize_success() {
         let value =
@@ -379,5 +381,140 @@ mod tests {
         let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
         let serialized = serde_json::to_string(&value).unwrap();
         assert_eq!(serialized, "4");
+    }
+
+    #[test]
+    fn test_refinement_modify_success() {
+        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(3, PhantomData);
+        let modified = value.modify(|x| x + 1).unwrap();
+        assert_eq!(*modified, 4);
+    }
+
+    #[test]
+    fn test_refinement_modify_failure() {
+        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
+        let modified = value.modify(|x| x + 1).unwrap_err();
+        assert_eq!(
+            format!("{}", modified),
+            "Refinement violated: must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_refinement_replace_success() {
+        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
+        let replaced = value.replace(3).unwrap();
+        assert_eq!(*replaced, 3);
+    }
+
+    #[test]
+    fn test_refinement_replace_failure() {
+        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
+        let replaced = value.replace(5).unwrap_err();
+        assert_eq!(
+            format!("{}", replaced),
+            "Refinement violated: must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_refinement_extract() {
+        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
+        let extracted = value.extract();
+        assert_eq!(extracted, 4);
+    }
+
+    #[test]
+    fn test_named_refinement_deserialize_success() {
+        let value = serde_json::from_str::<
+            NamedRefinement<Test, u8, boundable::unsigned::LessThan<5>>,
+        >("4")
+        .unwrap();
+        assert_eq!(*value, 4);
+    }
+
+    #[test]
+    fn test_named_refinement_deserialize_failure() {
+        let err =
+            serde_json::from_str::<NamedRefinement<Test, u8, boundable::unsigned::LessThan<5>>>(
+                "5",
+            )
+            .unwrap_err();
+        assert_eq!(
+            format!("{}", err),
+            "Refinement violated: test must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_named_refinement_serialize() {
+        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
+            4,
+            PhantomData,
+            PhantomData,
+        );
+        let serialized = serde_json::to_string(&value).unwrap();
+        assert_eq!(serialized, "4");
+    }
+
+    #[test]
+    fn test_named_refinement_modify_success() {
+        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
+            3,
+            PhantomData,
+            PhantomData,
+        );
+        let modified = value.modify(|x| x + 1).unwrap();
+        assert_eq!(*modified, 4);
+    }
+
+    #[test]
+    fn test_named_refinement_modify_failure() {
+        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
+            4,
+            PhantomData,
+            PhantomData,
+        );
+        let modified = value.modify(|x| x + 1).unwrap_err();
+        assert_eq!(
+            format!("{}", modified),
+            "Refinement violated: test must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_named_refinement_replace_success() {
+        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
+            4,
+            PhantomData,
+            PhantomData,
+        );
+        let replaced = value.replace(3).unwrap();
+        assert_eq!(*replaced, 3);
+    }
+
+    #[test]
+    fn test_named_refinement_replace_failure() {
+        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
+            4,
+            PhantomData,
+            PhantomData,
+        );
+        let replaced = value.replace(5).unwrap_err();
+        assert_eq!(
+            format!("{}", replaced),
+            "Refinement violated: test must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_named_refinement_extract() {
+        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
+            4,
+            PhantomData,
+            PhantomData,
+        );
+        let extracted = value.extract();
+        assert_eq!(extracted, 4);
     }
 }
