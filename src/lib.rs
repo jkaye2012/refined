@@ -1,8 +1,7 @@
 //! Basic [refinement types](https://en.wikipedia.org/wiki/Refinement_type) for the Rust standard library.
 //!
-//! Refinement is the process of imbuing types with predicates, allowing maintainers to see immediately
-//! that types must be constrained with certain invariants, and ensuring that those invariants hold at
-//! run time.
+//! Refinement in this context is the process of imbuing types with predicates, allowing maintainers to see immediately
+//! that types must be constrained with certain invariants and ensuring that those invariants hold at run time.
 //!
 //! In addition to the [Predicate] implementations provided for the standard library, `refined` also
 //! provides a simple mechanism for defining your own refinement types.
@@ -30,6 +29,7 @@
 //!
 //! type FrobnicatorSize = Refinement<u8, LessThanEqual<100>>;
 //!
+//! #[derive(Debug)]
 //! struct Frobnicator {
 //!   name: FrobnicatorName,
 //!   size: FrobnicatorSize
@@ -48,8 +48,53 @@
 //! }
 //!
 //! assert!(Frobnicator::new("Good name".to_string(), 99).is_ok());
-//! assert!(Frobnicator::new("Bad name, too long".to_string(), 99).is_err());
-//! assert!(Frobnicator::new("Good name".to_string(), 123).is_err());
+//! assert_eq!(Frobnicator::new("Bad name, too long".to_string(), 99).unwrap_err().to_string(),
+//!            "Refinement violated: must be greater than or equal to 1 and must be less than or equal to 10");
+//! assert_eq!(Frobnicator::new("Good name".to_string(), 123).unwrap_err().to_string(),
+//!            "Refinement violated: must be less than or equal to 100");
+//! ```
+//!
+//! ## Named refinement
+//!
+//! As you can see in the error messages above, there are two possible fields that could have led to the error in refinement,
+//! but it isn't readily apparent which field caused the error by reading the error message. While this isn't a problem
+//! when using libraries like [serde_path_to_error](https://docs.rs/serde_path_to_error/latest/serde_path_to_error/), this
+//! can be important functionality to have in your own error messages.
+//!
+//! If this is something that you need, consider using [NamedRefinement] instead of [Refinement].
+//!
+//! ```
+//! use refined::{NamedRefinement, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}, type_string, TypeString};
+//!
+//! type_string!(Name, "name");
+//! type FrobnicatorName = NamedRefinement<Name, String, ClosedInterval<1, 10>>;
+//!
+//! type_string!(Size, "size");
+//! type FrobnicatorSize = NamedRefinement<Size, u8, LessThanEqual<100>>;
+//!
+//! #[derive(Debug)]
+//! struct Frobnicator {
+//!   name: FrobnicatorName,
+//!   size: FrobnicatorSize
+//! }
+//!
+//! impl Frobnicator {
+//!   pub fn new(name: String, size: u8) -> Result<Frobnicator, RefinementError> {
+//!     let name = FrobnicatorName::refine(name)?;
+//!     let size = FrobnicatorSize::refine(size)?;
+//!
+//!     Ok(Self {
+//!       name,
+//!       size
+//!     })
+//!   }
+//! }
+//!
+//! assert!(Frobnicator::new("Good name".to_string(), 99).is_ok());
+//! assert_eq!(Frobnicator::new("Bad name, too long".to_string(), 99).unwrap_err().to_string(),
+//!            "Refinement violated: name must be greater than or equal to 1 and must be less than or equal to 10");
+//! assert_eq!(Frobnicator::new("Good name".to_string(), 123).unwrap_err().to_string(),
+//!            "Refinement violated: size must be less than or equal to 100");
 //! ```
 //!
 //! ## Serde support
