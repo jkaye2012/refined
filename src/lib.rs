@@ -49,9 +49,9 @@
 //!
 //! assert!(Frobnicator::new("Good name".to_string(), 99).is_ok());
 //! assert_eq!(Frobnicator::new("Bad name, too long".to_string(), 99).unwrap_err().to_string(),
-//!            "Refinement violated: must be greater than or equal to 1 and must be less than or equal to 10");
+//!            "refinement violated: must be greater than or equal to 1 and must be less than or equal to 10");
 //! assert_eq!(Frobnicator::new("Good name".to_string(), 123).unwrap_err().to_string(),
-//!            "Refinement violated: must be less than or equal to 100");
+//!            "refinement violated: must be less than or equal to 100");
 //! ```
 //!
 //! ## Named refinement
@@ -92,9 +92,9 @@
 //!
 //! assert!(Frobnicator::new("Good name".to_string(), 99).is_ok());
 //! assert_eq!(Frobnicator::new("Bad name, too long".to_string(), 99).unwrap_err().to_string(),
-//!            "Refinement violated: name must be greater than or equal to 1 and must be less than or equal to 10");
+//!            "refinement violated: name must be greater than or equal to 1 and must be less than or equal to 10");
 //! assert_eq!(Frobnicator::new("Good name".to_string(), 123).unwrap_err().to_string(),
-//!            "Refinement violated: size must be less than or equal to 100");
+//!            "refinement violated: size must be less than or equal to 100");
 //! ```
 //!
 //! ## Serde support
@@ -272,7 +272,7 @@ impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
 ///
 /// type BoundedLong = NamedRefinement<Example, u64, GreaterThan<100>>;
 ///
-/// assert_eq!(&BoundedLong::refine(99).unwrap_err().to_string(), "Refinement violated: example name must be greater than 100");
+/// assert_eq!(&BoundedLong::refine(99).unwrap_err().to_string(), "refinement violated: example name must be greater than 100");
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(
@@ -310,7 +310,7 @@ pub struct RefinementError(String);
 
 impl Display for RefinementError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Refinement violated: {}", self.0)
+        write!(f, "refinement violated: {}", self.0)
     }
 }
 
@@ -417,7 +417,7 @@ mod tests {
             .unwrap_err();
         assert_eq!(
             format!("{}", err),
-            "Refinement violated: must be less than 5"
+            "refinement violated: must be less than 5"
         );
     }
 
@@ -441,7 +441,7 @@ mod tests {
         let modified = value.modify(|x| x + 1).unwrap_err();
         assert_eq!(
             format!("{}", modified),
-            "Refinement violated: must be less than 5"
+            "refinement violated: must be less than 5"
         );
     }
 
@@ -458,7 +458,7 @@ mod tests {
         let replaced = value.replace(5).unwrap_err();
         assert_eq!(
             format!("{}", replaced),
-            "Refinement violated: must be less than 5"
+            "refinement violated: must be less than 5"
         );
     }
 
@@ -487,7 +487,7 @@ mod tests {
             .unwrap_err();
         assert_eq!(
             format!("{}", err),
-            "Refinement violated: test must be less than 5"
+            "refinement violated: test must be less than 5"
         );
     }
 
@@ -523,7 +523,7 @@ mod tests {
         let modified = value.modify(|x| x + 1).unwrap_err();
         assert_eq!(
             format!("{}", modified),
-            "Refinement violated: test must be less than 5"
+            "refinement violated: test must be less than 5"
         );
     }
 
@@ -548,7 +548,7 @@ mod tests {
         let replaced = value.replace(5).unwrap_err();
         assert_eq!(
             format!("{}", replaced),
-            "Refinement violated: test must be less than 5"
+            "refinement violated: test must be less than 5"
         );
     }
 

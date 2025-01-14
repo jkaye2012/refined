@@ -1,5 +1,5 @@
 {
-  description = "An example of how to use refined";
+  description = "An example of how to use refined with Axum";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-24.05";
