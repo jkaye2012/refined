@@ -122,7 +122,8 @@
 //! the [Implies] trait bounds to be met.
 //!
 //! ```
-//! #![allow(incomplete_features), feature(generic_const_exprs)]
+//! #![allow(incomplete_features)]
+//! #![feature(generic_const_exprs)]
 //!
 //! use refined::{Refinement, boundable::unsigned::LessThan, Implies};
 //!

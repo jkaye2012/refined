@@ -11,7 +11,8 @@
 /// `Implies` allows us to encode this relationship like so:
 ///
 /// ```
-/// #![allow(incomplete_features), feature(generic_const_exprs)]
+/// #![allow(incomplete_features)]
+/// #![feature(generic_const_exprs)]
 ///
 /// use refined::{Refinement, boundable::unsigned::LessThan, Implies};
 ///

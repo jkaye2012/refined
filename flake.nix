@@ -2,7 +2,7 @@
   description = "Simple refinement types for Rust with Serde support";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.05";
+    nixpkgs.url = "nixpkgs/nixos-24.11";
     fenix = {
       url = "github:nix-community/fenix/monthly";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -11,7 +11,7 @@
       url = "github:jkaye2012/devenv";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    naersk.url = "github:nix-community/naersk";
+    crane.url = "github:ipetkov/crane";
   };
 
   outputs =
@@ -20,17 +20,14 @@
       fenix,
       nixpkgs,
       devenv,
-      naersk,
+      crane,
     }:
     devenv.lib.forAllSystems nixpkgs (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         fenix' = fenix.packages.${system};
-        naersk' = pkgs.callPackage naersk {
-          cargo = fenix'.complete.toolchain;
-          rustc = fenix'.complete.toolchain;
-        };
+        crane' = (crane.mkLib pkgs).overrideToolchain fenix'.complete.toolchain;
         manifest = (pkgs.lib.importTOML ./Cargo.toml).package;
       in
       {
@@ -46,8 +43,10 @@
           ];
         };
 
-        packages.${system}.default = naersk'.buildPackage {
-          src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
+        # TODO: ensure that docs and examples can be built
+        packages.${system}.default = crane'.buildPackage {
+          src = crane'.cleanCargoSource ./.;
+          cargoTestExtraArgs = "--all-features";
         };
       }
     );
