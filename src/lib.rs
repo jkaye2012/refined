@@ -59,7 +59,7 @@
 //! As you can see in the error messages above, there are two possible fields that could have led to the error in refinement,
 //! but it isn't readily apparent which field caused the error by reading the error message. While this isn't a problem
 //! when using libraries like [serde_path_to_error](https://docs.rs/serde_path_to_error/latest/serde_path_to_error/), this
-//! can be important functionality to have in your own error messages.
+//! can be important functionality to have in your own error messages if you're using basic serde functionality.
 //!
 //! If this is something that you need, consider using [NamedRefinement] instead of [Refinement].
 //!

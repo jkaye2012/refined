@@ -6,4 +6,9 @@ For detailed information, please see the [documentation on docs.rs](https://docs
 
 ## Quickstart
 
-See the [examples]() to get started.
+The [basic usage example on docs.rs](file:///home/jkaye/git/refined/target/doc/refined/index.html#basic-usage)
+is a minimal example that should be easy to follow.
+
+You can also use the [examples](https://github.com/jkaye2012/refined/examples) to get started. Each example is
+a complete cargo project of its own. They are meant to be run with `cargo run` so that you can view their output
+and reference it against the code.
