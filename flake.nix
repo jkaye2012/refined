@@ -29,6 +29,47 @@
         fenix' = fenix.packages.${system};
         crane' = (crane.mkLib pkgs).overrideToolchain fenix'.complete.toolchain;
         manifest = (pkgs.lib.importTOML ./Cargo.toml).package;
+
+        src = crane'.cleanCargoSource ./.;
+
+        buildExample =
+          {
+            src,
+            subdir,
+            args ? { },
+          }:
+          crane'.buildPackage {
+            inherit src;
+            cargoLock = ./${subdir}/Cargo.lock;
+            cargoToml = ./${subdir}/Cargo.toml;
+
+            postUnpack = ''
+              cd $sourceRoot/${subdir}
+              sourceRoot="."
+            '';
+          }
+          // args;
+
+        refined = crane'.buildPackage {
+          inherit src;
+          cargoTestExtraArgs = "--all-features";
+        };
+
+        refined-doc = crane'.cargoDoc {
+          inherit src;
+          cargoArtifacts = refined;
+          cargoDocExtraArgs = "--all-features";
+        };
+
+        refined-example-quickstart = buildExample {
+          inherit src;
+          subdir = "examples/quickstart";
+        };
+
+        refined-example-axum = buildExample {
+          inherit src;
+          subdir = "examples/axum";
+        };
       in
       {
         devShells.${system}.default = pkgs.mkShell {
@@ -43,10 +84,23 @@
           ];
         };
 
-        # TODO: ensure that docs and examples can be built
-        packages.${system}.default = crane'.buildPackage {
-          src = crane'.cleanCargoSource ./.;
-          cargoTestExtraArgs = "--all-features";
+        checks.${system} = {
+          inherit
+            refined
+            refined-doc
+            refined-example-axum
+            refined-example-quickstart
+            ;
+        };
+
+        packages.${system} = rec {
+          inherit
+            refined
+            refined-doc
+            refined-example-axum
+            refined-example-quickstart
+            ;
+          default = refined;
         };
       }
     );
