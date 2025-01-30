@@ -64,11 +64,17 @@
         refined-example-quickstart = buildExample {
           inherit src;
           subdir = "examples/quickstart";
+          args = {
+            cargoArtifacts = refined;
+          };
         };
 
         refined-example-axum = buildExample {
           inherit src;
           subdir = "examples/axum";
+          args = {
+            cargoArtifacts = refined;
+          };
         };
       in
       {
