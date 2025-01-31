@@ -1,7 +1,6 @@
 name: "Verify"
 on:
   pull_request:
-  push:
 jobs:
   verify:
     runs-on: ubuntu-latest
