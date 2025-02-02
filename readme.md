@@ -1,5 +1,9 @@
 # Refined
 
+![Crates.io Version](https://img.shields.io/crates/v/refined)
+![Release Status](https://img.shields.io/github/actions/workflow/status/jkaye2012/refined/publish.yml?branch=main)
+![Crates.io License](https://img.shields.io/crates/l/refined)
+
 Simple [refinement types](https://en.wikipedia.org/wiki/Refinement_type) for Rust.
 
 For detailed information, please see the [documentation on docs.rs](https://docs.rs/crate/refined/latest).

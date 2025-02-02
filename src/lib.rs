@@ -20,6 +20,10 @@
 //!
 //! # Examples
 //!
+//! In addition to the examples included here, you can also refer to the
+//! [examples on GitHub](https://github.com/jkaye2012/refined/tree/main/examples) for complete end-to-end examples
+//! that could you easily build and run yourself.
+//!
 //! ## Basic usage
 //!
 //! ```
