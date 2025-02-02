@@ -6,13 +6,13 @@
 
 Simple [refinement types](https://en.wikipedia.org/wiki/Refinement_type) for Rust.
 
-For detailed information, please see the [documentation on docs.rs](https://docs.rs/crate/refined/latest).
+For detailed information, please see the [documentation on docs.rs](https://docs.rs/refined/latest/refined).
 
 ## Quickstart
 
-The [basic usage example on docs.rs](file:///home/jkaye/git/refined/target/doc/refined/index.html#basic-usage)
+The [basic usage example on docs.rs](https://docs.rs/refined/latest/refined/#basic-usage)
 is a minimal example that should be easy to follow.
 
-You can also use the [examples](https://github.com/jkaye2012/refined/examples) to get started. Each example is
+You can also use the [examples](https://github.com/jkaye2012/refined/tree/main/examples) to get started. Each example is
 a complete cargo project of its own. They are meant to be run with `cargo run` so that you can view their output
 and reference it against the code.
