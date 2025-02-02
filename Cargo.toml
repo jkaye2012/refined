@@ -3,6 +3,8 @@ name = "refined"
 version = "0.0.1"
 edition = "2021"
 description = "Simple refinement types; parse, don't validate!"
+documentation = "https://docs.rs/refined"
+repository = "https://github.com/jkaye2012/refined"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
