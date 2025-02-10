@@ -9,6 +9,21 @@
 //! Most users will be interested primarily in the [Refinement] struct, which allows a [Predicate] to be
 //! applied to values of a type and ensures that the predicate always holds.
 //!
+//! # Provided refinements
+//!
+//! `refined` comes packaged with a large number of refinements over commonly used `std` types. The refinements
+//! are grouped into modules based on the type of refinement that they provide.
+//!
+//! Here's a quick reference of what is currently available:
+//!
+//! * [UnsignedBoundable]: types that can be reduced to an unsigned size so that their size can be bounded. Examples
+//!   include `String`, `u8`, `u64`, or any `std` container-like type that implements a `len()` method
+//! * [SignedBoundable]: types that can be reduced to a signed size so that their size can be bounded. Examples include
+//!   `i8`, `i64`, and `isize`
+//! * [boolean]: "combinator" refinements that allow other refinements to be combined with one another
+//! * [character]: refinements of [char]
+//! * [string]: refinements of any type that implements [AsRef\<str\>](AsRef)
+//!
 //! # Features
 //!
 //! * `serde`: enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
