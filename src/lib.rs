@@ -1,39 +1,15 @@
 //! Basic [refinement types](https://en.wikipedia.org/wiki/Refinement_type) for the Rust standard library.
 //!
 //! Refinement in this context is the process of imbuing types with predicates, allowing maintainers to see immediately
-//! that types must be constrained with certain invariants and ensuring that those invariants hold at run time.
+//! that types must be constrained with certain invariants and ensuring that those invariants hold at run time. This
+//! allows types to be "narrowed" to a subset of their possible values. For a gentle introduction, you can refer to
+//! [my blog post announcing the release of the library](https://jordankaye.dev/posts/refined/).
 //!
 //! In addition to the [Predicate] implementations provided for the standard library, `refined` also
 //! provides a simple mechanism for defining your own refinement types.
 //!
 //! Most users will be interested primarily in the [Refinement] struct, which allows a [Predicate] to be
 //! applied to values of a type and ensures that the predicate always holds.
-//!
-//! # Provided refinements
-//!
-//! `refined` comes packaged with a large number of refinements over commonly used `std` types. The refinements
-//! are grouped into modules based on the type of refinement that they provide.
-//!
-//! Here's a quick reference of what is currently available:
-//!
-//! * [UnsignedBoundable]: types that can be reduced to an unsigned size so that their size can be bounded. Examples
-//!   include `String`, `u8`, `u64`, or any `std` container-like type that implements a `len()` method
-//! * [SignedBoundable]: types that can be reduced to a signed size so that their size can be bounded. Examples include
-//!   `i8`, `i64`, and `isize`
-//! * [boolean]: "combinator" refinements that allow other refinements to be combined with one another. Examples include
-//!   [And](boolean::And) and [Or](boolean::Or)
-//! * [character]: refinements of [char]. Examples include [IsLowercase](character::IsLowercase) and [IsWhitespace](character::IsWhitespace)
-//! * [string]: refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains) and
-//!   [Trimmed](string::Trimmed)
-//!
-//! # Features
-//!
-//! * `serde`: enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
-//!   This functionality was actually my main motivation for writing the crate in the first place, but technically
-//!   the serde dependency is not required for the core functionality of the trait, so it can be disabled
-//! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
-//!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
-//!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
 //!
 //! # Examples
 //!
@@ -157,6 +133,32 @@
 //! let result = takes_lt_100(lt_50.imply());
 //! assert_eq!(result, "49");
 //! ```
+//!
+//! # Provided refinements
+//!
+//! `refined` comes packaged with a large number of refinements over commonly used `std` types. The refinements
+//! are grouped into modules based on the type of refinement that they provide.
+//!
+//! Here's a quick reference of what is currently available:
+//!
+//! * [UnsignedBoundable]: types that can be reduced to an unsigned size so that their size can be bounded. Examples
+//!   include `String`, `u8`, `u64`, or any `std` container-like type that implements a `len()` method
+//! * [SignedBoundable]: types that can be reduced to a signed size so that their size can be bounded. Examples include
+//!   `i8`, `i64`, and `isize`
+//! * [boolean]: "combinator" refinements that allow other refinements to be combined with one another. Examples include
+//!   [And](boolean::And) and [Or](boolean::Or)
+//! * [character]: refinements of [char]. Examples include [IsLowercase](character::IsLowercase) and [IsWhitespace](character::IsWhitespace)
+//! * [string]: refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains) and
+//!   [Trimmed](string::Trimmed)
+//!
+//! # Features
+//!
+//! * `serde`: enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
+//!   This functionality was actually my main motivation for writing the crate in the first place, but technically
+//!   the serde dependency is not required for the core functionality of the trait, so it can be disabled
+//! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
+//!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
+//!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
 #![cfg_attr(
     feature = "implication",
     allow(incomplete_features),
