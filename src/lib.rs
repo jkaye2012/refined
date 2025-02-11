@@ -134,6 +134,26 @@
 //! assert_eq!(result, "49");
 //! ```
 //!
+//! This design leads to some interesting emergent properties; for example, the "compatibility" of
+//! range comparison over equality is enforced at compile time:
+//!
+//! ```
+//! #![allow(incomplete_features)]
+//! #![feature(generic_const_exprs)]
+//!
+//! use refined::{Refinement, boundable::unsigned::OpenInterval, Implies};
+//!
+//! let bigger_range: Refinement<u8, OpenInterval<1, 100>> = Refinement::refine(50).unwrap();
+//! let smaller_range: Refinement<u8, OpenInterval<25, 75>> = Refinement::refine(50).unwrap();
+//! let incompatible_range: Refinement<u8, OpenInterval<101, 200>> = Refinement::refine(150).unwrap();
+//! // assert_eq!(bigger_range, smaller_range); // Fails to compile, type mismatch
+//! // assert_eq!(bigger_ragne, incompatible_range) // Fails to compile, invalid implication
+//! assert_eq!(bigger_range, smaller_range.imply()); // Works!
+//! ```
+//!
+//! Note that the order matters here; the smaller range refinement can be implied to the larger range,
+//! but the opposite is logically invalid.
+//!
 //! # Provided refinements
 //!
 //! `refined` comes packaged with a large number of refinements over commonly used `std` types. The refinements

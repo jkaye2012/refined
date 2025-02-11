@@ -365,4 +365,11 @@ mod tests {
         let _: Refinement<usize, unsigned::LessThanEqual<15>> = e.imply();
         // let _: Refinement<usize, unsigned::LessThanEqual<14>> = e.imply();
     }
+
+    #[test]
+    fn test_unsigned_open_interval_implication() {
+        let bigger = Refinement::<u8, unsigned::OpenInterval<1, 100>>::refine(50).unwrap();
+        let smaller = Refinement::<u8, unsigned::OpenInterval<25, 75>>::refine(50).unwrap();
+        assert_eq!(bigger, smaller.imply());
+    }
 }

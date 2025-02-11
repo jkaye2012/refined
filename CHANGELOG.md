@@ -8,6 +8,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.0.3] - 2025-02-11
 
 - Updates documentation and readme to improve discoverability of provided refinements
+- Adds documentation of "smart equality" under implication
 
 ## [0.0.2] - 2025-02-02
 
