@@ -247,6 +247,7 @@
     allow(incomplete_features),
     feature(generic_const_exprs)
 )]
+#![feature(doc_cfg)]
 
 use std::fmt::Display;
 
@@ -267,8 +268,10 @@ pub use refinement::*;
 pub use boundable::signed::SignedBoundable;
 pub use boundable::unsigned::UnsignedBoundable;
 
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 pub mod implication;
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 pub use implication::*;
 

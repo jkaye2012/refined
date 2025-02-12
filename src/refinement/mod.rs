@@ -19,7 +19,7 @@ use crate::Implies;
     derive(Deserialize, Serialize),
     serde(try_from = "Refined<T>", into = "Refined<T>")
 )]
-pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
+pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(pub(crate) T, pub(crate) PhantomData<P>);
 
 impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     type T = T;
