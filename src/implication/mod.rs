@@ -41,5 +41,6 @@ pub trait Implies<T> {
     fn imply(self) -> T;
 }
 
+mod arithmetic_imp;
 mod boolean_imp;
 mod boundable_imp;

@@ -184,6 +184,7 @@
     allow(incomplete_features),
     feature(generic_const_exprs)
 )]
+#![feature(doc_cfg)]
 
 use std::fmt::Display;
 use std::marker::PhantomData;
@@ -201,8 +202,10 @@ pub mod string;
 pub use boundable::signed::SignedBoundable;
 pub use boundable::unsigned::UnsignedBoundable;
 
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 pub mod implication;
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 pub use implication::*;
 
@@ -275,6 +278,7 @@ impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> From<NamedRefinem
 )]
 pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
 
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 impl<F, T, Type: Clone> Implies<Refinement<Type, T>> for Refinement<Type, F>
 where
