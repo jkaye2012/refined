@@ -1,4 +1,18 @@
 //! Boundable refinement via signed values.
+//!
+//! # Example
+//!
+//! ```
+//! use refined::{Refinement, RefinementOps, boundable::signed::ClosedInterval};
+//!
+//! type RangedI64 = Refinement<i64, ClosedInterval<-10, 10>>;
+//!
+//! let ok = RangedI64::refine(0);
+//! assert!(ok.is_ok());
+//!
+//! let not_ok = RangedI64::refine(11);
+//! assert!(not_ok.is_err());
+//! ```
 use crate::{boolean::*, Predicate};
 
 /// Types that can be reduced to a signed size so that they can be bounded.

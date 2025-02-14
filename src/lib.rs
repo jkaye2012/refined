@@ -209,7 +209,7 @@
 //! let smaller_range: Refinement<u8, OpenInterval<25, 75>> = Refinement::refine(50).unwrap();
 //! let incompatible_range: Refinement<u8, OpenInterval<101, 200>> = Refinement::refine(150).unwrap();
 //! // assert_eq!(bigger_range, smaller_range); // Fails to compile, type mismatch
-//! // assert_eq!(bigger_ragne, incompatible_range) // Fails to compile, invalid implication
+//! // assert_eq!(bigger_range, incompatible_range) // Fails to compile, invalid implication
 //! assert_eq!(bigger_range, smaller_range.imply()); // Works!
 //! ```
 //!
@@ -223,25 +223,55 @@
 //!
 //! Here's a quick reference of what is currently available:
 //!
-//! * [UnsignedBoundable]: types that can be reduced to an unsigned size so that their size can be bounded. Examples
+//! * [boundable::unsigned] contains refinements for anything that implements [UnsignedBoundable];
+//!   these are types that can be reduced to an unsigned size so that their size can be bounded. Examples
 //!   include `String`, `u8`, `u64`, or any `std` container-like type that implements a `len()` method
-//! * [SignedBoundable]: types that can be reduced to a signed size so that their size can be bounded. Examples include
+//! * [boundable::signed] contains refinements for anything that implements [SignedBoundable];
+//!   these are types that can be reduced to a signed size so that their size can be bounded. Examples include
 //!   `i8`, `i64`, and `isize`
-//! * [boolean]: "combinator" refinements that allow other refinements to be combined with one another. Examples include
+//! * [boolean] contains "combinator" refinements that allow other refinements to be combined with one another. Examples include
 //!   [And](boolean::And) and [Or](boolean::Or)
-//! * [character]: refinements of [char]. Examples include [IsLowercase](character::IsLowercase) and [IsWhitespace](character::IsWhitespace)
-//! * [string]: refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains),
+//! * [character] contains refinements of [char]. Examples include [IsLowercase](character::IsLowercase) and [IsWhitespace](character::IsWhitespace)
+//! * [string] contains refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains),
 //!   [Trimmed](string::Trimmed), and [Regex](string::Regex)
 //!
 //! # Features
 //!
-//! * `serde`: enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
-//!   This functionality was actually my main motivation for writing the crate in the first place, but technically
-//!   the serde dependency is not required for the core functionality of the trait, so it can be disabled
-//! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
-//!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
-//!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
-//! * `regex`: enabling regex allows the use of the [Regex](string::Regex) predicates. This carries a dependency on the [regex] crate
+//! ## `serde`
+//!
+//! Enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
+//! This functionality was actually my main motivation for writing the crate in the first place, but technically
+//! the serde dependency is not required for the core functionality of the trait, so it can be disabled
+//!
+//! ## `regex`
+//!
+//! Enabling regex allows the use of the [Regex](string::Regex) predicate. This carries a dependency on the [regex] crate
+//!
+//! ## `implication`
+//!
+//! Enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
+//! feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
+//! which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
+//!
+//! ## `arithmetic`
+//!
+//! Enabling arithmetic provides implementations of many of the [std::ops] traits for relevant [Refinement]
+//! types. Enabling this feature also automatically enables `implication`. Because the relationship of refined types
+//! allows for the immediate computation of the resulting bounds, refined arithmetic should have no additional overhead
+//! compared to raw arithmetic operations.
+//!
+//! Following the types that implement arithmetic can be difficult, so we list the supported operations here informally:
+//!
+//! * [Addition](std::ops::Add) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
+//! * [Subtraction](std::ops::Sub) of valid combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
+//!   * "Valid" here means that the subtrahend is less than or equal to the minuend, thus preserving the unsigned bound
+//! * [Multiplication](std::ops::Mul) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
+//! * [Division](std::ops::Div) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
+//!
+//! Examples make it easier to visualize and understand the arithmetic support:
+//!
+//! ```
+//! ```
 #![cfg_attr(
     feature = "implication",
     allow(incomplete_features),

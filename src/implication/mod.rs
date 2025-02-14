@@ -41,6 +41,14 @@ pub trait Implies<T> {
     fn imply(self) -> T;
 }
 
+pub(crate) enum Assert<const CHECK: bool> {}
+
+pub(crate) trait IsTrue {}
+
+impl IsTrue for Assert<true> {}
+
+#[doc(cfg(feature = "arithmetic"))]
+#[cfg(feature = "arithmetic")]
 mod arithmetic_imp;
 mod boolean_imp;
 mod boundable_imp;
