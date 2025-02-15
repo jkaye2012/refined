@@ -218,6 +218,20 @@ impl<
         const AMAX: usize,
         const BMAX: usize,
         Type: Clone + unsigned::UnsignedBoundable + Div<Output = Type>,
+    > Div<Refinement<Type, unsigned::LTE<BMAX>>> for Refinement<Type, unsigned::LTE<AMAX>>
+where
+    Assert<{ BMAX >= 1 }>: IsTrue,
+{
+    type Output = Refinement<Type, unsigned::LTE<AMAX>>;
+
+    fn div(self, rhs: Refinement<Type, unsigned::LTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Div<Output = Type>,
     > Div<Refinement<Type, unsigned::LT<BMAX>>> for Refinement<Type, unsigned::LTE<AMAX>>
 where
     Assert<{ BMAX > 1 }>: IsTrue,
@@ -232,18 +246,240 @@ where
 impl<
         const AMAX: usize,
         const BMAX: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Div<Output = Type>,
-    > Div<Refinement<Type, unsigned::LTE<BMAX>>> for Refinement<Type, unsigned::LTE<AMAX>>
+        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
+    > Add<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
 where
-    Assert<{ BMAX >= 1 }>: IsTrue,
+    Refinement<Type, unsigned::GT<{ AMAX + BMAX + 1 }>>: Sized,
 {
-    type Output = Refinement<Type, unsigned::LTE<AMAX>>;
+    type Output = Refinement<Type, unsigned::GT<{ AMAX + BMAX + 1 }>>;
 
-    fn div(self, rhs: Refinement<Type, unsigned::LTE<BMAX>>) -> Self::Output {
+    fn add(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
+        Refinement(self.0 + rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
+    > Add<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
+where
+    Refinement<Type, unsigned::GT<{ AMAX + BMAX }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GT<{ AMAX + BMAX }>>;
+
+    fn add(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 + rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
+    > Mul<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
+where
+    Refinement<Type, unsigned::GT<{ (AMAX + 1) * (BMAX + 1) - 1 }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GT<{ (AMAX + 1) * (BMAX + 1) - 1 }>>;
+
+    fn mul(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
+        Refinement(self.0 * rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
+    > Mul<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
+where
+    Refinement<Type, unsigned::GT<{ (AMAX + 1) * BMAX - 1 }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GT<{ (AMAX + 1) * BMAX - 1 }>>;
+
+    fn mul(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 * rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
+    > Sub<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
+where
+    Refinement<Type, unsigned::GT<{ AMAX - BMAX - 1 }>>: Sized,
+    Assert<{ AMAX >= BMAX }>: IsTrue,
+{
+    type Output = Refinement<Type, unsigned::GT<{ AMAX - BMAX - 1 }>>;
+
+    fn sub(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
+    > Sub<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
+where
+    Refinement<Type, unsigned::GT<{ AMAX - BMAX }>>: Sized,
+    Assert<{ AMAX > BMAX }>: IsTrue,
+{
+    type Output = Refinement<Type, unsigned::GT<{ AMAX - BMAX }>>;
+
+    fn sub(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Div<Output = Type>,
+    > Div<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
+{
+    type Output = Refinement<Type, unsigned::GTE<0>>;
+
+    fn div(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
         Refinement(self.0 / rhs.0, PhantomData)
     }
 }
 
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Div<Output = Type>,
+    > Div<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GT<AMAX>>
+where
+    Assert<{ BMAX > 0 }>: IsTrue,
+{
+    type Output = Refinement<Type, unsigned::GTE<0>>;
+
+    fn div(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
+    > Add<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+where
+    Refinement<Type, unsigned::GTE<{ AMAX + BMAX }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GTE<{ AMAX + BMAX }>>;
+
+    fn add(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 + rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
+    > Add<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+where
+    Refinement<Type, unsigned::GTE<{ AMAX + BMAX + 1 }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GTE<{ AMAX + BMAX + 1 }>>;
+
+    fn add(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
+        Refinement(self.0 + rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
+    > Sub<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+where
+    Refinement<Type, unsigned::GTE<{ AMAX - BMAX - 1 }>>: Sized,
+    Assert<{ AMAX > BMAX }>: IsTrue,
+{
+    type Output = Refinement<Type, unsigned::GTE<{ AMAX - BMAX - 1 }>>;
+
+    fn sub(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
+    > Sub<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+where
+    Refinement<Type, unsigned::GTE<{ AMAX - BMAX }>>: Sized,
+    Assert<{ AMAX >= BMAX }>: IsTrue,
+{
+    type Output = Refinement<Type, unsigned::GTE<{ AMAX - BMAX }>>;
+
+    fn sub(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
+    > Mul<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+where
+    Refinement<Type, unsigned::GT<{ (AMAX) * (BMAX + 1) }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GTE<{ (AMAX) * (BMAX + 1) }>>;
+
+    fn mul(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
+        Refinement(self.0 * rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
+    > Mul<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+where
+    Refinement<Type, unsigned::GTE<{ AMAX * BMAX }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GTE<{ AMAX * BMAX }>>;
+
+    fn mul(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 * rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Div<Output = Type>,
+    > Div<Refinement<Type, unsigned::GT<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+{
+    type Output = Refinement<Type, unsigned::GTE<0>>;
+
+    fn div(self, rhs: Refinement<Type, unsigned::GT<BMAX>>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const AMAX: usize,
+        const BMAX: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Div<Output = Type>,
+    > Div<Refinement<Type, unsigned::GTE<BMAX>>> for Refinement<Type, unsigned::GTE<AMAX>>
+{
+    type Output = Refinement<Type, unsigned::GTE<0>>;
+
+    fn div(self, rhs: Refinement<Type, unsigned::GTE<BMAX>>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -361,7 +597,6 @@ mod tests {
         assert_eq!(*result, 60);
     }
 
-    // write tests for unsigned_lte_div and unsigned_lte_div_lt
     #[test]
     fn test_unsigned_lte_div() {
         let a = Refinement::<u8, unsigned::LTE<20>>::refine(20).unwrap();
@@ -376,5 +611,133 @@ mod tests {
         let b = Refinement::<u8, unsigned::LT<5>>::refine(4).unwrap();
         let result: Refinement<u8, unsigned::LTE<25>> = a / b;
         assert_eq!(*result, 6);
+    }
+
+    #[test]
+    fn test_unsigned_gt_add() {
+        let a = Refinement::<u8, unsigned::GT<10>>::refine(11).unwrap();
+        let b = Refinement::<u8, unsigned::GT<20>>::refine(21).unwrap();
+        let result: Refinement<u8, unsigned::GT<31>> = a + b;
+        assert_eq!(*result, 32);
+    }
+
+    #[test]
+    fn test_unsigned_gt_add_gte() {
+        let a = Refinement::<u8, unsigned::GT<15>>::refine(16).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<25>>::refine(25).unwrap();
+        let result: Refinement<u8, unsigned::GT<40>> = a + b;
+        assert_eq!(*result, 41);
+    }
+
+    #[test]
+    fn test_unsigned_gt_sub() {
+        let a = Refinement::<u8, unsigned::GT<20>>::refine(21).unwrap();
+        let b = Refinement::<u8, unsigned::GT<10>>::refine(11).unwrap();
+        let result: Refinement<u8, unsigned::GT<9>> = a - b;
+        assert_eq!(*result, 10);
+    }
+
+    #[test]
+    fn test_unsigned_gt_sub_gte() {
+        let a = Refinement::<u8, unsigned::GT<25>>::refine(26).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<10>>::refine(10).unwrap();
+        let result: Refinement<u8, unsigned::GT<15>> = a - b;
+        assert_eq!(*result, 16);
+    }
+
+    #[test]
+    fn test_unsigned_gt_mul() {
+        let a = Refinement::<u8, unsigned::GT<10>>::refine(11).unwrap();
+        let b = Refinement::<u8, unsigned::GT<5>>::refine(6).unwrap();
+        let result: Refinement<u8, unsigned::GT<65>> = a * b;
+        assert_eq!(*result, 66);
+    }
+
+    #[test]
+    fn test_unsigned_gt_mul_gte() {
+        let a = Refinement::<u8, unsigned::GT<10>>::refine(11).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<5>>::refine(5).unwrap();
+        let result: Refinement<u8, unsigned::GT<54>> = a * b;
+        assert_eq!(*result, 55);
+    }
+
+    #[test]
+    fn test_unsigned_gt_div() {
+        let a = Refinement::<u8, unsigned::GT<20>>::refine(21).unwrap();
+        let b = Refinement::<u8, unsigned::GT<5>>::refine(6).unwrap();
+        let result: Refinement<u8, unsigned::GTE<0>> = a / b;
+        assert_eq!(*result, 3);
+    }
+
+    #[test]
+    fn test_unsigned_gt_div_gte() {
+        let a = Refinement::<u8, unsigned::GT<25>>::refine(26).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<5>>::refine(5).unwrap();
+        let result: Refinement<u8, unsigned::GTE<0>> = a / b;
+        assert_eq!(*result, 5);
+    }
+
+    #[test]
+    fn test_unsigned_gte_add() {
+        let a = Refinement::<u8, unsigned::GTE<15>>::refine(15).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<25>>::refine(25).unwrap();
+        let result: Refinement<u8, unsigned::GTE<40>> = a + b;
+        assert_eq!(*result, 40);
+    }
+
+    #[test]
+    fn test_unsigned_gte_add_gt() {
+        let a = Refinement::<u8, unsigned::GTE<15>>::refine(15).unwrap();
+        let b = Refinement::<u8, unsigned::GT<25>>::refine(26).unwrap();
+        let result: Refinement<u8, unsigned::GTE<41>> = a + b;
+        assert_eq!(*result, 41);
+    }
+
+    #[test]
+    fn test_unsigned_gte_sub() {
+        let a = Refinement::<u8, unsigned::GTE<25>>::refine(25).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<10>>::refine(10).unwrap();
+        let result: Refinement<u8, unsigned::GTE<15>> = a - b;
+        assert_eq!(*result, 15);
+    }
+
+    #[test]
+    fn test_unsigned_gte_sub_gt() {
+        let a = Refinement::<u8, unsigned::GTE<30>>::refine(30).unwrap();
+        let b = Refinement::<u8, unsigned::GT<10>>::refine(11).unwrap();
+        let result: Refinement<u8, unsigned::GTE<19>> = a - b;
+        assert_eq!(*result, 19);
+    }
+
+    #[test]
+    fn test_unsigned_gte_mul() {
+        let a = Refinement::<u8, unsigned::GTE<15>>::refine(15).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<5>>::refine(5).unwrap();
+        let result: Refinement<u8, unsigned::GTE<75>> = a * b;
+        assert_eq!(*result, 75);
+    }
+
+    #[test]
+    fn test_unsigned_gte_mul_gt() {
+        let a = Refinement::<u8, unsigned::GTE<15>>::refine(15).unwrap();
+        let b = Refinement::<u8, unsigned::GT<5>>::refine(6).unwrap();
+        let result: Refinement<u8, unsigned::GTE<90>> = a * b;
+        assert_eq!(*result, 90);
+    }
+
+    #[test]
+    fn test_unsigned_gte_div() {
+        let a = Refinement::<u8, unsigned::GTE<25>>::refine(25).unwrap();
+        let b = Refinement::<u8, unsigned::GTE<5>>::refine(5).unwrap();
+        let result: Refinement<u8, unsigned::GTE<0>> = a / b;
+        assert_eq!(*result, 5);
+    }
+
+    #[test]
+    fn test_unsigned_gte_div_gt() {
+        let a = Refinement::<u8, unsigned::GTE<30>>::refine(30).unwrap();
+        let b = Refinement::<u8, unsigned::GT<5>>::refine(6).unwrap();
+        let result: Refinement<u8, unsigned::GTE<0>> = a / b;
+        assert_eq!(*result, 5);
     }
 }

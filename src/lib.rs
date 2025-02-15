@@ -263,10 +263,13 @@
 //! Following the types that implement arithmetic can be difficult, so we list the supported operations here informally:
 //!
 //! * [Addition](std::ops::Add) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
+//! * [Addition](std::ops::Add) of all combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
 //! * [Subtraction](std::ops::Sub) of valid combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
-//!   * "Valid" here means that the subtrahend is less than or equal to the minuend, thus preserving the unsigned bound
+//! * [Subtraction](std::ops::Sub) of valid combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
 //! * [Multiplication](std::ops::Mul) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
+//! * [Multiplication](std::ops::Mul) of all combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
 //! * [Division](std::ops::Div) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
+//! * [Division](std::ops::Div) of all combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
 //!
 //! Examples make it easier to visualize and understand the arithmetic support:
 //!
