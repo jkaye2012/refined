@@ -249,6 +249,12 @@ pub trait Predicate<T> {
     fn error() -> String;
 }
 
+pub trait StatefulPredicate<T>: Default + Predicate<T> {
+    fn test(&self, value: &T) -> bool;
+
+    fn error(&self) -> String;
+}
+
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize), serde(transparent))]
 struct Refined<T>(T);
 
@@ -359,6 +365,63 @@ impl Display for RefinementError {
 }
 
 impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
+    /// Attempts to refine a runtime value with the type's imbued predicate.
+    pub fn refine(value: T) -> Result<Self, RefinementError> {
+        Self::try_from(Refined(value))
+    }
+
+    /// Attempts a modification of a refined value, re-certifying that the predicate
+    /// still holds after the modification is complete.
+    pub fn modify<F>(self, fun: F) -> Result<Self, RefinementError>
+    where
+        F: FnOnce(T) -> T,
+    {
+        Self::refine(fun(self.0))
+    }
+
+    /// Attempts a replacement of a refined value, re-certifying that the predicate
+    /// holds for the new value.
+    pub fn replace(self, value: T) -> Result<Self, RefinementError> {
+        Self::refine(value)
+    }
+
+    /// Destructively removes the refined value from the `Refinement` wrapper.
+    ///
+    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
+    pub fn extract(self) -> T {
+        self.0
+    }
+}
+
+impl<T: Clone, P: StatefulPredicate<T> + Clone> From<StatefulRefinement<T, P>> for Refined<T> {
+    fn from(value: StatefulRefinement<T, P>) -> Self {
+        Refined(value.0)
+    }
+}
+
+impl<T: Clone, P: StatefulPredicate<T> + Clone> TryFrom<Refined<T>> for StatefulRefinement<T, P> {
+    type Error = RefinementError;
+
+    fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
+        let predicate = P::default();
+        if predicate.test(&value.0) {
+            Ok(Self(value.0, predicate))
+        } else {
+            Err(RefinementError(predicate.error()))
+        }
+    }
+}
+
+/// A refinement of a type `T` certifying that the [Predicate] `P` holds.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(try_from = "Refined<T>", into = "Refined<T>")
+)]
+pub struct StatefulRefinement<T: Clone, P: StatefulPredicate<T> + Clone>(T, P);
+
+impl<T: Clone, P: StatefulPredicate<T> + Clone> StatefulRefinement<T, P> {
     /// Attempts to refine a runtime value with the type's imbued predicate.
     pub fn refine(value: T) -> Result<Self, RefinementError> {
         Self::try_from(Refined(value))
