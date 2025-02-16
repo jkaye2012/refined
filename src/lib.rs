@@ -168,8 +168,8 @@
 //! * [boolean]: "combinator" refinements that allow other refinements to be combined with one another. Examples include
 //!   [And](boolean::And) and [Or](boolean::Or)
 //! * [character]: refinements of [char]. Examples include [IsLowercase](character::IsLowercase) and [IsWhitespace](character::IsWhitespace)
-//! * [string]: refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains) and
-//!   [Trimmed](string::Trimmed)
+//! * [string]: refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains),
+//!   [Trimmed](string::Trimmed), and [Regex](string::Regex)
 //!
 //! # Features
 //!
