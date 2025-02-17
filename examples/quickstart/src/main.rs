@@ -8,9 +8,9 @@ use refined::{
 type_string!(Name, "name");
 type_string!(Size, "size");
 
-type FrobnicatorName = Named<Name, String, Refinement<String, ClosedInterval<1, 10>>>;
+type FrobnicatorName = Named<Name, Refinement<String, ClosedInterval<1, 10>>>;
 
-type FrobnicatorSize = Named<Size, u8, Refinement<u8, LessThanEqual<100>>>;
+type FrobnicatorSize = Named<Size, Refinement<u8, LessThanEqual<100>>>;
 
 #[derive(Debug)]
 struct Frobnicator {

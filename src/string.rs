@@ -86,20 +86,97 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
 impl<T: AsRef<str>> StatefulPredicate<T> for Trimmed {}
 
 #[cfg(feature = "regex")]
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Regex<S: TypeString>(PhantomData<S>);
+mod regex_pred {
+    use super::*;
 
-#[cfg(feature = "regex")]
-impl<S: TypeString, T: AsRef<str>> Predicate<T> for Regex<S> {
-    fn test(s: &T) -> bool {
-        regex::Regex::new(S::VALUE)
-            .expect("Invalid regex")
-            .is_match(s.as_ref())
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+    pub struct Regex<S: TypeString>(PhantomData<S>);
+
+    impl<S: TypeString, T: AsRef<str>> Predicate<T> for Regex<S> {
+        fn test(s: &T) -> bool {
+            regex::Regex::new(S::VALUE)
+                .expect("Invalid regex")
+                .is_match(s.as_ref())
+        }
+
+        fn error() -> String {
+            format!("must match regular expression {}", S::VALUE)
+        }
     }
-    fn error() -> String {
-        format!("must match regular expression {}", S::VALUE)
+
+    impl<S: TypeString, T: AsRef<str>> StatefulPredicate<T> for Regex<S> {}
+
+    #[derive(Clone, Debug)]
+    pub struct StatefulRegex<S: TypeString>(regex::Regex, PhantomData<S>);
+
+    impl<S: TypeString> Default for StatefulRegex<S> {
+        fn default() -> Self {
+            Self(
+                regex::Regex::new(S::VALUE).expect("Invalid regex"),
+                PhantomData,
+            )
+        }
+    }
+
+    impl<S: TypeString, T: AsRef<str>> Predicate<T> for StatefulRegex<S> {
+        fn test(s: &T) -> bool {
+            regex::Regex::new(S::VALUE)
+                .expect("Invalid regex")
+                .is_match(s.as_ref())
+        }
+
+        fn error() -> String {
+            format!("must match regular expression {}", S::VALUE)
+        }
+    }
+
+    impl<S: TypeString, T: AsRef<str>> StatefulPredicate<T> for StatefulRegex<S> {
+        fn test(&self, value: &T) -> bool {
+            self.0.is_match(value.as_ref())
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use crate::*;
+
+        type_string!(AllAs, "^a+$");
+
+        #[test]
+        fn test_regex() {
+            type Test = Refinement<String, Regex<AllAs>>;
+            assert!(Test::refine("aaa".to_string()).is_ok());
+            assert!(Test::refine("aab".to_string()).is_err());
+        }
+
+        #[test]
+        fn test_stateful_regex() {
+            type Test = Refinement<String, StatefulRegex<AllAs>>;
+            assert!(Test::refine("aaa".to_string()).is_ok());
+            assert!(Test::refine("aab".to_string()).is_err());
+        }
+
+        #[test]
+        fn test_stateful_regex_modify() {
+            type Test = Refinement<String, StatefulRegex<AllAs>>;
+            let it = Test::refine("aaa".to_string()).unwrap();
+            let it = it.modify(|s| s + "aaa").unwrap();
+            assert!(it.modify(|s| s + "b").is_err());
+        }
+
+        #[test]
+        fn test_stateful_regex_replace() {
+            type Test = Refinement<String, StatefulRegex<AllAs>>;
+            let it = Test::refine("aaa".to_string()).unwrap();
+            let it = it.replace("aaaa".to_string()).unwrap();
+            assert!(it.replace("bbbb".to_string()).is_err());
+        }
     }
 }
+
+#[cfg(feature = "regex")]
+pub use regex_pred::*;
 
 #[cfg(test)]
 mod tests {
