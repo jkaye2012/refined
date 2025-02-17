@@ -70,6 +70,22 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
     }
 }
 
+#[cfg(feature = "regex")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+pub struct Regex<S: TypeString>(PhantomData<S>);
+
+#[cfg(feature = "regex")]
+impl<S: TypeString, T: AsRef<str>> Predicate<T> for Regex<S> {
+    fn test(s: &T) -> bool {
+        regex::Regex::new(S::VALUE)
+            .expect("Invalid regex")
+            .is_match(s.as_ref())
+    }
+    fn error() -> String {
+        format!("must match regular expression {}", S::VALUE)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -103,5 +119,16 @@ mod tests {
         type Test = Refinement<&'static str, Trimmed>;
         assert!(Test::refine("  foo  ").is_err());
         assert!(Test::refine("foo").is_ok());
+    }
+
+    #[cfg(feature = "regex")]
+    type_string!(AllAs, "^a+$");
+
+    #[test]
+    #[cfg(feature = "regex")]
+    fn test_regex() {
+        type Test = Refinement<String, Regex<AllAs>>;
+        assert!(Test::refine("aaa".to_string()).is_ok());
+        assert!(Test::refine("aab".to_string()).is_err());
     }
 }
