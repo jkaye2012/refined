@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```
-//! use refined::{Refinement, type_string, TypeString, string::StartsWith};
+//! use refined::{Refinement, RefinementOps, type_string, TypeString, string::StartsWith};
 //!
 //! type_string!(Foo, "foo");
 //! type Test = Refinement<String, StartsWith<Foo>>;
@@ -16,7 +16,7 @@
 //! ```
 use std::marker::PhantomData;
 
-use crate::{Predicate, TypeString};
+use crate::{Predicate, StatefulPredicate, TypeString};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct StartsWith<Prefix: TypeString>(PhantomData<Prefix>);
@@ -31,6 +31,8 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
     }
 }
 
+impl<T: AsRef<str>, Prefix: TypeString> StatefulPredicate<T> for StartsWith<Prefix> {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct EndsWith<Suffix: TypeString>(PhantomData<Suffix>);
 
@@ -43,6 +45,8 @@ impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
         format!("must end with '{}'", Suffix::VALUE)
     }
 }
+
+impl<T: AsRef<str>, Suffix: TypeString> StatefulPredicate<T> for EndsWith<Suffix> {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Contains<Substr: TypeString>(PhantomData<Substr>);
@@ -57,6 +61,8 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
     }
 }
 
+impl<T: AsRef<str>, Substr: TypeString> StatefulPredicate<T> for Contains<Substr> {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Trimmed;
 
@@ -69,6 +75,8 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
         String::from("must not start or end with whitespace")
     }
 }
+
+impl<T: AsRef<str>> StatefulPredicate<T> for Trimmed {}
 
 #[cfg(feature = "regex")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]

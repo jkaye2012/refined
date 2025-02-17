@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```
-//! use refined::{Refinement, boolean::*, boundable::unsigned::*};
+//! use refined::{Refinement, RefinementOps, boolean::*, boundable::unsigned::*};
 //!
 //! type SizedString = Refinement<String, And<GreaterThan<3>, LessThan<10>>>;
 //!
@@ -35,6 +35,8 @@ impl<T> Predicate<T> for True {
     }
 }
 
+impl<T> StatefulPredicate<T> for True {}
+
 /// Always `false`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct False;
@@ -48,6 +50,8 @@ impl<T> Predicate<T> for False {
         String::from("false predicate")
     }
 }
+
+impl<T> StatefulPredicate<T> for False {}
 
 /// Logical conjunction of two [predicates](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -63,6 +67,8 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
     }
 }
 
+impl<T, A: Predicate<T> + Default, B: Predicate<T> + Default> StatefulPredicate<T> for And<A, B> {}
+
 /// Logical disjunction of two [predicates](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Or<A, B>(PhantomData<A>, PhantomData<B>);
@@ -76,6 +82,8 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
         format!("{} or {}", A::error(), B::error())
     }
 }
+
+impl<T, A: Predicate<T> + Default, B: Predicate<T> + Default> StatefulPredicate<T> for Or<A, B> {}
 
 /// Logical exclusive disjunction of two [predicates](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -91,6 +99,8 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
     }
 }
 
+impl<T, A: Predicate<T> + Default, B: Predicate<T> + Default> StatefulPredicate<T> for Xor<A, B> {}
+
 /// Logical negation of a [predicate](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Not<P>(PhantomData<P>);
@@ -105,160 +115,13 @@ impl<T, P: Predicate<T>> Predicate<T> for Not<P> {
     }
 }
 
+impl<T, P: Predicate<T> + Default> StatefulPredicate<T> for Not<P> {}
+
 /// Logical negated conjunction of two [predicates](Predicate).
 pub type Nand<A, B> = Not<And<A, B>>;
 
 /// Logical negated disjunction of two [predicates](Predicate).
 pub type Nor<A, B> = Not<Or<A, B>>;
-
-/// Always `true`, statefully.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct TrueST;
-
-impl<T> Predicate<T> for TrueST {
-    fn test(_: &T) -> bool {
-        true
-    }
-
-    fn error() -> String {
-        String::from("true predicate")
-    }
-}
-
-impl<T> StatefulPredicate<T> for TrueST {
-    fn test(&self, value: &T) -> bool {
-        <Self as Predicate<T>>::test(value)
-    }
-
-    fn error(&self) -> String {
-        <Self as Predicate<T>>::error()
-    }
-}
-
-/// Always `false`, statefully.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct FalseST;
-
-impl<T> Predicate<T> for FalseST {
-    fn test(_: &T) -> bool {
-        false
-    }
-
-    fn error() -> String {
-        String::from("false predicate")
-    }
-}
-impl<T> StatefulPredicate<T> for FalseST {
-    fn test(&self, value: &T) -> bool {
-        <Self as Predicate<T>>::test(value)
-    }
-
-    fn error(&self) -> String {
-        <Self as Predicate<T>>::error()
-    }
-}
-
-/// Logical conjunction of two [stateful predicates](StatefulPredicate).
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct AndST<A, B>(A, B);
-
-impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for AndST<A, B> {
-    fn test(t: &T) -> bool {
-        A::test(t) && B::test(t)
-    }
-
-    fn error() -> String {
-        format!("{} and {}", A::error(), B::error())
-    }
-}
-
-impl<T, A: StatefulPredicate<T>, B: StatefulPredicate<T>> StatefulPredicate<T> for AndST<A, B> {
-    fn test(&self, t: &T) -> bool {
-        self.0.test(t) && self.1.test(t)
-    }
-
-    fn error(&self) -> String {
-        format!("{} and {}", self.0.error(), self.1.error())
-    }
-}
-
-/// Logical disjunction of two [stateful predicates](StatefulPredicate).
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct OrST<A, B>(A, B);
-
-impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for OrST<A, B> {
-    fn test(t: &T) -> bool {
-        A::test(t) || B::test(t)
-    }
-
-    fn error() -> String {
-        format!("{} or {}", A::error(), B::error())
-    }
-}
-
-impl<T, A: StatefulPredicate<T>, B: StatefulPredicate<T>> StatefulPredicate<T> for OrST<A, B> {
-    fn test(&self, t: &T) -> bool {
-        self.0.test(t) || self.1.test(t)
-    }
-
-    fn error(&self) -> String {
-        format!("{} or {}", self.0.error(), self.1.error())
-    }
-}
-
-/// Logical exclusive disjunction of two [stateful predicates](StatefulPredicate).
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct XorST<A, B>(A, B);
-
-impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for XorST<A, B> {
-    fn test(t: &T) -> bool {
-        A::test(t) ^ B::test(t)
-    }
-
-    fn error() -> String {
-        format!("{} xor {}", A::error(), B::error())
-    }
-}
-
-impl<T, A: StatefulPredicate<T>, B: StatefulPredicate<T>> StatefulPredicate<T> for XorST<A, B> {
-    fn test(&self, t: &T) -> bool {
-        self.0.test(t) ^ self.1.test(t)
-    }
-
-    fn error(&self) -> String {
-        format!("{} xor {}", self.0.error(), self.1.error())
-    }
-}
-
-/// Logical negation of a [stateful predicate](StatefulPredicate).
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct NotST<P>(P);
-
-impl<T, P: Predicate<T>> Predicate<T> for NotST<P> {
-    fn test(t: &T) -> bool {
-        !P::test(t)
-    }
-
-    fn error() -> String {
-        format!("not {}", P::error())
-    }
-}
-
-impl<T, P: StatefulPredicate<T>> StatefulPredicate<T> for NotST<P> {
-    fn test(&self, t: &T) -> bool {
-        !self.0.test(t)
-    }
-
-    fn error(&self) -> String {
-        format!("not {}", self.0.error())
-    }
-}
-
-/// Logical negated conjunction of two [stateful predicates](StatefulPredicate).
-pub type NandST<A, B> = NotST<AndST<A, B>>;
-
-/// Logical negated disjunction of two [stateful predicates](StatefulPredicate).
-pub type NorST<A, B> = NotST<OrST<A, B>>;
 
 #[cfg(test)]
 mod tests {
@@ -363,97 +226,97 @@ mod tests {
 
     #[test]
     fn test_true_st() {
-        type Test = StatefulRefinement<String, TrueST>;
+        type Test = StatefulRefinement<String, True>;
         assert!(Test::refine("Hello".to_string()).is_ok());
     }
 
     #[test]
     fn test_false_st() {
-        type Test = StatefulRefinement<String, FalseST>;
+        type Test = StatefulRefinement<String, False>;
         assert!(Test::refine("Hello".to_string()).is_err());
     }
 
     #[test]
     fn test_and_st() {
-        type TestTrueFalse = StatefulRefinement<String, AndST<TrueST, FalseST>>;
+        type TestTrueFalse = StatefulRefinement<String, And<True, False>>;
         assert!(TestTrueFalse::refine("Hello".to_string()).is_err());
 
-        type TestTrueTrue = Refinement<String, AndST<TrueST, TrueST>>;
+        type TestTrueTrue = Refinement<String, And<True, True>>;
         assert!(TestTrueTrue::refine("Hello".to_string()).is_ok());
 
-        type TestFalseTrue = Refinement<String, AndST<FalseST, TrueST>>;
+        type TestFalseTrue = Refinement<String, And<False, True>>;
         assert!(TestFalseTrue::refine("Hello".to_string()).is_err());
 
-        type TestFalseFalse = Refinement<String, AndST<FalseST, FalseST>>;
+        type TestFalseFalse = Refinement<String, And<False, False>>;
         assert!(TestFalseFalse::refine("Hello".to_string()).is_err());
     }
 
     #[test]
     fn test_or_st() {
-        type TestTrueFalse = StatefulRefinement<String, OrST<TrueST, FalseST>>;
+        type TestTrueFalse = StatefulRefinement<String, Or<True, False>>;
         assert!(TestTrueFalse::refine("Hello".to_string()).is_ok());
 
-        type TestTrueTrue = StatefulRefinement<String, OrST<TrueST, TrueST>>;
+        type TestTrueTrue = StatefulRefinement<String, Or<True, True>>;
         assert!(TestTrueTrue::refine("Hello".to_string()).is_ok());
 
-        type TestFalseTrue = StatefulRefinement<String, OrST<FalseST, TrueST>>;
+        type TestFalseTrue = StatefulRefinement<String, Or<False, True>>;
         assert!(TestFalseTrue::refine("Hello".to_string()).is_ok());
 
-        type TestFalseFalse = StatefulRefinement<String, OrST<FalseST, FalseST>>;
+        type TestFalseFalse = StatefulRefinement<String, Or<False, False>>;
         assert!(TestFalseFalse::refine("Hello".to_string()).is_err());
     }
 
     #[test]
     fn test_xor_st() {
-        type TestTrueFalse = StatefulRefinement<String, XorST<TrueST, FalseST>>;
+        type TestTrueFalse = StatefulRefinement<String, Xor<True, False>>;
         assert!(TestTrueFalse::refine("Hello".to_string()).is_ok());
 
-        type TestTrueTrue = StatefulRefinement<String, XorST<TrueST, TrueST>>;
+        type TestTrueTrue = StatefulRefinement<String, Xor<True, True>>;
         assert!(TestTrueTrue::refine("Hello".to_string()).is_err());
 
-        type TestFalseTrue = StatefulRefinement<String, XorST<FalseST, TrueST>>;
+        type TestFalseTrue = StatefulRefinement<String, Xor<False, True>>;
         assert!(TestFalseTrue::refine("Hello".to_string()).is_ok());
 
-        type TestFalseFalse = StatefulRefinement<String, XorST<FalseST, FalseST>>;
+        type TestFalseFalse = StatefulRefinement<String, Xor<False, False>>;
         assert!(TestFalseFalse::refine("Hello".to_string()).is_err());
     }
 
     #[test]
     fn test_not_st() {
-        type TestNotTrue = StatefulRefinement<String, NotST<TrueST>>;
+        type TestNotTrue = StatefulRefinement<String, Not<True>>;
         assert!(TestNotTrue::refine("Hello".to_string()).is_err());
 
-        type TestNotFalse = StatefulRefinement<String, NotST<FalseST>>;
+        type TestNotFalse = StatefulRefinement<String, Not<False>>;
         assert!(TestNotFalse::refine("Hello".to_string()).is_ok());
     }
 
     #[test]
     fn test_nand_st() {
-        type TestTrueFalse = StatefulRefinement<String, NandST<TrueST, FalseST>>;
+        type TestTrueFalse = StatefulRefinement<String, Nand<True, False>>;
         assert!(TestTrueFalse::refine("Hello".to_string()).is_ok());
 
-        type TestTrueTrue = StatefulRefinement<String, NandST<TrueST, TrueST>>;
+        type TestTrueTrue = StatefulRefinement<String, Nand<True, True>>;
         assert!(TestTrueTrue::refine("Hello".to_string()).is_err());
 
-        type TestFalseTrue = StatefulRefinement<String, NandST<FalseST, TrueST>>;
+        type TestFalseTrue = StatefulRefinement<String, Nand<False, True>>;
         assert!(TestFalseTrue::refine("Hello".to_string()).is_ok());
 
-        type TestFalseFalse = StatefulRefinement<String, NandST<FalseST, FalseST>>;
+        type TestFalseFalse = StatefulRefinement<String, Nand<False, False>>;
         assert!(TestFalseFalse::refine("Hello".to_string()).is_ok());
     }
 
     #[test]
     fn test_nor_st() {
-        type TestTrueFalse = StatefulRefinement<String, NorST<TrueST, FalseST>>;
+        type TestTrueFalse = StatefulRefinement<String, Nor<True, False>>;
         assert!(TestTrueFalse::refine("Hello".to_string()).is_err());
 
-        type TestTrueTrue = StatefulRefinement<String, NorST<TrueST, TrueST>>;
+        type TestTrueTrue = StatefulRefinement<String, Nor<True, True>>;
         assert!(TestTrueTrue::refine("Hello".to_string()).is_err());
 
-        type TestFalseTrue = StatefulRefinement<String, NorST<FalseST, TrueST>>;
+        type TestFalseTrue = StatefulRefinement<String, Nor<False, True>>;
         assert!(TestFalseTrue::refine("Hello".to_string()).is_err());
 
-        type TestFalseFalse = StatefulRefinement<String, NorST<FalseST, FalseST>>;
+        type TestFalseFalse = StatefulRefinement<String, Nor<False, False>>;
         assert!(TestFalseFalse::refine("Hello".to_string()).is_ok());
     }
 }

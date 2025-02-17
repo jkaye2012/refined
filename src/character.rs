@@ -3,14 +3,14 @@
 //! # Example
 //!
 //! ```
-//! use refined::{Refinement, character::IsDigit};
+//! use refined::{Refinement, RefinementOps, character::IsDigit};
 //!
 //! type Test = Refinement<char, IsDigit>;
 //!
 //! assert!(Test::refine('0').is_ok());
 //! assert!(Test::refine('a').is_err());
 //! ```
-use crate::Predicate;
+use crate::{Predicate, StatefulPredicate};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct IsControl;
@@ -25,6 +25,8 @@ impl Predicate<char> for IsControl {
     }
 }
 
+impl StatefulPredicate<char> for IsControl {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct IsDigit;
 
@@ -37,6 +39,8 @@ impl Predicate<char> for IsDigit {
         String::from("must be a digit")
     }
 }
+
+impl StatefulPredicate<char> for IsDigit {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct IsLowercase;
@@ -64,6 +68,8 @@ impl Predicate<char> for IsUppercase {
     }
 }
 
+impl StatefulPredicate<char> for IsLowercase {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct IsNumeric;
 
@@ -90,6 +96,8 @@ impl Predicate<char> for IsWhitespace {
     }
 }
 
+impl StatefulPredicate<char> for IsNumeric {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct IsHexDigit;
 
@@ -102,6 +110,8 @@ impl Predicate<char> for IsHexDigit {
         String::from("must be a valid hex character")
     }
 }
+
+impl StatefulPredicate<char> for IsHexDigit {}
 
 #[cfg(test)]
 mod tests {

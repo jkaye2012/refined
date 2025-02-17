@@ -9,6 +9,7 @@ use std::collections::VecDeque;
 
 use crate::boolean::*;
 use crate::Predicate;
+use crate::StatefulPredicate;
 
 /// Types that can be reduced to an unsigned size so that they can be bounded.
 pub trait UnsignedBoundable {
@@ -166,6 +167,8 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThan<MIN> {
     }
 }
 
+impl<T: UnsignedBoundable, const MIN: usize> StatefulPredicate<T> for GreaterThan<MIN> {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct GreaterThanEqual<const MIN: usize>;
 
@@ -180,6 +183,8 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThanEqual<M
         format!("must be greater than or equal to {}", MIN)
     }
 }
+
+impl<T: UnsignedBoundable, const MIN: usize> StatefulPredicate<T> for GreaterThanEqual<MIN> {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct LessThan<const MAX: usize>;
@@ -196,6 +201,8 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
     }
 }
 
+impl<T: UnsignedBoundable, const MAX: usize> StatefulPredicate<T> for LessThan<MAX> {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct LessThanEqual<const MAX: usize>;
 
@@ -210,6 +217,8 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThanEqual<MAX>
         format!("must be less than or equal to {}", MAX)
     }
 }
+
+impl<T: UnsignedBoundable, const MAX: usize> StatefulPredicate<T> for LessThanEqual<MAX> {}
 
 pub type OpenInterval<const MIN: usize, const MAX: usize> = And<GT<MIN>, LT<MAX>>;
 
@@ -232,6 +241,11 @@ impl<T: UnsignedBoundable, const DIV: usize, const MOD: usize> Predicate<T> for 
     }
 }
 
+impl<T: UnsignedBoundable, const DIV: usize, const MOD: usize> StatefulPredicate<T>
+    for Modulo<DIV, MOD>
+{
+}
+
 pub type Divisible<const DIV: usize> = Modulo<DIV, 0>;
 
 pub type Even = Modulo<2, 0>;
@@ -250,6 +264,8 @@ impl<T: UnsignedBoundable, const VAL: usize> Predicate<T> for Equals<VAL> {
         format!("must be equal to {}", VAL)
     }
 }
+
+impl<T: UnsignedBoundable, const VAL: usize> StatefulPredicate<T> for Equals<VAL> {}
 
 pub type Zero = Equals<0>;
 
