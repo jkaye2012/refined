@@ -90,6 +90,7 @@ mod regex_pred {
     use super::*;
 
     #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct Regex<S: TypeString>(PhantomData<S>);
 
     impl<S: TypeString, T: AsRef<str>> Predicate<T> for Regex<S> {
