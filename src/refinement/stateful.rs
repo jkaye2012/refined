@@ -26,7 +26,7 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
 ///
 /// This is useful in situations where the additional space required to hold the
 /// predicate is outweighed by the cost of applying the predicate statelessly.
-/// Whenever possible, [Refinement] should be preferred.
+/// Whenever possible, [Refinement](super::Refinement) should be preferred.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(
     feature = "serde",
@@ -35,7 +35,9 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
 )]
 pub struct StatefulRefinement<T: Clone, P: StatefulPredicate<T> + Clone>(T, P);
 
-impl<T: Clone, P: StatefulPredicate<T> + Clone> RefinementOps<T> for StatefulRefinement<T, P> {
+impl<T: Clone, P: StatefulPredicate<T> + Clone> RefinementOps for StatefulRefinement<T, P> {
+    type T = T;
+
     fn extract(self) -> T {
         self.0
     }
@@ -79,6 +81,7 @@ mod tests {
     use super::*;
     use crate::*;
 
+    #[cfg(feature = "serde")]
     #[test]
     fn test_stateful_refinement_deserialize_success() {
         let value =
@@ -87,6 +90,7 @@ mod tests {
         assert_eq!(*value, 4);
     }
 
+    #[cfg(feature = "serde")]
     #[test]
     fn test_stateful_refinement_deserialize_failure() {
         let err =
@@ -98,6 +102,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "serde")]
     #[test]
     fn test_stateful_refinement_serialize() {
         let value =

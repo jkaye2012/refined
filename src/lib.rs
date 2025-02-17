@@ -51,6 +51,16 @@
 //!            "refinement violated: must be less than or equal to 100");
 //! ```
 //!
+//! ## Stateful refinement
+//!
+//! While most type refinements can (and should) be implemented statelessly, it is possible to refine types in
+//! ways that are more efficient/ergonomic using runtime state. For these cases, [StatefulRefinement] and
+//! [StatefulPredicate] are provided.
+//!
+//! ```text
+//! // Example forthcoming
+//! ```
+//!
 //! ## Named refinement
 //!
 //! As you can see in the error messages above, there are two possible fields that could have led to the error in refinement,
@@ -58,16 +68,16 @@
 //! when using libraries like [serde_path_to_error](https://docs.rs/serde_path_to_error/latest/serde_path_to_error/), this
 //! can be important functionality to have in your own error messages if you're using basic serde functionality.
 //!
-//! If this is something that you need, consider using [Named].
+//! If this is something that you need, consider using [Named], or [NamedSerde] if using `serde`.
 //!
 //! ```
 //! use refined::{Named, RefinementError, Refinement, RefinementOps, boundable::unsigned::{LessThanEqual, ClosedInterval}, type_string, TypeString};
 //!
 //! type_string!(Name, "name");
-//! type FrobnicatorName = Named<Name, String, Refinement<String, ClosedInterval<1, 10>>>;
+//! type FrobnicatorName = Named<Name, Refinement<String, ClosedInterval<1, 10>>>;
 //!
 //! type_string!(Size, "size");
-//! type FrobnicatorSize = Named<Size, u8, Refinement<u8, LessThanEqual<100>>>;
+//! type FrobnicatorSize = Named<Size, Refinement<u8, LessThanEqual<100>>>;
 //!
 //! #[derive(Debug)]
 //! struct Frobnicator {
@@ -264,11 +274,13 @@ impl Display for RefinementError {
     }
 }
 
-pub trait RefinementOps<T>:
-    TryFrom<Refined<T>, Error = RefinementError> + std::ops::Deref<Target = T>
+pub trait RefinementOps:
+    TryFrom<Refined<Self::T>, Error = RefinementError> + std::ops::Deref<Target = Self::T>
 {
+    type T;
+
     /// Attempts to refine a runtime value with the type's imbued predicate.
-    fn refine(value: T) -> Result<Self, RefinementError> {
+    fn refine(value: Self::T) -> Result<Self, RefinementError> {
         Self::try_from(Refined(value))
     }
 
@@ -276,19 +288,19 @@ pub trait RefinementOps<T>:
     /// still holds after the modification is complete.
     fn modify<F>(self, fun: F) -> Result<Self, RefinementError>
     where
-        F: FnOnce(T) -> T,
+        F: FnOnce(Self::T) -> Self::T,
     {
         Self::refine(fun(self.extract()))
     }
 
     /// Attempts a replacement of a refined value, re-certifying that the predicate
     /// holds for the new value.
-    fn replace(self, value: T) -> Result<Self, RefinementError> {
+    fn replace(self, value: Self::T) -> Result<Self, RefinementError> {
         Self::refine(value)
     }
 
     /// Destructively removes the refined value from the `Refinement` wrapper.
     ///
     /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
-    fn extract(self) -> T;
+    fn extract(self) -> Self::T;
 }

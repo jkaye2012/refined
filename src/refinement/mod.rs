@@ -23,7 +23,9 @@ use crate::Implies;
 )]
 pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
 
-impl<T: Clone, P: Predicate<T> + Clone> RefinementOps<T> for Refinement<T, P> {
+impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
+    type T = T;
+
     fn extract(self) -> T {
         self.0
     }
