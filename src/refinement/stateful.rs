@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{Predicate, Refined, RefinementError, RefinementOps};
 
+use super::Refinement;
+
 /// An assertion that must hold for an instance of a type to be considered statefully refined.
 ///
 /// Compared to [Predicate], the difference is that stateful predicates are "materialized" and
@@ -73,6 +75,14 @@ impl<T: Clone, P: StatefulPredicate<T> + Clone> TryFrom<Refined<T>> for Stateful
         } else {
             Err(RefinementError(predicate.error()))
         }
+    }
+}
+
+impl<T: Clone, P: StatefulPredicate<T> + Clone> From<Refinement<T, P>>
+    for StatefulRefinement<T, P>
+{
+    fn from(value: Refinement<T, P>) -> Self {
+        Self(value.extract(), P::default())
     }
 }
 

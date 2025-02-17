@@ -73,6 +73,14 @@ where
     }
 }
 
+impl<T: Clone, P: StatefulPredicate<T> + Clone> From<StatefulRefinement<T, P>>
+    for Refinement<T, P>
+{
+    fn from(value: StatefulRefinement<T, P>) -> Self {
+        Self(value.extract(), PhantomData)
+    }
+}
+
 #[cfg(all(test, feature = "serde"))]
 mod tests {
     use super::*;
