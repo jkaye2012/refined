@@ -1,7 +1,8 @@
 //! Boundable refinement via signed values.
-use crate::boolean::*;
-use crate::Predicate;
-use crate::StatefulPredicate;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+use crate::{boolean::*, Predicate, StatefulPredicate};
 
 /// Types that can be reduced to a signed size so that they can be bounded.
 pub trait SignedBoundable {
@@ -102,6 +103,7 @@ impl SignedBoundable for std::num::NonZeroI64 {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct GreaterThan<const MIN: isize>;
 
 pub type GT<const MIN: isize> = GreaterThan<MIN>;
@@ -119,6 +121,7 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
 impl<T: SignedBoundable, const MIN: isize> StatefulPredicate<T> for GreaterThan<MIN> {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct GreaterThanEqual<const MIN: isize>;
 
 pub type GTE<const MIN: isize> = GreaterThanEqual<MIN>;
@@ -136,6 +139,7 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN
 impl<T: SignedBoundable, const MIN: isize> StatefulPredicate<T> for GreaterThanEqual<MIN> {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct LessThan<const MAX: isize>;
 
 pub type LT<const MAX: isize> = LessThan<MAX>;
@@ -153,6 +157,7 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
 impl<T: SignedBoundable, const MAX: isize> StatefulPredicate<T> for LessThan<MAX> {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct LessThanEqual<const MAX: isize>;
 
 pub type LTE<const MAX: isize> = LessThanEqual<MAX>;
@@ -178,6 +183,7 @@ pub type ClosedOpenInterval<const MIN: isize, const MAX: isize> = And<GTE<MIN>, 
 pub type ClosedInterval<const MIN: isize, const MAX: isize> = And<GTE<MIN>, LTE<MAX>>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Modulo<const DIV: isize, const MOD: isize>;
 
 impl<T: SignedBoundable, const DIV: isize, const MOD: isize> Predicate<T> for Modulo<DIV, MOD> {
@@ -202,6 +208,7 @@ pub type Even = Modulo<2, 0>;
 pub type Odd = Not<Even>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Equals<const VAL: isize>;
 
 impl<T: SignedBoundable, const VAL: isize> Predicate<T> for Equals<VAL> {

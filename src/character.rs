@@ -12,7 +12,11 @@
 //! ```
 use crate::{Predicate, StatefulPredicate};
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct IsControl;
 
 impl Predicate<char> for IsControl {
@@ -28,6 +32,7 @@ impl Predicate<char> for IsControl {
 impl StatefulPredicate<char> for IsControl {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct IsDigit;
 
 impl Predicate<char> for IsDigit {
@@ -43,6 +48,7 @@ impl Predicate<char> for IsDigit {
 impl StatefulPredicate<char> for IsDigit {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct IsLowercase;
 
 impl Predicate<char> for IsLowercase {
@@ -56,6 +62,7 @@ impl Predicate<char> for IsLowercase {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct IsUppercase;
 
 impl Predicate<char> for IsUppercase {
@@ -71,6 +78,7 @@ impl Predicate<char> for IsUppercase {
 impl StatefulPredicate<char> for IsLowercase {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct IsNumeric;
 
 impl Predicate<char> for IsNumeric {
@@ -84,6 +92,7 @@ impl Predicate<char> for IsNumeric {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct IsWhitespace;
 
 impl Predicate<char> for IsWhitespace {
@@ -99,6 +108,7 @@ impl Predicate<char> for IsWhitespace {
 impl StatefulPredicate<char> for IsNumeric {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct IsHexDigit;
 
 impl Predicate<char> for IsHexDigit {

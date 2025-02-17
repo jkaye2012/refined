@@ -75,4 +75,80 @@ impl<T: Clone, P: StatefulPredicate<T> + Clone> TryFrom<Refined<T>> for Stateful
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+    use crate::*;
+
+    #[test]
+    fn test_stateful_refinement_deserialize_success() {
+        let value =
+            serde_json::from_str::<StatefulRefinement<u8, boundable::unsigned::LessThan<5>>>("4")
+                .unwrap();
+        assert_eq!(*value, 4);
+    }
+
+    #[test]
+    fn test_stateful_refinement_deserialize_failure() {
+        let err =
+            serde_json::from_str::<StatefulRefinement<u8, boundable::unsigned::LessThan<5>>>("5")
+                .unwrap_err();
+        assert_eq!(
+            format!("{}", err),
+            "refinement violated: must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_stateful_refinement_serialize() {
+        let value =
+            StatefulRefinement::<u8, boundable::unsigned::LessThan<5>>(4, Default::default());
+        let serialized = serde_json::to_string(&value).unwrap();
+        assert_eq!(serialized, "4");
+    }
+
+    #[test]
+    fn test_stateful_refinement_modify_success() {
+        let value =
+            StatefulRefinement::<u8, boundable::unsigned::LessThan<5>>(3, Default::default());
+        let modified = value.modify(|x| x + 1).unwrap();
+        assert_eq!(*modified, 4);
+    }
+
+    #[test]
+    fn test_stateful_refinement_modify_failure() {
+        let value =
+            StatefulRefinement::<u8, boundable::unsigned::LessThan<5>>(4, Default::default());
+        let modified = value.modify(|x| x + 1).unwrap_err();
+        assert_eq!(
+            format!("{}", modified),
+            "refinement violated: must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_stateful_refinement_replace_success() {
+        let value =
+            StatefulRefinement::<u8, boundable::unsigned::LessThan<5>>(4, Default::default());
+        let replaced = value.replace(3).unwrap();
+        assert_eq!(*replaced, 3);
+    }
+
+    #[test]
+    fn test_stateful_refinement_replace_failure() {
+        let value =
+            StatefulRefinement::<u8, boundable::unsigned::LessThan<5>>(4, Default::default());
+        let replaced = value.replace(5).unwrap_err();
+        assert_eq!(
+            format!("{}", replaced),
+            "refinement violated: must be less than 5"
+        );
+    }
+
+    #[test]
+    fn test_stateful_refinement_extract() {
+        let value =
+            StatefulRefinement::<u8, boundable::unsigned::LessThan<5>>(4, Default::default());
+        let extracted = value.extract();
+        assert_eq!(extracted, 4);
+    }
+}
