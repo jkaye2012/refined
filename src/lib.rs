@@ -58,7 +58,7 @@
 //! when using libraries like [serde_path_to_error](https://docs.rs/serde_path_to_error/latest/serde_path_to_error/), this
 //! can be important functionality to have in your own error messages if you're using basic serde functionality.
 //!
-//! If this is something that you need, consider using [NamedRefinement] instead of [Refinement].
+//! If this is something that you need, consider using [Named].
 //!
 //! ```
 //! use refined::{Named, RefinementError, Refinement, RefinementOps, boundable::unsigned::{LessThanEqual, ClosedInterval}, type_string, TypeString};

@@ -5,11 +5,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::{Predicate, Refined, RefinementError, RefinementOps};
 
+/// An assertion that must hold for an instance of a type to be considered statefully refined.
+///
+/// Compared to [Predicate], the difference is that stateful predicates are "materialized" and
+/// may carry state along with them to be re-used across what would otherwise be independent
+/// tests.
 pub trait StatefulPredicate<T>: Default + Predicate<T> {
+    /// Whether a value satisfies the stateful predicate.
     fn test(&self, value: &T) -> bool {
         <Self as Predicate<T>>::test(value)
     }
 
+    /// An error message to display when the stateful predicate doesn't hold.
     fn error(&self) -> String {
         <Self as Predicate<T>>::error()
     }

@@ -2,15 +2,15 @@
 
 use refined::{
     boundable::unsigned::{ClosedInterval, LessThanEqual},
-    type_string, NamedRefinement, RefinementError, TypeString,
+    type_string, Named, Refinement, RefinementError, RefinementOps, TypeString,
 };
 
 type_string!(Name, "name");
 type_string!(Size, "size");
 
-type FrobnicatorName = NamedRefinement<Name, String, ClosedInterval<1, 10>>;
+type FrobnicatorName = Named<Name, String, Refinement<String, ClosedInterval<1, 10>>>;
 
-type FrobnicatorSize = NamedRefinement<Size, u8, LessThanEqual<100>>;
+type FrobnicatorSize = Named<Size, u8, Refinement<u8, LessThanEqual<100>>>;
 
 #[derive(Debug)]
 struct Frobnicator {
