@@ -1,6 +1,8 @@
 use std::{marker::PhantomData, ops::Deref};
 
-use crate::{Refined, RefinementError, RefinementOps, TypeString};
+use crate::{
+    Refined, RefinementError, RefinementOps, StatefulPredicate, StatefulRefinementOps, TypeString,
+};
 
 /// A named refinement over a refinement type `R`.
 ///
@@ -60,6 +62,17 @@ impl<N: TypeString + Clone, R: Clone + RefinementOps> RefinementOps for Named<N,
 
     fn extract(self) -> Self::T {
         self.0.extract()
+    }
+}
+
+impl<N: TypeString + Clone, T, P: StatefulPredicate<T>, R: Clone + StatefulRefinementOps<T, P>>
+    StatefulRefinementOps<T, P> for Named<N, R>
+{
+    fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError> {
+        match R::refine_with_state(predicate, value) {
+            Ok(value) => Ok(Self(value, PhantomData)),
+            Err(err) => Err(RefinementError(format!("{} {}", N::VALUE, err.0))),
+        }
     }
 }
 
@@ -130,6 +143,21 @@ mod named_serde {
 
         fn extract(self) -> Self::T {
             self.0.extract()
+        }
+    }
+
+    impl<
+            N: TypeString + Clone,
+            T: Serialize + DeserializeOwned,
+            P: StatefulPredicate<T>,
+            R: Clone + StatefulRefinementOps<T, P>,
+        > StatefulRefinementOps<T, P> for NamedSerde<N, R>
+    {
+        fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError> {
+            match R::refine_with_state(predicate, value) {
+                Ok(value) => Ok(Self(value, PhantomData)),
+                Err(err) => Err(RefinementError(format!("{} {}", N::VALUE, err.0))),
+            }
         }
     }
 }

@@ -1,15 +1,13 @@
 mod named;
-mod stateful;
 
 use std::{fmt::Display, marker::PhantomData};
 
 pub use named::*;
-pub use stateful::*;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Predicate, Refined, RefinementError, RefinementOps};
+use crate::{Predicate, Refined, RefinementError, RefinementOps, StatefulRefinementOps};
 
 #[cfg(feature = "implication")]
 use crate::Implies;
@@ -30,6 +28,7 @@ impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
         self.0
     }
 }
+
 impl<T: Clone + Display, P: Predicate<T> + Clone> Display for Refinement<T, P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", &self.0)
@@ -73,11 +72,21 @@ where
     }
 }
 
-impl<T: Clone, P: StatefulPredicate<T> + Clone> From<StatefulRefinement<T, P>>
-    for Refinement<T, P>
-{
-    fn from(value: StatefulRefinement<T, P>) -> Self {
-        Self(value.extract(), PhantomData)
+pub trait StatefulPredicate<T>: Default + Predicate<T> {
+    fn test(&self, value: &T) -> bool;
+
+    fn error(&self) -> String {
+        <Self as Predicate<T>>::error()
+    }
+}
+
+impl<T: Clone, P: StatefulPredicate<T> + Clone> StatefulRefinementOps<T, P> for Refinement<T, P> {
+    fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError> {
+        if predicate.test(&value) {
+            Ok(Self(value, PhantomData))
+        } else {
+            Err(RefinementError(predicate.error()))
+        }
     }
 }
 

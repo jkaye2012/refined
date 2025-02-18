@@ -54,11 +54,32 @@
 //! ## Stateful refinement
 //!
 //! While most type refinements can (and should) be implemented statelessly, it is possible to refine types in
-//! ways that are more efficient/ergonomic using runtime state. For these cases, [StatefulRefinement] and
+//! ways that are more efficient/ergonomic using runtime state. For these cases, [StatefulRefinementOps] and
 //! [StatefulPredicate] are provided.
 //!
-//! ```text
-//! // Example forthcoming
+//! Because all [StatefulPredicate] are also [Predicate], you can move seamlessly between stateful and stateless
+//! certification without the underlying refinement type being aware of how it was materialized. This means that
+//! the `serde` feature functions transparently with stateful predicates, but it's important to be aware that the
+//! `Serialize` and `Deserialize` implementations will use the stateless variants (as there's no way to easily
+//! "inject" the predicate state into the serde process).
+//!
+//! The `regex` feature provides a good motivation for when it could make sense to use [StatefulRefinementOps]; compiling
+//! the regular expression can be an expensive operation, often more expensive than certifying the predicate itself. We
+//! can use the same [Regex](string::Regex) predicate both statefully and stateless as mentioned above:
+//!
+//! ```
+//! use refined::{Refinement, RefinementOps, StatefulRefinementOps, RefinementError, string::Regex, type_string, TypeString};
+//!
+//! type_string!(AllZs, "^z+$");
+//! type OopsAllZs = Refinement<String, Regex<AllZs>>;
+//!
+//! // Stateless refinement as usual, requires re-compiling the regex for every certification
+//! assert!(OopsAllZs::refine("zzzzz".to_string()).is_ok());
+//!
+//! // Stateful refinement, we carry around the pre-compiled regex so that it can be re-used
+//! let all_zs = Regex::<AllZs>::default();
+//! assert!(OopsAllZs::refine_with_state(&all_zs, "zzzzz".to_string()).is_ok());
+//! assert!(OopsAllZs::refine_with_state(&all_zs, "zazzy".to_string()).is_err());
 //! ```
 //!
 //! ## Named refinement
@@ -121,6 +142,29 @@
 //! assert!(good.is_ok());
 //! let bad: Result<Example, _> =  from_str(r#"{"name":"Bad example","size":123}"#);
 //! assert!(bad.is_err());
+//! assert_eq!(bad.unwrap_err().to_string(), "refinement violated: must be less than 100 at line 1 column 33");
+//! ```
+//!
+//! If using named refinement, only [NamedSerde] will work in serde implementations:
+//!
+//! ```
+//! use refined::{Refinement, RefinementOps, NamedSerde, boundable::unsigned::LessThan, type_string, TypeString};
+//! use serde::{Serialize, Deserialize};
+//! use serde_json::{from_str, to_string};
+//!
+//! type_string!(ExampleFieldName, "john");
+//!
+//! #[derive(Debug, Serialize, Deserialize)]
+//! struct Example {
+//!   name: String,
+//!   size: NamedSerde<ExampleFieldName, Refinement<u8, LessThan<100>>>
+//! }
+//!
+//! let good: Result<Example, _> =  from_str(r#"{"name":"Good example","size":99}"#);
+//! assert!(good.is_ok());
+//! let bad: Result<Example, _> =  from_str(r#"{"name":"Bad example","size":123}"#);
+//! assert!(bad.is_err());
+//! assert_eq!(bad.unwrap_err().to_string(), "refinement violated: john must be less than 100 at line 1 column 33");
 //! ```
 //!
 //! ## Implication
@@ -305,4 +349,28 @@ pub trait RefinementOps:
     ///
     /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
     fn extract(self) -> Self::T;
+}
+
+pub trait StatefulRefinementOps<T, P: StatefulPredicate<T>>: RefinementOps<T = T> {
+    /// Attempts to refine a runtime value with the type's imbued predicate, statefully.
+    fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError>;
+
+    /// Attempts a modification of a refined value, re-certifying that the stateful predicate
+    /// still holds after the modification is complete.
+    fn modify_with_state<F>(self, predicate: &P, fun: F) -> Result<Self, RefinementError>
+    where
+        F: FnOnce(<Self as RefinementOps>::T) -> <Self as RefinementOps>::T,
+    {
+        Self::refine_with_state(predicate, fun(self.extract()))
+    }
+
+    /// Attempts a replacement of a refined value, re-certifying that the stateful predicate
+    /// holds for the new value.
+    fn replace_with_state(
+        self,
+        predicate: &P,
+        value: <Self as RefinementOps>::T,
+    ) -> Result<Self, RefinementError> {
+        Self::refine_with_state(predicate, value)
+    }
 }

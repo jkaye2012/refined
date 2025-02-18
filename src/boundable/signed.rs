@@ -2,7 +2,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{boolean::*, Predicate, StatefulPredicate};
+use crate::{boolean::*, Predicate};
 
 /// Types that can be reduced to a signed size so that they can be bounded.
 pub trait SignedBoundable {
@@ -118,8 +118,6 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
     }
 }
 
-impl<T: SignedBoundable, const MIN: isize> StatefulPredicate<T> for GreaterThan<MIN> {}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct GreaterThanEqual<const MIN: isize>;
@@ -135,8 +133,6 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN
         format!("must be greater than or equal to {}", MIN)
     }
 }
-
-impl<T: SignedBoundable, const MIN: isize> StatefulPredicate<T> for GreaterThanEqual<MIN> {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
@@ -154,8 +150,6 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
     }
 }
 
-impl<T: SignedBoundable, const MAX: isize> StatefulPredicate<T> for LessThan<MAX> {}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct LessThanEqual<const MAX: isize>;
@@ -171,8 +165,6 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
         format!("must be less than or equal to {}", MAX)
     }
 }
-
-impl<T: SignedBoundable, const MAX: isize> StatefulPredicate<T> for LessThanEqual<MAX> {}
 
 pub type OpenInterval<const MIN: isize, const MAX: isize> = And<GT<MIN>, LT<MAX>>;
 
@@ -196,11 +188,6 @@ impl<T: SignedBoundable, const DIV: isize, const MOD: isize> Predicate<T> for Mo
     }
 }
 
-impl<T: SignedBoundable, const DIV: isize, const MOD: isize> StatefulPredicate<T>
-    for Modulo<DIV, MOD>
-{
-}
-
 pub type Divisible<const DIV: isize> = Modulo<DIV, 0>;
 
 pub type Even = Modulo<2, 0>;
@@ -220,8 +207,6 @@ impl<T: SignedBoundable, const VAL: isize> Predicate<T> for Equals<VAL> {
         format!("must be equal to {}", VAL)
     }
 }
-
-impl<T: SignedBoundable, const VAL: isize> StatefulPredicate<T> for Equals<VAL> {}
 
 pub type Zero = Equals<0>;
 

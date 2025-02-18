@@ -16,7 +16,7 @@
 //! ```
 use std::marker::PhantomData;
 
-use crate::{Predicate, StatefulPredicate, TypeString};
+use crate::{Predicate, TypeString};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -35,8 +35,6 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
     }
 }
 
-impl<T: AsRef<str>, Prefix: TypeString> StatefulPredicate<T> for StartsWith<Prefix> {}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EndsWith<Suffix: TypeString>(PhantomData<Suffix>);
@@ -50,8 +48,6 @@ impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
         format!("must end with '{}'", Suffix::VALUE)
     }
 }
-
-impl<T: AsRef<str>, Suffix: TypeString> StatefulPredicate<T> for EndsWith<Suffix> {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -67,8 +63,6 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
     }
 }
 
-impl<T: AsRef<str>, Substr: TypeString> StatefulPredicate<T> for Contains<Substr> {}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Trimmed;
@@ -83,15 +77,13 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
     }
 }
 
-impl<T: AsRef<str>> StatefulPredicate<T> for Trimmed {}
-
 #[cfg(feature = "regex")]
 mod regex_pred {
     use super::*;
+    use crate::StatefulPredicate;
 
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct Regex<S: TypeString>(PhantomData<S>);
+    #[derive(Clone, Debug)]
+    pub struct Regex<S: TypeString>(regex::Regex, PhantomData<S>);
 
     impl<S: TypeString, T: AsRef<str>> Predicate<T> for Regex<S> {
         fn test(s: &T) -> bool {
@@ -105,12 +97,7 @@ mod regex_pred {
         }
     }
 
-    impl<S: TypeString, T: AsRef<str>> StatefulPredicate<T> for Regex<S> {}
-
-    #[derive(Clone, Debug)]
-    pub struct StatefulRegex<S: TypeString>(regex::Regex, PhantomData<S>);
-
-    impl<S: TypeString> Default for StatefulRegex<S> {
+    impl<S: TypeString> Default for Regex<S> {
         fn default() -> Self {
             Self(
                 regex::Regex::new(S::VALUE).expect("Invalid regex"),
@@ -119,19 +106,7 @@ mod regex_pred {
         }
     }
 
-    impl<S: TypeString, T: AsRef<str>> Predicate<T> for StatefulRegex<S> {
-        fn test(s: &T) -> bool {
-            regex::Regex::new(S::VALUE)
-                .expect("Invalid regex")
-                .is_match(s.as_ref())
-        }
-
-        fn error() -> String {
-            format!("must match regular expression {}", S::VALUE)
-        }
-    }
-
-    impl<S: TypeString, T: AsRef<str>> StatefulPredicate<T> for StatefulRegex<S> {
+    impl<S: TypeString, T: AsRef<str>> StatefulPredicate<T> for Regex<S> {
         fn test(&self, value: &T) -> bool {
             self.0.is_match(value.as_ref())
         }
@@ -143,6 +118,7 @@ mod regex_pred {
         use crate::*;
 
         type_string!(AllAs, "^a+$");
+        type_string!(Test, "test");
 
         #[test]
         fn test_regex() {
@@ -153,25 +129,63 @@ mod regex_pred {
 
         #[test]
         fn test_stateful_regex() {
-            type Test = Refinement<String, StatefulRegex<AllAs>>;
-            assert!(Test::refine("aaa".to_string()).is_ok());
-            assert!(Test::refine("aab".to_string()).is_err());
+            let st = Regex::<AllAs>::default();
+            type Test = Refinement<String, Regex<AllAs>>;
+            assert!(Test::refine_with_state(&st, "aaa".to_string()).is_ok());
+            assert!(Test::refine_with_state(&st, "aab".to_string()).is_err());
         }
 
         #[test]
         fn test_stateful_regex_modify() {
-            type Test = Refinement<String, StatefulRegex<AllAs>>;
-            let it = Test::refine("aaa".to_string()).unwrap();
-            let it = it.modify(|s| s + "aaa").unwrap();
-            assert!(it.modify(|s| s + "b").is_err());
+            let st = Regex::<AllAs>::default();
+            type Test = Refinement<String, Regex<AllAs>>;
+            let it = Test::refine_with_state(&st, "aaa".to_string()).unwrap();
+            let it = it.modify_with_state(&st, |s| s + "aaa").unwrap();
+            assert!(it.modify_with_state(&st, |s| s + "b").is_err());
         }
 
         #[test]
         fn test_stateful_regex_replace() {
-            type Test = Refinement<String, StatefulRegex<AllAs>>;
+            type Test = Refinement<String, Regex<AllAs>>;
             let it = Test::refine("aaa".to_string()).unwrap();
             let it = it.replace("aaaa".to_string()).unwrap();
             assert!(it.replace("bbbb".to_string()).is_err());
+        }
+
+        #[cfg(feature = "serde")]
+        #[test]
+        fn test_named_refinement_stateful_deserialize_success() {
+            let value = serde_json::from_str::<NamedSerde<Test, Refinement<String, Regex<AllAs>>>>(
+                "\"aaaa\"",
+            )
+            .unwrap();
+            assert_eq!(*value, "aaaa");
+        }
+
+        #[cfg(feature = "serde")]
+        #[test]
+        fn test_named_refinement_stateful_deserialize_failure() {
+            let err = serde_json::from_str::<NamedSerde<Test, Refinement<String, Regex<AllAs>>>>(
+                "\"aaab\"",
+            )
+            .unwrap_err();
+            assert_eq!(
+                format!("{}", err),
+                "refinement violated: test must match regular expression ^a+$"
+            );
+        }
+
+        #[cfg(feature = "serde")]
+        #[test]
+        fn test_named_refinement_stateful_serialize() {
+            let st = Regex::<AllAs>::default();
+            let value = NamedSerde::<Test, Refinement<String, Regex<AllAs>>>::refine_with_state(
+                &st,
+                "aaa".to_string(),
+            )
+            .unwrap();
+            let serialized = serde_json::to_string(&value).unwrap();
+            assert_eq!(serialized, "\"aaa\"");
         }
     }
 }
