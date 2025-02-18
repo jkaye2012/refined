@@ -21,12 +21,8 @@ use std::marker::PhantomData;
 
 use crate::Predicate;
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
 /// Always `true`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct True;
 
 impl<T> Predicate<T> for True {
@@ -41,7 +37,6 @@ impl<T> Predicate<T> for True {
 
 /// Always `false`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct False;
 
 impl<T> Predicate<T> for False {
@@ -56,7 +51,6 @@ impl<T> Predicate<T> for False {
 
 /// Logical conjunction of two [predicates](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct And<A, B>(pub(crate) PhantomData<A>, pub(crate) PhantomData<B>);
 
 impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
@@ -71,7 +65,6 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
 
 /// Logical disjunction of two [predicates](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Or<A, B>(PhantomData<A>, PhantomData<B>);
 
 impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
@@ -86,7 +79,6 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
 
 /// Logical exclusive disjunction of two [predicates](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Xor<A, B>(PhantomData<A>, PhantomData<B>);
 
 impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
@@ -101,7 +93,6 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
 
 /// Logical negation of a [predicate](Predicate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Not<P>(PhantomData<P>);
 
 impl<T, P: Predicate<T>> Predicate<T> for Not<P> {

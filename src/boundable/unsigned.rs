@@ -1,9 +1,6 @@
 //! Boundable refinement via unsigned values.
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
 use crate::{boolean::*, Predicate};
 
 /// Types that can be reduced to an unsigned size so that they can be bounded.
@@ -148,7 +145,6 @@ impl<T> UnsignedBoundable for [T] {
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct GreaterThan<const MIN: usize>;
 
 pub type GT<const MIN: usize> = GreaterThan<MIN>;
@@ -164,7 +160,6 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThan<MIN> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct GreaterThanEqual<const MIN: usize>;
 
 pub type GTE<const MIN: usize> = GreaterThanEqual<MIN>;
@@ -180,7 +175,6 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThanEqual<M
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct LessThan<const MAX: usize>;
 
 pub type LT<const MAX: usize> = LessThan<MAX>;
@@ -196,7 +190,6 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct LessThanEqual<const MAX: usize>;
 
 pub type LTE<const MAX: usize> = LessThanEqual<MAX>;
@@ -218,7 +211,6 @@ pub type OpenClosedInterval<const MIN: usize, const MAX: usize> = And<GT<MIN>, L
 pub type ClosedOpenInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LT<MAX>>;
 
 pub type ClosedInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LTE<MAX>>;
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Modulo<const DIV: usize, const MOD: usize>;
 
@@ -237,7 +229,6 @@ pub type Divisible<const DIV: usize> = Modulo<DIV, 0>;
 pub type Even = Modulo<2, 0>;
 
 pub type Odd = Not<Even>;
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Equals<const VAL: usize>;
 

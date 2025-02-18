@@ -233,8 +233,7 @@
 //! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
 //!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
 //!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
-//! * `regex`: enabling regex allows the use of the [Regex](string::Regex) and [StatefulRegex](string::StatefulRegex)
-//!   predicates. This carries a dependency on the [regex] crate
+//! * `regex`: enabling regex allows the use of the [Regex](string::Regex) predicates. This carries a dependency on the [regex] crate
 #![cfg_attr(
     feature = "implication",
     allow(incomplete_features),

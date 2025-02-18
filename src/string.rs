@@ -18,11 +18,7 @@ use std::marker::PhantomData;
 
 use crate::{Predicate, TypeString};
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StartsWith<Prefix: TypeString>(PhantomData<Prefix>);
 
 impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
@@ -36,7 +32,6 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EndsWith<Suffix: TypeString>(PhantomData<Suffix>);
 
 impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
@@ -50,7 +45,6 @@ impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Contains<Substr: TypeString>(PhantomData<Substr>);
 
 impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
@@ -64,7 +58,6 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Trimmed;
 
 impl<T: AsRef<str>> Predicate<T> for Trimmed {
