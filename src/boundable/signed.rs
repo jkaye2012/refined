@@ -1,6 +1,5 @@
 //! Boundable refinement via signed values.
-use crate::boolean::*;
-use crate::Predicate;
+use crate::{boolean::*, Predicate};
 
 /// Types that can be reduced to a signed size so that they can be bounded.
 pub trait SignedBoundable {

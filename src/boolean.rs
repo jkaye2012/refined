@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```
-//! use refined::{Refinement, boolean::*, boundable::unsigned::*};
+//! use refined::{Refinement, RefinementOps, boolean::*, boundable::unsigned::*};
 //!
 //! type SizedString = Refinement<String, And<GreaterThan<3>, LessThan<10>>>;
 //!

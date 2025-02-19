@@ -9,7 +9,12 @@
 //! provides a simple mechanism for defining your own refinement types.
 //!
 //! Most users will be interested primarily in the [Refinement] struct, which allows a [Predicate] to be
-//! applied to values of a type and ensures that the predicate always holds.
+//! applied to values of a type and ensures that the predicate always holds. To access most of the functionality
+//! available for [Refinement], you'll also need to import the [RefinementOps] trait (or, [StatefulRefinementOps]
+//! if you're sure that you require [stateful refinement](stateful-refinement)).
+//!
+//! You may find it easiest to import the required types using the [prelude] module. Note that the prelude does
+//! not include any predicates, only the basic type machinery required for refinement in general.
 //!
 //! # Examples
 //!
@@ -19,8 +24,11 @@
 //!
 //! ## Basic usage
 //!
+//! This examples demonstrates the "lowest level" raw usage of `refined` for simple refinement. Note that use
+//! of the [prelude] is not required, though it will be used for brevity in most other examples.
+//!
 //! ```
-//! use refined::{Refinement, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}};
+//! use refined::{Refinement, RefinementOps, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}};
 //!
 //! type FrobnicatorName = Refinement<String, ClosedInterval<1, 10>>;
 //!
@@ -51,6 +59,37 @@
 //!            "refinement violated: must be less than or equal to 100");
 //! ```
 //!
+//! ## Stateful refinement
+//!
+//! While most type refinements can (and should) be implemented statelessly, it is possible to refine types in
+//! ways that are more efficient/ergonomic using runtime state. For these cases, [StatefulRefinementOps] and
+//! [StatefulPredicate] are provided.
+//!
+//! Because all [StatefulPredicate] are also [Predicate], you can move seamlessly between stateful and stateless
+//! certification without the underlying refinement type being aware of how it was materialized. This means that
+//! the `serde` feature functions transparently with stateful predicates, but it's important to be aware that the
+//! `Serialize` and `Deserialize` implementations will use the stateless variants (as there's no way to easily
+//! "inject" the predicate state into the serde process).
+//!
+//! The `regex` feature provides a good motivation for when it could make sense to use [StatefulRefinementOps]; compiling
+//! the regular expression can be an expensive operation, often more expensive than certifying the predicate itself. We
+//! can use the same [Regex](string::Regex) predicate both statefully and stateless as mentioned above:
+//!
+//! ```
+//! use refined::{prelude::*, string::Regex};
+//!
+//! type_string!(AllZs, "^z+$");
+//! type OopsAllZs = Refinement<String, Regex<AllZs>>;
+//!
+//! // Stateless refinement as usual, requires re-compiling the regex for every certification
+//! assert!(OopsAllZs::refine("zzzzz".to_string()).is_ok());
+//!
+//! // Stateful refinement, we carry around the pre-compiled regex so that it can be re-used
+//! let all_zs = Regex::<AllZs>::default();
+//! assert!(OopsAllZs::refine_with_state(&all_zs, "zzzzz".to_string()).is_ok());
+//! assert!(OopsAllZs::refine_with_state(&all_zs, "zazzy".to_string()).is_err());
+//! ```
+//!
 //! ## Named refinement
 //!
 //! As you can see in the error messages above, there are two possible fields that could have led to the error in refinement,
@@ -58,16 +97,16 @@
 //! when using libraries like [serde_path_to_error](https://docs.rs/serde_path_to_error/latest/serde_path_to_error/), this
 //! can be important functionality to have in your own error messages if you're using basic serde functionality.
 //!
-//! If this is something that you need, consider using [NamedRefinement] instead of [Refinement].
+//! If this is something that you need, consider using [Named], or [NamedSerde] if using `serde`.
 //!
 //! ```
-//! use refined::{NamedRefinement, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}, type_string, TypeString};
+//! use refined::{prelude::*, boundable::unsigned::{LessThanEqual, ClosedInterval}};
 //!
 //! type_string!(Name, "name");
-//! type FrobnicatorName = NamedRefinement<Name, String, ClosedInterval<1, 10>>;
+//! type FrobnicatorName = Named<Name, Refinement<String, ClosedInterval<1, 10>>>;
 //!
 //! type_string!(Size, "size");
-//! type FrobnicatorSize = NamedRefinement<Size, u8, LessThanEqual<100>>;
+//! type FrobnicatorSize = Named<Size, Refinement<u8, LessThanEqual<100>>>;
 //!
 //! #[derive(Debug)]
 //! struct Frobnicator {
@@ -97,7 +136,7 @@
 //! ## Serde support
 //!
 //! ```
-//! use refined::{Refinement, boundable::unsigned::LessThan};
+//! use refined::{Refinement, RefinementOps, boundable::unsigned::LessThan};
 //! use serde::{Serialize, Deserialize};
 //! use serde_json::{from_str, to_string};
 //!
@@ -111,6 +150,29 @@
 //! assert!(good.is_ok());
 //! let bad: Result<Example, _> =  from_str(r#"{"name":"Bad example","size":123}"#);
 //! assert!(bad.is_err());
+//! assert_eq!(bad.unwrap_err().to_string(), "refinement violated: must be less than 100 at line 1 column 33");
+//! ```
+//!
+//! If using named refinement, only [NamedSerde] will work in serde implementations:
+//!
+//! ```
+//! use refined::{Refinement, RefinementOps, NamedSerde, boundable::unsigned::LessThan, type_string, TypeString};
+//! use serde::{Serialize, Deserialize};
+//! use serde_json::{from_str, to_string};
+//!
+//! type_string!(ExampleFieldName, "john");
+//!
+//! #[derive(Debug, Serialize, Deserialize)]
+//! struct Example {
+//!   name: String,
+//!   size: NamedSerde<ExampleFieldName, Refinement<u8, LessThan<100>>>
+//! }
+//!
+//! let good: Result<Example, _> =  from_str(r#"{"name":"Good example","size":99}"#);
+//! assert!(good.is_ok());
+//! let bad: Result<Example, _> =  from_str(r#"{"name":"Bad example","size":123}"#);
+//! assert!(bad.is_err());
+//! assert_eq!(bad.unwrap_err().to_string(), "refinement violated: john must be less than 100 at line 1 column 33");
 //! ```
 //!
 //! ## Implication
@@ -122,7 +184,7 @@
 //! #![allow(incomplete_features)]
 //! #![feature(generic_const_exprs)]
 //!
-//! use refined::{Refinement, boundable::unsigned::LessThan, Implies};
+//! use refined::{Refinement, RefinementOps, boundable::unsigned::LessThan, Implies};
 //!
 //! fn takes_lt_100(value: Refinement<u8, LessThan<100>>) -> String {
 //!   format!("{}", value)
@@ -141,7 +203,7 @@
 //! #![allow(incomplete_features)]
 //! #![feature(generic_const_exprs)]
 //!
-//! use refined::{Refinement, boundable::unsigned::OpenInterval, Implies};
+//! use refined::{prelude::*, boundable::unsigned::OpenInterval};
 //!
 //! let bigger_range: Refinement<u8, OpenInterval<1, 100>> = Refinement::refine(50).unwrap();
 //! let smaller_range: Refinement<u8, OpenInterval<25, 75>> = Refinement::refine(50).unwrap();
@@ -179,6 +241,7 @@
 //! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
 //!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
 //!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
+//! * `regex`: enabling regex allows the use of the [Regex](string::Regex) predicates. This carries a dependency on the [regex] crate
 #![cfg_attr(
     feature = "implication",
     allow(incomplete_features),
@@ -186,7 +249,6 @@
 )]
 
 use std::fmt::Display;
-use std::marker::PhantomData;
 
 use thiserror::Error;
 
@@ -196,7 +258,11 @@ use serde::{Deserialize, Serialize};
 pub mod boolean;
 pub mod boundable;
 pub mod character;
+pub mod prelude;
 pub mod string;
+
+mod refinement;
+pub use refinement::*;
 
 pub use boundable::signed::SignedBoundable;
 pub use boundable::unsigned::UnsignedBoundable;
@@ -210,7 +276,7 @@ pub use implication::*;
 ///
 /// Most string predicates require type-level strings, but currently strings are not supported
 /// as const generic trait bounds. `TypeString` is a workaround for this limitation.
-pub trait TypeString {
+pub trait TypeString: Default {
     const VALUE: &'static str;
 }
 
@@ -250,103 +316,7 @@ pub trait Predicate<T> {
 }
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize), serde(transparent))]
-struct Refined<T>(T);
-
-impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
-    fn from(value: Refinement<T, P>) -> Self {
-        Refined(value.0)
-    }
-}
-
-impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> From<NamedRefinement<N, T, P>>
-    for Refined<T>
-{
-    fn from(value: NamedRefinement<N, T, P>) -> Self {
-        Refined(value.0)
-    }
-}
-
-/// A refinement of a type `T` certifying that the [Predicate] `P` holds.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize),
-    serde(try_from = "Refined<T>", into = "Refined<T>")
-)]
-pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
-
-#[cfg(feature = "implication")]
-impl<F, T, Type: Clone> Implies<Refinement<Type, T>> for Refinement<Type, F>
-where
-    F: Predicate<Type> + Implies<T> + Clone,
-    T: Predicate<Type> + Clone,
-{
-    fn imply(self) -> Refinement<Type, T> {
-        Refinement(self.0, PhantomData)
-    }
-}
-
-impl<T: Clone + Display, P: Predicate<T> + Clone> Display for Refinement<T, P> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", &self.0)
-    }
-}
-
-impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-/// A named refinement of a type `T` certifying that the [Predicate] `P` holds.
-///
-/// Named refinements are useful when more precise error messages are required.
-/// When using features like `serde`, this is generally unnecessary because we
-/// can instead rely on tools like [path_to_error](https://github.com/dtolnay/path-to-error)
-/// rather than building the name into the type itself.
-///
-/// # Example
-///
-/// ```
-/// use refined::{type_string, TypeString, NamedRefinement, boundable::unsigned::GreaterThan};
-///
-/// type_string!(Example, "example name");
-///
-/// type BoundedLong = NamedRefinement<Example, u64, GreaterThan<100>>;
-///
-/// assert_eq!(&BoundedLong::refine(99).unwrap_err().to_string(), "refinement violated: example name must be greater than 100");
-/// ```
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize),
-    serde(try_from = "Refined<T>", into = "Refined<T>")
-)]
-pub struct NamedRefinement<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone>(
-    T,
-    PhantomData<P>,
-    PhantomData<N>,
-);
-
-impl<N: TypeString + Clone, T: Clone + Display, P: Predicate<T> + Clone> Display
-    for NamedRefinement<N, T, P>
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", &self.0)
-    }
-}
-
-impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> std::ops::Deref
-    for NamedRefinement<N, T, P>
-{
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+pub struct Refined<T>(T);
 
 /// An [Error] that can result from failed refinement.
 #[derive(Error, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -358,252 +328,59 @@ impl Display for RefinementError {
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> Refinement<T, P> {
-    /// Attempts to refine a runtime value with the type's imbued predicate.
-    pub fn refine(value: T) -> Result<Self, RefinementError> {
-        Self::try_from(Refined(value))
-    }
-
-    /// Attempts a modification of a refined value, re-certifying that the predicate
-    /// still holds after the modification is complete.
-    pub fn modify<F>(self, fun: F) -> Result<Self, RefinementError>
-    where
-        F: FnOnce(T) -> T,
-    {
-        Self::refine(fun(self.0))
-    }
-
-    /// Attempts a replacement of a refined value, re-certifying that the predicate
-    /// holds for the new value.
-    pub fn replace(self, value: T) -> Result<Self, RefinementError> {
-        Self::refine(value)
-    }
-
-    /// Destructively removes the refined value from the `Refinement` wrapper.
-    ///
-    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
-    pub fn extract(self) -> T {
-        self.0
-    }
-}
-
-impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P> {
-    type Error = RefinementError;
-
-    fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
-        if P::test(&value.0) {
-            Ok(Self(value.0, PhantomData))
-        } else {
-            Err(RefinementError(P::error()))
-        }
-    }
-}
-
-impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> NamedRefinement<N, T, P> {
-    /// Attempts to refine a runtime value with the type's imbued predicate.
-    pub fn refine(value: T) -> Result<Self, RefinementError> {
-        Self::try_from(Refined(value))
-    }
-
-    /// Attempts a modification of a refined value, re-certifying that the predicate
-    /// still holds after the modification is complete.
-    pub fn modify<F>(self, fun: F) -> Result<Self, RefinementError>
-    where
-        F: FnOnce(T) -> T,
-    {
-        Self::refine(fun(self.0))
-    }
-
-    /// Attempts a replacement of a refined value, re-certifying that the predicate
-    /// holds for the new value.
-    pub fn replace(self, value: T) -> Result<Self, RefinementError> {
-        Self::refine(value)
-    }
-
-    /// Destructively removes the refined value from the `Refinement` wrapper.
-    ///
-    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
-    pub fn extract(self) -> T {
-        self.0
-    }
-}
-
-impl<N: TypeString + Clone, T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>>
-    for NamedRefinement<N, T, P>
+/// Operations that can be made available on all types of refinement.
+pub trait RefinementOps:
+    TryFrom<Refined<Self::T>, Error = RefinementError> + std::ops::Deref<Target = Self::T>
 {
-    type Error = RefinementError;
+    type T;
 
-    fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
-        if P::test(&value.0) {
-            Ok(Self(value.0, PhantomData, PhantomData))
-        } else {
-            Err(RefinementError(format!("{} {}", N::VALUE, P::error())))
-        }
+    /// Attempts to refine a runtime value with the type's imbued predicate.
+    fn refine(value: Self::T) -> Result<Self, RefinementError> {
+        Self::try_from(Refined(value))
     }
+
+    /// Attempts a modification of a refined value, re-certifying that the predicate
+    /// still holds after the modification is complete.
+    fn modify<F>(self, fun: F) -> Result<Self, RefinementError>
+    where
+        F: FnOnce(Self::T) -> Self::T,
+    {
+        Self::refine(fun(self.extract()))
+    }
+
+    /// Attempts a replacement of a refined value, re-certifying that the predicate
+    /// holds for the new value.
+    fn replace(self, value: Self::T) -> Result<Self, RefinementError> {
+        Self::refine(value)
+    }
+
+    /// Destructively removes the refined value from the `Refinement` wrapper.
+    ///
+    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
+    fn extract(self) -> Self::T;
 }
 
-#[cfg(all(test, feature = "serde"))]
-mod tests {
-    use crate::*;
+/// Operations that can be made available on all types of stateful refinement.
+pub trait StatefulRefinementOps<T, P: StatefulPredicate<T>>: RefinementOps<T = T> {
+    /// Attempts to refine a runtime value with the type's imbued predicate, statefully.
+    fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError>;
 
-    type_string!(Test, "test");
-
-    #[test]
-    fn test_refinement_deserialize_success() {
-        let value =
-            serde_json::from_str::<Refinement<u8, boundable::unsigned::LessThan<5>>>("4").unwrap();
-        assert_eq!(*value, 4);
+    /// Attempts a modification of a refined value, re-certifying that the stateful predicate
+    /// still holds after the modification is complete.
+    fn modify_with_state<F>(self, predicate: &P, fun: F) -> Result<Self, RefinementError>
+    where
+        F: FnOnce(<Self as RefinementOps>::T) -> <Self as RefinementOps>::T,
+    {
+        Self::refine_with_state(predicate, fun(self.extract()))
     }
 
-    #[test]
-    fn test_refinement_deserialize_failure() {
-        let err = serde_json::from_str::<Refinement<u8, boundable::unsigned::LessThan<5>>>("5")
-            .unwrap_err();
-        assert_eq!(
-            format!("{}", err),
-            "refinement violated: must be less than 5"
-        );
-    }
-
-    #[test]
-    fn test_refinement_serialize() {
-        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
-        let serialized = serde_json::to_string(&value).unwrap();
-        assert_eq!(serialized, "4");
-    }
-
-    #[test]
-    fn test_refinement_modify_success() {
-        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(3, PhantomData);
-        let modified = value.modify(|x| x + 1).unwrap();
-        assert_eq!(*modified, 4);
-    }
-
-    #[test]
-    fn test_refinement_modify_failure() {
-        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
-        let modified = value.modify(|x| x + 1).unwrap_err();
-        assert_eq!(
-            format!("{}", modified),
-            "refinement violated: must be less than 5"
-        );
-    }
-
-    #[test]
-    fn test_refinement_replace_success() {
-        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
-        let replaced = value.replace(3).unwrap();
-        assert_eq!(*replaced, 3);
-    }
-
-    #[test]
-    fn test_refinement_replace_failure() {
-        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
-        let replaced = value.replace(5).unwrap_err();
-        assert_eq!(
-            format!("{}", replaced),
-            "refinement violated: must be less than 5"
-        );
-    }
-
-    #[test]
-    fn test_refinement_extract() {
-        let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
-        let extracted = value.extract();
-        assert_eq!(extracted, 4);
-    }
-
-    #[test]
-    fn test_named_refinement_deserialize_success() {
-        let value = serde_json::from_str::<
-            NamedRefinement<Test, u8, boundable::unsigned::LessThan<5>>,
-        >("4")
-        .unwrap();
-        assert_eq!(*value, 4);
-    }
-
-    #[test]
-    fn test_named_refinement_deserialize_failure() {
-        let err =
-            serde_json::from_str::<NamedRefinement<Test, u8, boundable::unsigned::LessThan<5>>>(
-                "5",
-            )
-            .unwrap_err();
-        assert_eq!(
-            format!("{}", err),
-            "refinement violated: test must be less than 5"
-        );
-    }
-
-    #[test]
-    fn test_named_refinement_serialize() {
-        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
-            4,
-            PhantomData,
-            PhantomData,
-        );
-        let serialized = serde_json::to_string(&value).unwrap();
-        assert_eq!(serialized, "4");
-    }
-
-    #[test]
-    fn test_named_refinement_modify_success() {
-        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
-            3,
-            PhantomData,
-            PhantomData,
-        );
-        let modified = value.modify(|x| x + 1).unwrap();
-        assert_eq!(*modified, 4);
-    }
-
-    #[test]
-    fn test_named_refinement_modify_failure() {
-        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
-            4,
-            PhantomData,
-            PhantomData,
-        );
-        let modified = value.modify(|x| x + 1).unwrap_err();
-        assert_eq!(
-            format!("{}", modified),
-            "refinement violated: test must be less than 5"
-        );
-    }
-
-    #[test]
-    fn test_named_refinement_replace_success() {
-        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
-            4,
-            PhantomData,
-            PhantomData,
-        );
-        let replaced = value.replace(3).unwrap();
-        assert_eq!(*replaced, 3);
-    }
-
-    #[test]
-    fn test_named_refinement_replace_failure() {
-        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
-            4,
-            PhantomData,
-            PhantomData,
-        );
-        let replaced = value.replace(5).unwrap_err();
-        assert_eq!(
-            format!("{}", replaced),
-            "refinement violated: test must be less than 5"
-        );
-    }
-
-    #[test]
-    fn test_named_refinement_extract() {
-        let value = NamedRefinement::<Test, u8, boundable::unsigned::LessThan<5>>(
-            4,
-            PhantomData,
-            PhantomData,
-        );
-        let extracted = value.extract();
-        assert_eq!(extracted, 4);
+    /// Attempts a replacement of a refined value, re-certifying that the stateful predicate
+    /// holds for the new value.
+    fn replace_with_state(
+        self,
+        predicate: &P,
+        value: <Self as RefinementOps>::T,
+    ) -> Result<Self, RefinementError> {
+        Self::refine_with_state(predicate, value)
     }
 }

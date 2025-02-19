@@ -3,7 +3,7 @@
 //! # Example
 //!
 //! ```
-//! use refined::{Refinement, character::IsDigit};
+//! use refined::{Refinement, RefinementOps, character::IsDigit};
 //!
 //! type Test = Refinement<char, IsDigit>;
 //!

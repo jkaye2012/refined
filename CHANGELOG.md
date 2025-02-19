@@ -7,7 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
-- Adds the `Regex` predicate to `string`
+- Adds the `Regex` predicate (and stateful implementation) to `string`
+- Adds the `RefinementOps` trait, which is used internally to provide refinement generically
+- Adds the `StatefulPredicate and`StatefulRefinementOps` traits to allow for stateful refinement
+- Refactors `NamedRefinement` into a generic `Named` wrapper
+
 ## [0.0.3] - 2025-02-11
 
 - Updates documentation and readme to improve discoverability of provided refinements
