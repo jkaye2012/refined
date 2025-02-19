@@ -9,7 +9,12 @@
 //! provides a simple mechanism for defining your own refinement types.
 //!
 //! Most users will be interested primarily in the [Refinement] struct, which allows a [Predicate] to be
-//! applied to values of a type and ensures that the predicate always holds.
+//! applied to values of a type and ensures that the predicate always holds. To access most of the functionality
+//! available for [Refinement], you'll also need to import the [RefinementOps] trait (or, [StatefulRefinementOps]
+//! if you're sure that you require [stateful refinement](stateful-refinement)).
+//!
+//! You may find it easiest to import the required types using the [prelude] module. Note that the prelude does
+//! not include any predicates, only the basic type machinery required for refinement in general.
 //!
 //! # Examples
 //!
@@ -18,6 +23,9 @@
 //! that could you easily build and run yourself.
 //!
 //! ## Basic usage
+//!
+//! This examples demonstrates the "lowest level" raw usage of `refined` for simple refinement. Note that use
+//! of the [prelude] is not required, though it will be used for brevity in most other examples.
 //!
 //! ```
 //! use refined::{Refinement, RefinementOps, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}};
@@ -68,7 +76,7 @@
 //! can use the same [Regex](string::Regex) predicate both statefully and stateless as mentioned above:
 //!
 //! ```
-//! use refined::{Refinement, RefinementOps, StatefulRefinementOps, RefinementError, string::Regex, type_string, TypeString};
+//! use refined::{prelude::*, string::Regex};
 //!
 //! type_string!(AllZs, "^z+$");
 //! type OopsAllZs = Refinement<String, Regex<AllZs>>;
@@ -92,7 +100,7 @@
 //! If this is something that you need, consider using [Named], or [NamedSerde] if using `serde`.
 //!
 //! ```
-//! use refined::{Named, RefinementError, Refinement, RefinementOps, boundable::unsigned::{LessThanEqual, ClosedInterval}, type_string, TypeString};
+//! use refined::{prelude::*, boundable::unsigned::{LessThanEqual, ClosedInterval}};
 //!
 //! type_string!(Name, "name");
 //! type FrobnicatorName = Named<Name, Refinement<String, ClosedInterval<1, 10>>>;
@@ -195,7 +203,7 @@
 //! #![allow(incomplete_features)]
 //! #![feature(generic_const_exprs)]
 //!
-//! use refined::{Refinement, RefinementOps, boundable::unsigned::OpenInterval, Implies};
+//! use refined::{prelude::*, boundable::unsigned::OpenInterval};
 //!
 //! let bigger_range: Refinement<u8, OpenInterval<1, 100>> = Refinement::refine(50).unwrap();
 //! let smaller_range: Refinement<u8, OpenInterval<25, 75>> = Refinement::refine(50).unwrap();
@@ -250,6 +258,7 @@ use serde::{Deserialize, Serialize};
 pub mod boolean;
 pub mod boundable;
 pub mod character;
+pub mod prelude;
 pub mod string;
 
 mod refinement;
@@ -319,6 +328,7 @@ impl Display for RefinementError {
     }
 }
 
+/// Operations that can be made available on all types of refinement.
 pub trait RefinementOps:
     TryFrom<Refined<Self::T>, Error = RefinementError> + std::ops::Deref<Target = Self::T>
 {
@@ -350,6 +360,7 @@ pub trait RefinementOps:
     fn extract(self) -> Self::T;
 }
 
+/// Operations that can be made available on all types of stateful refinement.
 pub trait StatefulRefinementOps<T, P: StatefulPredicate<T>>: RefinementOps<T = T> {
     /// Attempts to refine a runtime value with the type's imbued predicate, statefully.
     fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError>;

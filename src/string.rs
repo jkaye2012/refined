@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```
-//! use refined::{Refinement, RefinementOps, type_string, TypeString, string::StartsWith};
+//! use refined::{prelude::*, string::StartsWith};
 //!
 //! type_string!(Foo, "foo");
 //! type Test = Refinement<String, StartsWith<Foo>>;
