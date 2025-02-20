@@ -4,34 +4,92 @@ use std::ops::*;
 use super::{Assert, IsTrue};
 use crate::{boundable::*, Refinement};
 
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::LT<B>>> for Refinement<Type, unsigned::LT<A>>
-where
-    Refinement<Type, unsigned::LT<{ A + B - 1 }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LT<{ A + B - 1 }>>;
+mod unsigned_imp {
+    use super::*;
+    use crate::boundable::unsigned::*;
 
-    fn add(self, rhs: Refinement<Type, unsigned::LT<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
+    macro_rules! constrain {
+        ($constraint:expr) => {
+            $constraint
+        };
+        () => {
+            true
+        };
     }
-}
 
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::LTE<B>>> for Refinement<Type, unsigned::LT<A>>
-where
-    Refinement<Type, unsigned::LT<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LT<{ A + B }>>;
+    macro_rules! math_impl {
+        (Add, $a:ident, $b:ident, $expr:expr $(, $constraint:expr)?) => {
+            impl<
+                    const A: usize,
+                    const B: usize,
+                    Type: Clone + UnsignedBoundable + Add<Output = Type>,
+                > Add<Refinement<Type, $b<B>>> for Refinement<Type, $a<A>>
+            where
+                Refinement<Type, $a<{ $expr }>>: Sized,
+                Assert<{ constrain!($($constraint)?) }>: IsTrue,
+            {
+                type Output = Refinement<Type, $a<{ $expr }>>;
 
-    fn add(self, rhs: Refinement<Type, unsigned::LTE<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
+                fn add(self, rhs: Refinement<Type, $b<B>>) -> Self::Output {
+                    Refinement(self.0 + rhs.0, PhantomData)
+                }
+            }
+        };
+
+        (Sub, $a:ident, $b:ident, $expr:expr) => {
+            impl<
+                    const A: usize,
+                    const B: usize,
+                    Type: Clone + UnsignedBoundable + Sub<Output = Type>,
+                > Sub<Refinement<Type, $b<B>>> for Refinement<Type, $a<A>>
+            where
+                Refinement<Type, $a<$expr>>: Sized,
+            {
+                type Output = Refinement<Type, $a<$expr>>;
+
+                fn sub(self, rhs: Refinement<Type, $b<B>>) -> Self::Output {
+                    Refinement(self.0 - rhs.0, PhantomData)
+                }
+            }
+        };
+
+        (Mul, $a:ident, $b:ident, $expr:expr) => {
+            impl<
+                    const A: usize,
+                    const B: usize,
+                    Type: Clone + UnsignedBoundable + Mul<Output = Type>,
+                > Mul<Refinement<Type, $b<B>>> for Refinement<Type, $a<A>>
+            where
+                Refinement<Type, $a<$expr>>: Sized,
+            {
+                type Output = Refinement<Type, $a<$expr>>;
+
+                fn mul(self, rhs: Refinement<Type, $b<B>>) -> Self::Output {
+                    Refinement(self.0 * rhs.0, PhantomData)
+                }
+            }
+        };
+
+        (Div, $a:ident, $b:ident, $expr:expr) => {
+            impl<
+                    const A: usize,
+                    const B: usize,
+                    Type: Clone + UnsignedBoundable + Div<Output = Type>,
+                > Div<Refinement<Type, $b<B>>> for Refinement<Type, $a<A>>
+            where
+                Refinement<Type, $a<$expr>>: Sized,
+            {
+                type Output = Refinement<Type, $a<$expr>>;
+
+                fn div(self, rhs: Refinement<Type, $b<B>>) -> Self::Output {
+                    Refinement(self.0 / rhs.0, PhantomData)
+                }
+            }
+        };
     }
+
+    math_impl!(Add, LT, LT, A + B - 1);
+    math_impl!(Add, LT, LTE, A + B);
 }
 
 impl<
