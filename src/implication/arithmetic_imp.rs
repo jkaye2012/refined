@@ -90,21 +90,19 @@ mod unsigned_imp {
 
     math_impl!(Add, LT, LT, A + B - 1);
     math_impl!(Add, LT, LTE, A + B);
-}
+    math_impl!(Add, LT, Equals, A + B);
 
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::Equals<B>>> for Refinement<Type, unsigned::LT<A>>
-where
-    Refinement<Type, unsigned::LT<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LT<{ A + B }>>;
+    math_impl!(Add, LTE, LTE, A + B);
+    math_impl!(Add, LTE, LT, A + B);
+    math_impl!(Add, LTE, Equals, A + B);
 
-    fn add(self, rhs: Refinement<Type, unsigned::Equals<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
-    }
+    math_impl!(Add, GT, GT, A + B + 1);
+    math_impl!(Add, GT, GTE, A + B);
+    math_impl!(Add, GT, Equals, A + B);
+
+    math_impl!(Add, GTE, GTE, A + B);
+    math_impl!(Add, GTE, GT, A + B + 1);
+    math_impl!(Add, GTE, Equals, A + B);
 }
 
 impl<
@@ -247,51 +245,6 @@ where
 impl<
         const A: usize,
         const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::LTE<B>>> for Refinement<Type, unsigned::LTE<A>>
-where
-    Refinement<Type, unsigned::LTE<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LTE<{ A + B }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::LTE<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::LT<B>>> for Refinement<Type, unsigned::LTE<A>>
-where
-    Refinement<Type, unsigned::LTE<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LTE<{ A + B }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::LT<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::Equals<B>>> for Refinement<Type, unsigned::LTE<A>>
-where
-    Refinement<Type, unsigned::LTE<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LTE<{ A + B }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::Equals<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
         Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
     > Sub<Refinement<Type, unsigned::LT<B>>> for Refinement<Type, unsigned::LTE<A>>
 where
@@ -421,51 +374,6 @@ where
 
     fn div(self, rhs: Refinement<Type, unsigned::Equals<B>>) -> Self::Output {
         Refinement(self.0 / rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::GT<B>>> for Refinement<Type, unsigned::GT<A>>
-where
-    Refinement<Type, unsigned::GT<{ A + B + 1 }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::GT<{ A + B + 1 }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::GT<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::GTE<B>>> for Refinement<Type, unsigned::GT<A>>
-where
-    Refinement<Type, unsigned::GT<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::GT<{ A + B }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::GTE<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::Equals<B>>> for Refinement<Type, unsigned::GT<A>>
-where
-    Refinement<Type, unsigned::GT<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::GT<{ A + B }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::Equals<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
     }
 }
 
@@ -602,36 +510,6 @@ where
 
     fn div(self, rhs: Refinement<Type, unsigned::Equals<B>>) -> Self::Output {
         Refinement(self.0 / rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::GTE<B>>> for Refinement<Type, unsigned::GTE<A>>
-where
-    Refinement<Type, unsigned::GTE<{ A + B }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::GTE<{ A + B }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::GTE<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        const B: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Add<Output = Type>,
-    > Add<Refinement<Type, unsigned::GT<B>>> for Refinement<Type, unsigned::GTE<A>>
-where
-    Refinement<Type, unsigned::GTE<{ A + B + 1 }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::GTE<{ A + B + 1 }>>;
-
-    fn add(self, rhs: Refinement<Type, unsigned::GT<B>>) -> Self::Output {
-        Refinement(self.0 + rhs.0, PhantomData)
     }
 }
 
