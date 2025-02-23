@@ -14,7 +14,7 @@
 /// #![allow(incomplete_features)]
 /// #![feature(generic_const_exprs)]
 ///
-/// use refined::{Refinement, boundable::unsigned::LessThan, Implies};
+/// use refined::{Refinement, RefinementOps, boundable::unsigned::LessThan, Implies};
 ///
 /// fn takes_lt_100(value: Refinement<u8, LessThan<100>>) -> String {
 ///   format!("{}", value)

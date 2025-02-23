@@ -1,14 +1,7 @@
 //! Boundable refinement via unsigned values.
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
-use std::collections::BinaryHeap;
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::collections::LinkedList;
-use std::collections::VecDeque;
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 
-use crate::boolean::*;
-use crate::Predicate;
+use crate::{boolean::*, Predicate};
 
 /// Types that can be reduced to an unsigned size so that they can be bounded.
 pub trait UnsignedBoundable {
@@ -218,7 +211,6 @@ pub type OpenClosedInterval<const MIN: usize, const MAX: usize> = And<GT<MIN>, L
 pub type ClosedOpenInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LT<MAX>>;
 
 pub type ClosedInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LTE<MAX>>;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Modulo<const DIV: usize, const MOD: usize>;
 
@@ -237,7 +229,6 @@ pub type Divisible<const DIV: usize> = Modulo<DIV, 0>;
 pub type Even = Modulo<2, 0>;
 
 pub type Odd = Not<Even>;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Equals<const VAL: usize>;
 
