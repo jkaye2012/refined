@@ -47,8 +47,13 @@ pub(crate) trait IsTrue {}
 
 impl IsTrue for Assert<true> {}
 
-#[doc(cfg(feature = "arithmetic"))]
-#[cfg(feature = "arithmetic")]
-mod arithmetic_imp;
 mod boolean_imp;
 mod boundable_imp;
+
+#[doc(cfg(feature = "arithmetic"))]
+#[cfg(feature = "arithmetic")]
+mod arithmetic;
+
+#[doc(cfg(feature = "arithmetic"))]
+#[cfg(feature = "arithmetic")]
+pub use arithmetic::{UnsignedMax, UnsignedMin, UnsignedMinMax};
