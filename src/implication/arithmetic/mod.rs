@@ -1,6 +1,8 @@
 use crate::{boundable::*, Predicate, UnsignedBoundable};
 
 mod add;
+mod div;
+mod mul;
 mod sub;
 
 /// A type that has a statically knowable unsigned maximum value.
