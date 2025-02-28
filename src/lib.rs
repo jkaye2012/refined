@@ -280,7 +280,7 @@
     allow(incomplete_features),
     feature(generic_const_exprs)
 )]
-#![feature(doc_cfg)]
+#![feature(doc_cfg, lazy_type_alias)]
 
 use std::fmt::Display;
 

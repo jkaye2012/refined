@@ -2,7 +2,7 @@ use std::{marker::PhantomData, ops::Sub};
 
 use crate::{boundable::*, Assert, IsTrue, Predicate, Refinement};
 
-use super::{UnsignedMax, UnsignedMin, UnsignedMinMax};
+use super::*;
 
 impl<
         const A: usize,
@@ -73,9 +73,9 @@ impl<
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
     > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::OpenInterval<MIN, MAX>>
 where
-    Refinement<Type, unsigned::OpenInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>: Sized,
+    Refinement<Type, unsigned::OpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
 {
-    type Output = Refinement<Type, unsigned::OpenInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>;
+    type Output = Refinement<Type, unsigned::OpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
 
     fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
         Refinement(self.0 - rhs.0, PhantomData)
@@ -89,9 +89,9 @@ impl<
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
     > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::ClosedInterval<MIN, MAX>>
 where
-    Refinement<Type, unsigned::ClosedInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>: Sized,
+    Refinement<Type, unsigned::ClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
 {
-    type Output = Refinement<Type, unsigned::ClosedInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>;
+    type Output = Refinement<Type, unsigned::ClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
 
     fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
         Refinement(self.0 - rhs.0, PhantomData)
@@ -105,10 +105,10 @@ impl<
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
     > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::OpenClosedInterval<MIN, MAX>>
 where
-    Refinement<Type, unsigned::OpenClosedInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>: Sized,
+    Refinement<Type, unsigned::OpenClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
 {
     type Output =
-        Refinement<Type, unsigned::OpenClosedInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>;
+        Refinement<Type, unsigned::OpenClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
 
     fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
         Refinement(self.0 - rhs.0, PhantomData)
@@ -122,10 +122,10 @@ impl<
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
     > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::ClosedOpenInterval<MIN, MAX>>
 where
-    Refinement<Type, unsigned::ClosedOpenInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>: Sized,
+    Refinement<Type, unsigned::ClosedOpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
 {
     type Output =
-        Refinement<Type, unsigned::ClosedOpenInterval<{ MIN - B::UMIN }, { MAX - B::UMAX }>>;
+        Refinement<Type, unsigned::ClosedOpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
 
     fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
         Refinement(self.0 - rhs.0, PhantomData)
@@ -196,32 +196,136 @@ mod unsigned_tests {
     #[test]
     fn test_open_closed_interval_sub() {
         let a = Refinement::<u8, unsigned::OpenClosedInterval<11, 20>>::refine(15).unwrap();
-        let b = Refinement::<u8, unsigned::OpenClosedInterval<10, 15>>::refine(12).unwrap();
-        let c: Refinement<u8, unsigned::OpenClosedInterval<0, 5>> = a - b;
-        assert_eq!(*c, 3);
+        let b = Refinement::<u8, unsigned::OpenClosedInterval<0, 5>>::refine(2).unwrap();
+        let c: Refinement<u8, unsigned::OpenClosedInterval<6, 19>> = a - b;
+        assert_eq!(*c, 13);
     }
 
     #[test]
     fn test_closed_open_interval_sub() {
         let a = Refinement::<u8, unsigned::ClosedOpenInterval<50, 100>>::refine(58).unwrap();
         let b = Refinement::<u8, unsigned::ClosedOpenInterval<10, 15>>::refine(11).unwrap();
-        let c: Refinement<u8, unsigned::ClosedOpenInterval<40, 86>> = a - b;
+        let c: Refinement<u8, unsigned::ClosedOpenInterval<36, 90>> = a - b;
         assert_eq!(*c, 47);
     }
 
     #[test]
     fn test_open_interval_sub() {
-        let a = Refinement::<u8, unsigned::OpenInterval<15, 30>>::refine(17).unwrap();
-        let b = Refinement::<u8, unsigned::OpenInterval<10, 15>>::refine(12).unwrap();
-        let c: Refinement<u8, unsigned::OpenInterval<4, 16>> = a - b;
-        assert_eq!(*c, 5);
+        let a = Refinement::<u8, unsigned::OpenInterval<15, 30>>::refine(29).unwrap();
+        let b = Refinement::<u8, unsigned::OpenInterval<10, 15>>::refine(11).unwrap();
+        let c: Refinement<u8, unsigned::OpenInterval<1, 19>> = a - b;
+        assert_eq!(*c, 18);
     }
 
     #[test]
     fn test_closed_interval_sub() {
         let a = Refinement::<u8, unsigned::ClosedInterval<15, 50>>::refine(18).unwrap();
         let b = Refinement::<u8, unsigned::ClosedInterval<5, 15>>::refine(12).unwrap();
-        let c: Refinement<u8, unsigned::ClosedInterval<10, 35>> = a - b;
+        let c: Refinement<u8, unsigned::ClosedInterval<0, 45>> = a - b;
+        assert_eq!(*c, 6);
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Sub<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Sub<Refinement<Type, B>> for Refinement<Type, signed::OpenInterval<MIN, MAX>>
+where
+    Refinement<Type, signed::OpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
+{
+    type Output = Refinement<Type, signed::OpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
+
+    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Sub<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Sub<Refinement<Type, B>> for Refinement<Type, signed::ClosedInterval<MIN, MAX>>
+where
+    Refinement<Type, signed::ClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
+{
+    type Output = Refinement<Type, signed::ClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
+
+    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Sub<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Sub<Refinement<Type, B>> for Refinement<Type, signed::OpenClosedInterval<MIN, MAX>>
+where
+    Refinement<Type, signed::OpenClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
+{
+    type Output =
+        Refinement<Type, signed::OpenClosedInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
+
+    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Sub<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Sub<Refinement<Type, B>> for Refinement<Type, signed::ClosedOpenInterval<MIN, MAX>>
+where
+    Refinement<Type, signed::ClosedOpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>: Sized,
+{
+    type Output =
+        Refinement<Type, signed::ClosedOpenInterval<{ MIN - B::UMAX }, { MAX - B::UMIN }>>;
+
+    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+#[cfg(test)]
+mod signed_tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[test]
+    fn test_open_closed_interval_sub() {
+        let a = Refinement::<i8, signed::OpenClosedInterval<-11, 20>>::refine(-10).unwrap();
+        let b = Refinement::<i8, signed::OpenClosedInterval<10, 15>>::refine(11).unwrap();
+        let c: Refinement<i8, signed::OpenClosedInterval<-26, 9>> = a - b;
+        assert_eq!(*c, -21);
+    }
+
+    #[test]
+    fn test_closed_open_interval_sub() {
+        let a = Refinement::<i8, signed::ClosedOpenInterval<-50, 100>>::refine(-50).unwrap();
+        let b = Refinement::<i8, signed::ClosedOpenInterval<-15, -10>>::refine(-11).unwrap();
+        let c: Refinement<i8, signed::ClosedOpenInterval<-39, 115>> = a - b;
+        assert_eq!(*c, -39);
+    }
+
+    #[test]
+    fn test_open_interval_sub() {
+        let a = Refinement::<i8, signed::OpenInterval<-30, -15>>::refine(-29).unwrap();
+        let b = Refinement::<i8, signed::OpenInterval<-15, -5>>::refine(-6).unwrap();
+        let c: Refinement<i8, signed::OpenInterval<-24, -1>> = a - b;
+        assert_eq!(*c, -23);
+    }
+
+    #[test]
+    fn test_closed_interval_sub() {
+        let a = Refinement::<i8, signed::ClosedInterval<15, 50>>::refine(18).unwrap();
+        let b = Refinement::<i8, signed::ClosedInterval<5, 15>>::refine(12).unwrap();
+        let c: Refinement<i8, signed::ClosedInterval<0, 45>> = a - b;
         assert_eq!(*c, 6);
     }
 }

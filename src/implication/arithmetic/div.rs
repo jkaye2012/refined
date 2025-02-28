@@ -2,7 +2,7 @@ use std::{marker::PhantomData, ops::Div};
 
 use crate::{boundable::*, Predicate, Refinement};
 
-use super::{UnsignedMax, UnsignedMin, UnsignedMinMax};
+use super::*;
 
 impl<
         const A: usize,
@@ -225,5 +225,155 @@ mod unsigned_tests {
         let b = Refinement::<u8, unsigned::ClosedInterval<3, 6>>::refine(6).unwrap();
         let c: Refinement<u8, unsigned::ClosedInterval<2, 16>> = a / b;
         assert_eq!(*c, 5);
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Div<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Div<Refinement<Type, B>> for Refinement<Type, signed::OpenInterval<MIN, MAX>>
+where
+    Refinement<
+        Type,
+        signed::OpenInterval<
+            { min_div(MIN + 1, MAX - 1, B::UMIN, B::UMAX) - 1 },
+            { max_div(MIN + 1, MAX - 1, B::UMIN, B::UMAX) + 1 },
+        >,
+    >: Sized,
+{
+    type Output = Refinement<
+        Type,
+        signed::OpenInterval<
+            { min_div(MIN + 1, MAX - 1, B::UMIN, B::UMAX) - 1 },
+            { max_div(MIN + 1, MAX - 1, B::UMIN, B::UMAX) + 1 },
+        >,
+    >;
+
+    fn div(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Div<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Div<Refinement<Type, B>> for Refinement<Type, signed::ClosedInterval<MIN, MAX>>
+where
+    Refinement<
+        Type,
+        signed::ClosedInterval<
+            { min_div(MIN, MAX, B::UMIN, B::UMAX) },
+            { max_div(MIN, MAX, B::UMIN, B::UMAX) },
+        >,
+    >: Sized,
+{
+    type Output = Refinement<
+        Type,
+        signed::ClosedInterval<
+            { min_div(MIN, MAX, B::UMIN, B::UMAX) },
+            { max_div(MIN, MAX, B::UMIN, B::UMAX) },
+        >,
+    >;
+
+    fn div(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Div<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Div<Refinement<Type, B>> for Refinement<Type, signed::OpenClosedInterval<MIN, MAX>>
+where
+    Refinement<
+        Type,
+        signed::OpenClosedInterval<
+            { min_div(MIN + 1, MAX, B::UMIN, B::UMAX) - 1 },
+            { max_div(MIN + 1, MAX, B::UMIN, B::UMAX) },
+        >,
+    >: Sized,
+{
+    type Output = Refinement<
+        Type,
+        signed::OpenClosedInterval<
+            { min_div(MIN + 1, MAX, B::UMIN, B::UMAX) - 1 },
+            { max_div(MIN + 1, MAX, B::UMIN, B::UMAX) },
+        >,
+    >;
+
+    fn div(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const MIN: isize,
+        const MAX: isize,
+        Type: Clone + signed::SignedBoundable + Div<Output = Type>,
+        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+    > Div<Refinement<Type, B>> for Refinement<Type, signed::ClosedOpenInterval<MIN, MAX>>
+where
+    Refinement<
+        Type,
+        signed::ClosedOpenInterval<
+            { min_div(MIN, MAX - 1, B::UMIN, B::UMAX) },
+            { max_div(MIN, MAX - 1, B::UMIN, B::UMAX) + 1 },
+        >,
+    >: Sized,
+{
+    type Output = Refinement<
+        Type,
+        signed::ClosedOpenInterval<
+            { min_div(MIN, MAX - 1, B::UMIN, B::UMAX) },
+            { max_div(MIN, MAX - 1, B::UMIN, B::UMAX) + 1 },
+        >,
+    >;
+
+    fn div(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 / rhs.0, PhantomData)
+    }
+}
+
+#[cfg(test)]
+mod signed_tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[test]
+    fn test_open_closed_interval_div() {
+        let a = Refinement::<i8, signed::OpenClosedInterval<15, 20>>::refine(16).unwrap();
+        let b = Refinement::<i8, signed::OpenClosedInterval<3, 6>>::refine(6).unwrap();
+        let c: Refinement<i8, signed::OpenClosedInterval<1, 5>> = a / b;
+        assert_eq!(*c, 2);
+    }
+
+    #[test]
+    fn test_closed_open_interval_div() {
+        let a = Refinement::<i8, signed::ClosedOpenInterval<50, 100>>::refine(99).unwrap();
+        let b = Refinement::<i8, signed::ClosedOpenInterval<5, 10>>::refine(5).unwrap();
+        let c: Refinement<i8, signed::ClosedOpenInterval<5, 20>> = a / b;
+        assert_eq!(*c, 19);
+    }
+
+    #[test]
+    fn test_open_interval_div() {
+        let a = Refinement::<i8, signed::OpenInterval<-30, -15>>::refine(-16).unwrap();
+        let b = Refinement::<i8, signed::OpenInterval<-10, -5>>::refine(-9).unwrap();
+        let c: Refinement<i8, signed::OpenInterval<0, 5>> = a / b;
+        assert_eq!(*c, 1);
+    }
+
+    #[test]
+    fn test_closed_interval_div() {
+        let a = Refinement::<i8, signed::ClosedInterval<-15, 50>>::refine(50).unwrap();
+        let b = Refinement::<i8, signed::ClosedInterval<-6, -3>>::refine(-3).unwrap();
+        let c: Refinement<i8, signed::ClosedInterval<-16, 5>> = a / b;
+        assert_eq!(*c, -16);
     }
 }

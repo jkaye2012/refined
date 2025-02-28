@@ -1,4 +1,4 @@
-use crate::{boundable::*, Predicate, UnsignedBoundable};
+use crate::{boundable::*, Predicate, SignedBoundable, UnsignedBoundable};
 
 mod add;
 mod div;
@@ -115,4 +115,161 @@ impl<T: UnsignedBoundable, const MIN: usize, const MAX: usize> UnsignedMinMax<T>
 impl<T: UnsignedBoundable, const MIN: usize, const MAX: usize> UnsignedMinMax<T>
     for unsigned::ClosedOpenInterval<MIN, MAX>
 {
+}
+
+/// A type that has a statically knowable signed maximum value.
+pub trait SignedMax<T: SignedBoundable>: Predicate<T> {
+    /// The maximum value.
+    const UMAX: isize;
+}
+
+impl<T: SignedBoundable, const MAX: isize> SignedMax<T> for signed::LessThan<MAX> {
+    const UMAX: isize = MAX - 1;
+}
+
+impl<T: SignedBoundable, const MAX: isize> SignedMax<T> for signed::LessThanEqual<MAX> {
+    const UMAX: isize = MAX;
+}
+
+impl<T: SignedBoundable, const VAL: isize> SignedMax<T> for signed::Equals<VAL> {
+    const UMAX: isize = VAL;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMax<T>
+    for signed::ClosedInterval<MIN, MAX>
+{
+    const UMAX: isize = MAX;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMax<T>
+    for signed::OpenClosedInterval<MIN, MAX>
+{
+    const UMAX: isize = MAX;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMax<T>
+    for signed::OpenInterval<MIN, MAX>
+{
+    const UMAX: isize = MAX - 1;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMax<T>
+    for signed::ClosedOpenInterval<MIN, MAX>
+{
+    const UMAX: isize = MAX - 1;
+}
+
+/// A type that has a statically knowable signed minimum value.
+pub trait SignedMin<T: SignedBoundable>: Predicate<T> {
+    /// The minimum value.
+    const UMIN: isize;
+}
+
+impl<T: SignedBoundable, const MIN: isize> SignedMin<T> for signed::GreaterThan<MIN> {
+    const UMIN: isize = MIN + 1;
+}
+
+impl<T: SignedBoundable, const MIN: isize> SignedMin<T> for signed::GreaterThanEqual<MIN> {
+    const UMIN: isize = MIN;
+}
+
+impl<T: SignedBoundable, const VAL: isize> SignedMin<T> for signed::Equals<VAL> {
+    const UMIN: isize = VAL;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMin<T>
+    for signed::ClosedInterval<MIN, MAX>
+{
+    const UMIN: isize = MIN;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMin<T>
+    for signed::OpenClosedInterval<MIN, MAX>
+{
+    const UMIN: isize = MIN + 1;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMin<T>
+    for signed::OpenInterval<MIN, MAX>
+{
+    const UMIN: isize = MIN + 1;
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMin<T>
+    for signed::ClosedOpenInterval<MIN, MAX>
+{
+    const UMIN: isize = MIN;
+}
+
+/// A type that has a statically knowable signed minimum value and maximum value.
+pub trait SignedMinMax<T: SignedBoundable>: Predicate<T> + SignedMin<T> + SignedMax<T> {}
+
+impl<T: SignedBoundable, const VAL: isize> SignedMinMax<T> for signed::Equals<VAL> {}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMinMax<T>
+    for signed::ClosedInterval<MIN, MAX>
+{
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMinMax<T>
+    for signed::OpenClosedInterval<MIN, MAX>
+{
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMinMax<T>
+    for signed::OpenInterval<MIN, MAX>
+{
+}
+
+impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMinMax<T>
+    for signed::ClosedOpenInterval<MIN, MAX>
+{
+}
+
+const fn elem_min(a: isize, b: isize) -> isize {
+    if a <= b {
+        a
+    } else {
+        b
+    }
+}
+
+/// Calculates the minimum bounds for an interval over multiplication.
+pub const fn min_mul(xmin: isize, xmax: isize, ymin: isize, ymax: isize) -> isize {
+    elem_min(
+        xmin * ymin,
+        elem_min(xmin * ymax, elem_min(xmax * ymin, xmax * ymax)),
+    )
+}
+
+/// Calculates the minimum bounds for an interval over division.
+pub const fn min_div(xmin: isize, xmax: isize, ymin: isize, ymax: isize) -> isize {
+    elem_min(
+        xmin / ymin,
+        elem_min(xmin / ymax, elem_min(xmax / ymin, xmax / ymax)),
+    )
+}
+
+const fn elem_max(a: isize, b: isize) -> isize {
+    if a >= b {
+        a
+    } else {
+        b
+    }
+}
+
+/// Calculates the maximum bounds for an interval over multiplication.
+pub const fn max_mul(xmin: isize, xmax: isize, ymin: isize, ymax: isize) -> isize {
+    elem_max(
+        xmin * ymin,
+        elem_max(xmin * ymax, elem_max(xmax * ymin, xmax * ymax)),
+    )
+}
+
+/// Calculates the maximum bounds for an interval over division.
+pub const fn max_div(xmin: isize, xmax: isize, ymin: isize, ymax: isize) -> isize {
+    elem_max(
+        xmin / ymin,
+        elem_max(xmin / ymax, elem_max(xmax / ymin, xmax / ymax)),
+    )
 }
