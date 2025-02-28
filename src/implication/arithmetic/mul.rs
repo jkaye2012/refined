@@ -237,66 +237,6 @@ mod unsigned_tests {
 }
 
 impl<
-        const A: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMax<Type> + Predicate<Type>,
-    > Mul<Refinement<Type, B>> for Refinement<Type, signed::LessThan<A>>
-where
-    Refinement<Type, signed::LessThan<{ (A - 1) * B::UMAX + 1 }>>: Sized,
-{
-    type Output = Refinement<Type, signed::LessThan<{ (A - 1) * B::UMAX + 1 }>>;
-
-    fn mul(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 * rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMax<Type> + Predicate<Type>,
-    > Mul<Refinement<Type, B>> for Refinement<Type, signed::LessThanEqual<A>>
-where
-    Refinement<Type, signed::LessThanEqual<{ A * B::UMAX }>>: Sized,
-{
-    type Output = Refinement<Type, signed::LessThanEqual<{ A * B::UMAX }>>;
-
-    fn mul(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 * rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMin<Type> + Predicate<Type>,
-    > Mul<Refinement<Type, B>> for Refinement<Type, signed::GreaterThan<A>>
-where
-    Refinement<Type, signed::GreaterThan<{ (A + 1) * B::UMIN - 1 }>>: Sized,
-{
-    type Output = Refinement<Type, signed::GreaterThan<{ (A + 1) * B::UMIN - 1 }>>;
-
-    fn mul(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 * rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMin<Type> + Predicate<Type>,
-    > Mul<Refinement<Type, B>> for Refinement<Type, signed::GreaterThanEqual<A>>
-where
-    Refinement<Type, signed::GreaterThanEqual<{ A * B::UMIN }>>: Sized,
-{
-    type Output = Refinement<Type, signed::GreaterThanEqual<{ A * B::UMIN }>>;
-
-    fn mul(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 * rhs.0, PhantomData)
-    }
-}
-
-impl<
         const MIN: isize,
         const MAX: isize,
         Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
@@ -412,62 +352,6 @@ where
 mod signed_tests {
     use super::*;
     use crate::prelude::*;
-
-    #[test]
-    fn test_lt_mul_lt() {
-        let a = Refinement::<i8, signed::LessThan<10>>::refine(9).unwrap();
-        let b = Refinement::<i8, signed::LessThan<10>>::refine(9).unwrap();
-        let c: Refinement<i8, signed::LessThan<82>> = a * b;
-        assert_eq!(*c, 81);
-    }
-
-    #[test]
-    fn test_lte_mul_lte() {
-        let a = Refinement::<i8, signed::LessThanEqual<10>>::refine(6).unwrap();
-        let b = Refinement::<i8, signed::LessThanEqual<10>>::refine(3).unwrap();
-        let c: Refinement<i8, signed::LessThanEqual<100>> = a * b;
-        assert_eq!(*c, 18);
-    }
-
-    #[test]
-    fn test_lte_mul_lt() {
-        let a = Refinement::<i8, signed::LessThanEqual<10>>::refine(6).unwrap();
-        let b = Refinement::<i8, signed::LessThan<11>>::refine(3).unwrap();
-        let c: Refinement<i8, signed::LessThanEqual<100>> = a * b;
-        assert_eq!(*c, 18);
-    }
-
-    #[test]
-    fn test_gt_mul_gt() {
-        let a = Refinement::<i8, signed::GreaterThan<10>>::refine(11).unwrap();
-        let b = Refinement::<i8, signed::GreaterThan<10>>::refine(11).unwrap();
-        let c: Refinement<i8, signed::GreaterThan<120>> = a * b;
-        assert_eq!(*c, 121);
-    }
-
-    #[test]
-    fn test_gt_mul_gte() {
-        let a = Refinement::<i8, signed::GreaterThan<10>>::refine(11).unwrap();
-        let b = Refinement::<i8, signed::GreaterThanEqual<3>>::refine(3).unwrap();
-        let c: Refinement<i8, signed::GreaterThan<32>> = a * b;
-        assert_eq!(*c, 33);
-    }
-
-    #[test]
-    fn test_gte_mul_gte() {
-        let a = Refinement::<i8, signed::GreaterThanEqual<10>>::refine(12).unwrap();
-        let b = Refinement::<i8, signed::GreaterThanEqual<3>>::refine(3).unwrap();
-        let c: Refinement<i8, signed::GreaterThanEqual<30>> = a * b;
-        assert_eq!(*c, 36);
-    }
-
-    #[test]
-    fn test_gte_mul_gt() {
-        let a = Refinement::<i8, signed::GreaterThanEqual<12>>::refine(15).unwrap();
-        let b = Refinement::<i8, signed::GreaterThan<3>>::refine(4).unwrap();
-        let c: Refinement<i8, signed::GreaterThanEqual<48>> = a * b;
-        assert_eq!(*c, 60);
-    }
 
     #[test]
     fn test_open_closed_interval_mul() {

@@ -307,10 +307,10 @@ mod signed_tests {
 
     #[test]
     fn test_closed_open_interval_sub() {
-        let a = Refinement::<i8, signed::ClosedOpenInterval<-50, 100>>::refine(-50).unwrap();
-        let b = Refinement::<i8, signed::ClosedOpenInterval<-15, -10>>::refine(-11).unwrap();
+        let a = Refinement::<i8, signed::ClosedOpenInterval<-50, 100>>::refine(99).unwrap();
+        let b = Refinement::<i8, signed::ClosedOpenInterval<-15, -10>>::refine(-15).unwrap();
         let c: Refinement<i8, signed::ClosedOpenInterval<-39, 115>> = a - b;
-        assert_eq!(*c, -39);
+        assert_eq!(*c, 114);
     }
 
     #[test]

@@ -56,4 +56,4 @@ mod arithmetic;
 
 #[doc(cfg(feature = "arithmetic"))]
 #[cfg(feature = "arithmetic")]
-pub use arithmetic::{UnsignedMax, UnsignedMin, UnsignedMinMax};
+pub use arithmetic::*;

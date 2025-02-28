@@ -226,7 +226,7 @@ impl<T: SignedBoundable, const MIN: isize, const MAX: isize> SignedMinMax<T>
 {
 }
 
-const fn elem_min(a: isize, b: isize) -> isize {
+pub const fn elem_min(a: isize, b: isize) -> isize {
     if a <= b {
         a
     } else {
@@ -250,7 +250,7 @@ pub const fn min_div(xmin: isize, xmax: isize, ymin: isize, ymax: isize) -> isiz
     )
 }
 
-const fn elem_max(a: isize, b: isize) -> isize {
+pub const fn elem_max(a: isize, b: isize) -> isize {
     if a >= b {
         a
     } else {

@@ -216,6 +216,39 @@
 //! Note that the order matters here; the smaller range refinement can be implied to the larger range,
 //! but the opposite is logically invalid.
 //!
+//! ## Arithmetic
+//!
+//! ```
+//! #![allow(incomplete_features)]
+//! #![feature(generic_const_exprs)]
+//!
+//! use refined::{prelude::*, boundable::unsigned::ClosedInterval};
+//!
+//! type SkillLevel = Refinement<u8, ClosedInterval<1, 10>>;
+//!
+//! /// A couple's aggregate skill level is the addition of their individual skill levels
+//! fn couple_skill(a: SkillLevel, b: SkillLevel) -> Refinement<u8, ClosedInterval<2, 20>> {
+//!    a + b // The addition here doesn't require a runtime bounds check
+//! }
+//!
+//! let tom_skill = SkillLevel::refine(9).unwrap();
+//! let sally_skill = SkillLevel::refine(6).unwrap();
+//!
+//! assert_eq!(*couple_skill(tom_skill, sally_skill), 15);
+//! ```
+//!
+//! ```
+//! #![allow(incomplete_features)]
+//! #![feature(generic_const_exprs)]
+//!
+//! use refined::{prelude::*, boundable::signed::LessThan};
+//!
+//! type LT100 = Refinement<i16, LessThan<100>>;
+//! type LT50 = Refinement<i16, LessThan<50>>;
+//! let result: Refinement<i16, LessThan<149>> = LT100::refine(99).unwrap() + LT50::refine(49).unwrap();
+//! assert_eq!(*result, 148);
+//! ````
+//!
 //! # Provided refinements
 //!
 //! `refined` comes packaged with a large number of refinements over commonly used `std` types. The refinements
@@ -256,25 +289,27 @@
 //! ## `arithmetic`
 //!
 //! Enabling arithmetic provides implementations of many of the [std::ops] traits for relevant [Refinement]
-//! types. Enabling this feature also automatically enables `implication`. Because the relationship of refined types
+//! types. Enabling this feature also automatically enables `implication` and correspondingly requires `generic_const_exprs`
+//! as detailed above.
+//!
+//! Because the relationship of refined types
 //! allows for the immediate computation of the resulting bounds, refined arithmetic should have no additional overhead
-//! compared to raw arithmetic operations.
+//! compared to raw arithmetic operations. Runtime bounds checking is not required.
 //!
-//! Following the types that implement arithmetic can be difficult, so we list the supported operations here informally:
+//! Following the types that implement arithmetic can be difficult. The support for bounds across different types is not perfect,
+//! and may be improved in the future. Currently, support is provided for the four primary arithmetic operations
+//! ([std::ops::Add], [std::ops::Sub], [std::ops::Mul], and [std::ops::Div]) for all meaningful combinations of both
+//! signed and unsigned boundable ranges. For unsigned ranges, this means all operations are implemented for all range types. For
+//! signed ranges, addition is implemented for all range types, while subtraction, multiplication, and division are implemented
+//! only for ranges with both minimum _and_ maximum bounds.
 //!
-//! * [Addition](std::ops::Add) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
-//! * [Addition](std::ops::Add) of all combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
-//! * [Subtraction](std::ops::Sub) of valid combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
-//! * [Subtraction](std::ops::Sub) of valid combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
-//! * [Multiplication](std::ops::Mul) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
-//! * [Multiplication](std::ops::Mul) of all combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
-//! * [Division](std::ops::Div) of all combinations of [boundable::unsigned::LessThan] and [boundable::unsigned::LessThanEqual]
-//! * [Division](std::ops::Div) of all combinations of [boundable::unsigned::GreaterThan] and [boundable::unsigned::GreaterThanEqual]
+//! For example, [boundable::unsigned::LessThan] can be added, subtracted, multiplied, or divided with any type
+//! that satisfies [implication::UnsignedMax], while [boundable::unsigned::GreaterThan] instead supports operations
+//! against [implication::UnsignedMin]. The range types support operations against one another via [implication::UnsignedMinMax].
 //!
-//! Examples make it easier to visualize and understand the arithmetic support:
+//! Similarly, the signed variants are [implication::SignedMin], [implication::SignedMax], and [implication::SignedMinMax].
 //!
-//! ```
-//! ```
+//! See the examples above for more intuition.
 #![cfg_attr(
     feature = "implication",
     allow(incomplete_features),
