@@ -73,7 +73,7 @@
 //!
 //! The `regex` feature provides a good motivation for when it could make sense to use [StatefulRefinementOps]; compiling
 //! the regular expression can be an expensive operation, often more expensive than certifying the predicate itself. We
-//! can use the same [Regex](string::Regex) predicate both statefully and stateless as mentioned above:
+//! can use the same [Regex](string::Regex) predicate both statefully and statelessly as mentioned above:
 //!
 //! ```
 //! use refined::{prelude::*, string::Regex};
@@ -92,10 +92,10 @@
 //!
 //! ## Named refinement
 //!
-//! As you can see in the error messages above, there are two possible fields that could have led to the error in refinement,
+//! As you can see in the error messages in the first example, there are two possible fields that could have led to the error in refinement,
 //! but it isn't readily apparent which field caused the error by reading the error message. While this isn't a problem
 //! when using libraries like [serde_path_to_error](https://docs.rs/serde_path_to_error/latest/serde_path_to_error/), this
-//! can be important functionality to have in your own error messages if you're using basic serde functionality.
+//! can be important functionality to have in your own error messages if you're using basic serde functionality or raw types.
 //!
 //! If this is something that you need, consider using [Named], or [NamedSerde] if using `serde`.
 //!
@@ -134,6 +134,8 @@
 //! ```
 //!
 //! ## Serde support
+//!
+//! Support for serde is about as automatic as you can get when the `serde` feature is enabled.
 //!
 //! ```
 //! use refined::{Refinement, RefinementOps, boundable::unsigned::LessThan};
@@ -177,8 +179,8 @@
 //!
 //! ## Implication
 //!
-//! Note that enabling `incomplete_features` and `generic_const_exprs` is **required** for
-//! the [Implies] trait bounds to be met.
+//! See the documentation on [Implies] for more information about the core idea behind implication.
+//! Note that enabling `incomplete_features` and `generic_const_exprs` is **required** for the [Implies] trait bounds to be met.
 //!
 //! ```
 //! #![allow(incomplete_features)]
@@ -217,6 +219,9 @@
 //! but the opposite is logically invalid.
 //!
 //! ## Arithmetic
+//!
+//! With the `arithmetic` feature enabled, refinements with mutually compatible bounds can be operated on
+//! numerically without any runtime overhead. See the arithmetic feature section below for more information.
 //!
 //! ```
 //! #![allow(incomplete_features)]
@@ -386,6 +391,7 @@ pub trait Predicate<T> {
     fn error() -> String;
 }
 
+/// An internal implementation detail that must be exposed publicly for proper serde support.
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize), serde(transparent))]
 pub struct Refined<T>(T);
 
