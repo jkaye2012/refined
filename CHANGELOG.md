@@ -13,6 +13,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Adds the `arithmetic` feature, allowing for simple arithmetic operations on `Refinement`
 - Refactors `NamedRefinement` into a generic `Named` wrapper
 - Deprecates `Refinement::extract` in favor of `Refinement::take` (via `RefinementOps`)
+- Adds the `optimized` feature to allow enabling unsafe optimizations
 
 ## [0.0.3] - 2025-02-11
 

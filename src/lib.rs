@@ -285,6 +285,12 @@
 //!
 //! Enabling regex allows the use of the [Regex](string::Regex) predicate. This carries a dependency on the [regex] crate
 //!
+//! ## `optimized`
+//!
+//! Enabling optimized turns on [unsafe optimizations](https://github.com/jkaye2012/refined/issues/9) that allow the compiler
+//! to remove potentially significant runtime bounds checking. Currently, this is disabled by default, but it may be moved to
+//! a default feature in the future.
+//!
 //! ## `implication`
 //!
 //! Enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
