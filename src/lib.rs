@@ -310,7 +310,8 @@
 //! Following the types that implement arithmetic can be difficult. The support for bounds across different types is not perfect,
 //! and may be improved in the future. Currently, support is provided for the four primary arithmetic operations
 //! ([std::ops::Add], [std::ops::Sub], [std::ops::Mul], and [std::ops::Div]) for all meaningful combinations of both
-//! signed and unsigned boundable ranges. For unsigned ranges, this means all operations are implemented for all range types. For
+//! signed and unsigned boundable ranges. For unsigned ranges, this means addition, multiplication, and division operations are implemented for all range types,
+//! while subtraction is implemented only for ranges with both minimum _and_ maximum bounds. For
 //! signed ranges, addition is implemented for all range types, while subtraction, multiplication, and division are implemented
 //! only for ranges with both minimum _and_ maximum bounds.
 //!

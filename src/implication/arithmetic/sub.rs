@@ -1,70 +1,8 @@
 use std::{marker::PhantomData, ops::Sub};
 
-use crate::{boundable::*, Assert, IsTrue, Predicate, Refinement};
+use crate::{boundable::*, Predicate, Refinement};
 
 use super::*;
-
-impl<
-        const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
-        B: Clone + UnsignedMax<Type> + Predicate<Type>,
-    > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::LessThan<A>>
-where
-    Assert<{ A >= B::UMAX }>: IsTrue,
-    Refinement<Type, unsigned::LessThan<A>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LessThan<A>>;
-
-    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 - rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
-        B: Clone + UnsignedMax<Type> + Predicate<Type>,
-    > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::LessThanEqual<A>>
-where
-    Assert<{ A >= B::UMAX }>: IsTrue,
-    Refinement<Type, unsigned::LessThanEqual<A>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::LessThanEqual<A>>;
-
-    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 - rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
-        B: Clone + UnsignedMin<Type> + Predicate<Type>,
-    > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::GreaterThan<A>>
-where
-    Refinement<Type, unsigned::GreaterThan<{ A + 1 - B::UMIN }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::GreaterThan<{ A + 1 - B::UMIN }>>;
-
-    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 - rhs.0, PhantomData)
-    }
-}
-
-impl<
-        const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
-        B: Clone + UnsignedMin<Type> + Predicate<Type>,
-    > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::GreaterThanEqual<A>>
-where
-    Refinement<Type, unsigned::GreaterThanEqual<{ A - B::UMIN }>>: Sized,
-{
-    type Output = Refinement<Type, unsigned::GreaterThanEqual<{ A - B::UMIN }>>;
-
-    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
-        Refinement(self.0 - rhs.0, PhantomData)
-    }
-}
 
 impl<
         const MIN: usize,
@@ -136,62 +74,6 @@ where
 mod unsigned_tests {
     use super::*;
     use crate::prelude::*;
-
-    #[test]
-    fn test_lt_sub_lt() {
-        let a = Refinement::<u8, unsigned::LessThan<10>>::refine(5).unwrap();
-        let b = Refinement::<u8, unsigned::LessThan<10>>::refine(3).unwrap();
-        let c: Refinement<u8, unsigned::LessThan<10>> = a - b;
-        assert_eq!(*c, 2);
-    }
-
-    #[test]
-    fn test_lte_sub_lte() {
-        let a = Refinement::<u8, unsigned::LessThanEqual<10>>::refine(5).unwrap();
-        let b = Refinement::<u8, unsigned::LessThanEqual<10>>::refine(3).unwrap();
-        let c: Refinement<u8, unsigned::LessThanEqual<10>> = a - b;
-        assert_eq!(*c, 2);
-    }
-
-    #[test]
-    fn test_lte_sub_lt() {
-        let a = Refinement::<u8, unsigned::LessThanEqual<10>>::refine(5).unwrap();
-        let b = Refinement::<u8, unsigned::LessThan<11>>::refine(3).unwrap();
-        let c: Refinement<u8, unsigned::LessThanEqual<10>> = a - b;
-        assert_eq!(*c, 2);
-    }
-
-    #[test]
-    fn test_gt_sub_gt() {
-        let a = Refinement::<u8, unsigned::GreaterThan<10>>::refine(11).unwrap();
-        let b = Refinement::<u8, unsigned::GreaterThan<10>>::refine(11).unwrap();
-        let c: Refinement<u8, unsigned::GreaterThan<0>> = a - b;
-        assert_eq!(*c, 0);
-    }
-
-    #[test]
-    fn test_gt_sub_gte() {
-        let a = Refinement::<u8, unsigned::GreaterThan<10>>::refine(11).unwrap();
-        let b = Refinement::<u8, unsigned::GreaterThanEqual<11>>::refine(11).unwrap();
-        let c: Refinement<u8, unsigned::GreaterThan<0>> = a - b;
-        assert_eq!(*c, 0);
-    }
-
-    #[test]
-    fn test_gte_sub_gte() {
-        let a = Refinement::<u8, unsigned::GreaterThanEqual<10>>::refine(10).unwrap();
-        let b = Refinement::<u8, unsigned::GreaterThanEqual<10>>::refine(10).unwrap();
-        let c: Refinement<u8, unsigned::GreaterThanEqual<0>> = a - b;
-        assert_eq!(*c, 0);
-    }
-
-    #[test]
-    fn test_gte_sub_gt() {
-        let a = Refinement::<u8, unsigned::GreaterThanEqual<11>>::refine(11).unwrap();
-        let b = Refinement::<u8, unsigned::GreaterThan<10>>::refine(11).unwrap();
-        let c: Refinement<u8, unsigned::GreaterThanEqual<0>> = a - b;
-        assert_eq!(*c, 0);
-    }
 
     #[test]
     fn test_open_closed_interval_sub() {
