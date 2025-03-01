@@ -73,7 +73,7 @@
 //!
 //! The `regex` feature provides a good motivation for when it could make sense to use [StatefulRefinementOps]; compiling
 //! the regular expression can be an expensive operation, often more expensive than certifying the predicate itself. We
-//! can use the same [Regex](string::Regex) predicate both statefully and stateless as mentioned above:
+//! can use the same [Regex](string::Regex) predicate both statefully and statelessly as mentioned above:
 //!
 //! ```
 //! use refined::{prelude::*, string::Regex};
@@ -92,10 +92,10 @@
 //!
 //! ## Named refinement
 //!
-//! As you can see in the error messages above, there are two possible fields that could have led to the error in refinement,
+//! As you can see in the error messages in the first example, there are two possible fields that could have led to the error in refinement,
 //! but it isn't readily apparent which field caused the error by reading the error message. While this isn't a problem
 //! when using libraries like [serde_path_to_error](https://docs.rs/serde_path_to_error/latest/serde_path_to_error/), this
-//! can be important functionality to have in your own error messages if you're using basic serde functionality.
+//! can be important functionality to have in your own error messages if you're using basic serde functionality or raw types.
 //!
 //! If this is something that you need, consider using [Named], or [NamedSerde] if using `serde`.
 //!
@@ -134,6 +134,8 @@
 //! ```
 //!
 //! ## Serde support
+//!
+//! Support for serde is about as automatic as you can get when the `serde` feature is enabled.
 //!
 //! ```
 //! use refined::{Refinement, RefinementOps, boundable::unsigned::LessThan};
@@ -177,8 +179,8 @@
 //!
 //! ## Implication
 //!
-//! Note that enabling `incomplete_features` and `generic_const_exprs` is **required** for
-//! the [Implies] trait bounds to be met.
+//! See the documentation on [Implies] for more information about the core idea behind implication.
+//! Note that enabling `incomplete_features` and `generic_const_exprs` is **required** for the [Implies] trait bounds to be met.
 //!
 //! ```
 //! #![allow(incomplete_features)]
@@ -209,12 +211,48 @@
 //! let smaller_range: Refinement<u8, OpenInterval<25, 75>> = Refinement::refine(50).unwrap();
 //! let incompatible_range: Refinement<u8, OpenInterval<101, 200>> = Refinement::refine(150).unwrap();
 //! // assert_eq!(bigger_range, smaller_range); // Fails to compile, type mismatch
-//! // assert_eq!(bigger_ragne, incompatible_range) // Fails to compile, invalid implication
+//! // assert_eq!(bigger_range, incompatible_range) // Fails to compile, invalid implication
 //! assert_eq!(bigger_range, smaller_range.imply()); // Works!
 //! ```
 //!
 //! Note that the order matters here; the smaller range refinement can be implied to the larger range,
 //! but the opposite is logically invalid.
+//!
+//! ## Arithmetic
+//!
+//! With the `arithmetic` feature enabled, refinements with mutually compatible bounds can be operated on
+//! numerically without any runtime overhead. See the arithmetic feature section below for more information.
+//!
+//! ```
+//! #![allow(incomplete_features)]
+//! #![feature(generic_const_exprs)]
+//!
+//! use refined::{prelude::*, boundable::unsigned::ClosedInterval};
+//!
+//! type SkillLevel = Refinement<u8, ClosedInterval<1, 10>>;
+//!
+//! /// A couple's aggregate skill level is the addition of their individual skill levels
+//! fn couple_skill(a: SkillLevel, b: SkillLevel) -> Refinement<u8, ClosedInterval<2, 20>> {
+//!    a + b // The addition here doesn't require a runtime bounds check
+//! }
+//!
+//! let tom_skill = SkillLevel::refine(9).unwrap();
+//! let sally_skill = SkillLevel::refine(6).unwrap();
+//!
+//! assert_eq!(*couple_skill(tom_skill, sally_skill), 15);
+//! ```
+//!
+//! ```
+//! #![allow(incomplete_features)]
+//! #![feature(generic_const_exprs)]
+//!
+//! use refined::{prelude::*, boundable::signed::LessThan};
+//!
+//! type LT100 = Refinement<i16, LessThan<100>>;
+//! type LT50 = Refinement<i16, LessThan<50>>;
+//! let result: Refinement<i16, LessThan<149>> = LT100::refine(99).unwrap() + LT50::refine(49).unwrap();
+//! assert_eq!(*result, 148);
+//! ````
 //!
 //! # Provided refinements
 //!
@@ -223,30 +261,66 @@
 //!
 //! Here's a quick reference of what is currently available:
 //!
-//! * [UnsignedBoundable]: types that can be reduced to an unsigned size so that their size can be bounded. Examples
+//! * [boundable::unsigned] contains refinements for anything that implements [UnsignedBoundable];
+//!   these are types that can be reduced to an unsigned size so that their size can be bounded. Examples
 //!   include `String`, `u8`, `u64`, or any `std` container-like type that implements a `len()` method
-//! * [SignedBoundable]: types that can be reduced to a signed size so that their size can be bounded. Examples include
+//! * [boundable::signed] contains refinements for anything that implements [SignedBoundable];
+//!   these are types that can be reduced to a signed size so that their size can be bounded. Examples include
 //!   `i8`, `i64`, and `isize`
-//! * [boolean]: "combinator" refinements that allow other refinements to be combined with one another. Examples include
+//! * [boolean] contains "combinator" refinements that allow other refinements to be combined with one another. Examples include
 //!   [And](boolean::And) and [Or](boolean::Or)
-//! * [character]: refinements of [char]. Examples include [IsLowercase](character::IsLowercase) and [IsWhitespace](character::IsWhitespace)
-//! * [string]: refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains),
+//! * [character] contains refinements of [char]. Examples include [IsLowercase](character::IsLowercase) and [IsWhitespace](character::IsWhitespace)
+//! * [string] contains refinements of any type that implements [AsRef\<str\>](AsRef). Examples include [Contains](string::Contains),
 //!   [Trimmed](string::Trimmed), and [Regex](string::Regex)
 //!
 //! # Features
 //!
-//! * `serde`: enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
-//!   This functionality was actually my main motivation for writing the crate in the first place, but technically
-//!   the serde dependency is not required for the core functionality of the trait, so it can be disabled
-//! * `implication`: enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
-//!   feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
-//!   which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
-//! * `regex`: enabling regex allows the use of the [Regex](string::Regex) predicates. This carries a dependency on the [regex] crate
+//! ## `serde`
+//!
+//! Enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
+//! This functionality was actually my main motivation for writing the crate in the first place, but technically
+//! the serde dependency is not required for the core functionality of the trait, so it can be disabled
+//!
+//! ## `regex`
+//!
+//! Enabling regex allows the use of the [Regex](string::Regex) predicate. This carries a dependency on the [regex] crate
+//!
+//! ## `implication`
+//!
+//! Enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
+//! feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
+//! which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
+//!
+//! ## `arithmetic`
+//!
+//! Enabling arithmetic provides implementations of many of the [std::ops] traits for relevant [Refinement]
+//! types. Enabling this feature also automatically enables `implication` and correspondingly requires `generic_const_exprs`
+//! as detailed above.
+//!
+//! Because the relationship of refined types
+//! allows for the immediate computation of the resulting bounds, refined arithmetic should have no additional overhead
+//! compared to raw arithmetic operations. Runtime bounds checking is not required.
+//!
+//! Following the types that implement arithmetic can be difficult. The support for bounds across different types is not perfect,
+//! and may be improved in the future. Currently, support is provided for the four primary arithmetic operations
+//! ([std::ops::Add], [std::ops::Sub], [std::ops::Mul], and [std::ops::Div]) for all meaningful combinations of both
+//! signed and unsigned boundable ranges. For unsigned ranges, this means all operations are implemented for all range types. For
+//! signed ranges, addition is implemented for all range types, while subtraction, multiplication, and division are implemented
+//! only for ranges with both minimum _and_ maximum bounds.
+//!
+//! For example, [boundable::unsigned::LessThan] can be added, subtracted, multiplied, or divided with any type
+//! that satisfies [implication::UnsignedMax], while [boundable::unsigned::GreaterThan] instead supports operations
+//! against [implication::UnsignedMin]. The range types support operations against one another via [implication::UnsignedMinMax].
+//!
+//! Similarly, the signed variants are [implication::SignedMin], [implication::SignedMax], and [implication::SignedMinMax].
+//!
+//! See the examples above for more intuition.
 #![cfg_attr(
     feature = "implication",
     allow(incomplete_features),
     feature(generic_const_exprs)
 )]
+#![feature(doc_cfg)]
 
 use std::fmt::Display;
 
@@ -267,8 +341,10 @@ pub use refinement::*;
 pub use boundable::signed::SignedBoundable;
 pub use boundable::unsigned::UnsignedBoundable;
 
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 pub mod implication;
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 pub use implication::*;
 
@@ -315,6 +391,7 @@ pub trait Predicate<T> {
     fn error() -> String;
 }
 
+/// An internal implementation detail that must be exposed publicly for proper serde support.
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize), serde(transparent))]
 pub struct Refined<T>(T);
 

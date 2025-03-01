@@ -20,6 +20,7 @@ default = [ "serde" ]
 implication = []
 regex = [ "dep:regex" ]
 serde = [ "dep:serde" ]
+arithmetic = [ "implication" ]
 
 [package.metadata.docs.rs]
 all-features = true

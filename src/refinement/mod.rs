@@ -19,7 +19,7 @@ use crate::Implies;
     derive(Deserialize, Serialize),
     serde(try_from = "Refined<T>", into = "Refined<T>")
 )]
-pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(T, PhantomData<P>);
+pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(pub(crate) T, pub(crate) PhantomData<P>);
 
 impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     type T = T;
@@ -72,9 +72,12 @@ where
     }
 }
 
+/// A stateful assertion that must hold for an instance of a type to be considered refined.
 pub trait StatefulPredicate<T>: Default + Predicate<T> {
+    /// Whether a value satisfies the predicate.
     fn test(&self, value: &T) -> bool;
 
+    /// An error message to display when the predicate doesn't hold.
     fn error(&self) -> String {
         <Self as Predicate<T>>::error()
     }

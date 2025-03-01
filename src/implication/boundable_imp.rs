@@ -1,12 +1,6 @@
 use crate::boundable::*;
 
-use super::Implies;
-
-pub(crate) enum Assert<const CHECK: bool> {}
-
-pub(crate) trait IsTrue {}
-
-impl IsTrue for Assert<true> {}
+use super::{Assert, Implies, IsTrue};
 
 impl<const F: isize, const T: isize> Implies<signed::GreaterThan<T>> for signed::GreaterThan<F>
 where

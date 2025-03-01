@@ -1,7 +1,21 @@
 //! Boundable refinement via unsigned values.
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
+//!
+//! # Example
+//!
+//! ```
+//! use refined::{Refinement, RefinementOps, boundable::unsigned::GreaterThan};
+//!
+//! type SizedString = Refinement<String, GreaterThan<3>>;
+//!
+//! let ok_string = SizedString::refine("Good".to_string());
+//! assert!(ok_string.is_ok());
+//!
+//! let not_ok_string = SizedString::refine("Bad".to_string());
+//! assert!(not_ok_string.is_err());
+//! ```
 
 use crate::{boolean::*, Predicate};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 
 /// Types that can be reduced to an unsigned size so that they can be bounded.
 pub trait UnsignedBoundable {

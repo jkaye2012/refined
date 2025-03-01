@@ -77,6 +77,7 @@ impl<N: TypeString + Clone, T, P: StatefulPredicate<T>, R: Clone + StatefulRefin
 }
 
 #[cfg(feature = "serde")]
+#[doc(cfg(feature = "serde"))]
 mod named_serde {
     use super::*;
     use serde::{de::DeserializeOwned, Deserialize, Serialize};

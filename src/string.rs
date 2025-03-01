@@ -71,6 +71,7 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
 }
 
 #[cfg(feature = "regex")]
+#[doc(cfg(feature = "regex"))]
 mod regex_pred {
     use super::*;
     use crate::StatefulPredicate;
