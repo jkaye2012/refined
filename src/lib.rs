@@ -422,7 +422,7 @@ pub trait RefinementOps:
     where
         F: FnOnce(Self::T) -> Self::T,
     {
-        Self::refine(fun(self.extract()))
+        Self::refine(fun(self.take()))
     }
 
     /// Attempts a replacement of a refined value, re-certifying that the predicate
@@ -434,6 +434,15 @@ pub trait RefinementOps:
     /// Destructively removes the refined value from the `Refinement` wrapper.
     ///
     /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
+    fn take(self) -> Self::T;
+
+    /// Destructively removes the refined value from the `Refinement` wrapper.
+    ///
+    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
+    #[deprecated(
+        since = "0.0.4",
+        note = "use the more idiomatic 'take' function instead"
+    )]
     fn extract(self) -> Self::T;
 }
 
@@ -448,7 +457,7 @@ pub trait StatefulRefinementOps<T, P: StatefulPredicate<T>>: RefinementOps<T = T
     where
         F: FnOnce(<Self as RefinementOps>::T) -> <Self as RefinementOps>::T,
     {
-        Self::refine_with_state(predicate, fun(self.extract()))
+        Self::refine_with_state(predicate, fun(self.take()))
     }
 
     /// Attempts a replacement of a refined value, re-certifying that the stateful predicate

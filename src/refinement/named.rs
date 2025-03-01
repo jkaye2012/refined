@@ -53,15 +53,19 @@ impl<N: TypeString + Clone, R: Clone + RefinementOps> TryFrom<Refined<R::T>> for
 
 impl<N: TypeString + Clone, R: Clone + RefinementOps> From<Named<N, R>> for Refined<R::T> {
     fn from(value: Named<N, R>) -> Self {
-        Refined(value.extract())
+        Refined(value.take())
     }
 }
 
 impl<N: TypeString + Clone, R: Clone + RefinementOps> RefinementOps for Named<N, R> {
     type T = R::T;
 
+    fn take(self) -> Self::T {
+        self.0.take()
+    }
+
     fn extract(self) -> Self::T {
-        self.0.extract()
+        self.0.take()
     }
 }
 
@@ -132,7 +136,7 @@ mod named_serde {
         R::T: Serialize + DeserializeOwned,
     {
         fn from(value: NamedSerde<N, R>) -> Self {
-            Refined(value.extract())
+            Refined(value.take())
         }
     }
 
@@ -142,8 +146,12 @@ mod named_serde {
     {
         type T = R::T;
 
+        fn take(self) -> Self::T {
+            self.0.take()
+        }
+
         fn extract(self) -> Self::T {
-            self.0.extract()
+            self.0.take()
         }
     }
 
@@ -252,12 +260,12 @@ mod tests {
     }
 
     #[test]
-    fn test_named_refinement_extract() {
+    fn test_named_refinement_take() {
         let value = Named::<Test, Refinement<u8, boundable::unsigned::LessThan<5>>>(
             Refinement::refine(4).unwrap(),
             PhantomData,
         );
-        let extracted = value.extract();
+        let extracted = value.take();
         assert_eq!(extracted, 4);
     }
 }

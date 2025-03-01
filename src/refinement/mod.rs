@@ -24,6 +24,10 @@ pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(pub(crate) T, pub(crate
 impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     type T = T;
 
+    fn take(self) -> T {
+        self.0
+    }
+
     fn extract(self) -> T {
         self.0
     }
@@ -157,9 +161,9 @@ mod tests {
     }
 
     #[test]
-    fn test_refinement_extract() {
+    fn test_refinement_take() {
         let value = Refinement::<u8, boundable::unsigned::LessThan<5>>(4, PhantomData);
-        let extracted = value.extract();
+        let extracted = value.take();
         assert_eq!(extracted, 4);
     }
 }
