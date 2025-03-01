@@ -6,6 +6,35 @@ use super::*;
 
 impl<
         const MIN: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
+        B: Clone + UnsignedMax<Type> + Predicate<Type>,
+    > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::GreaterThan<MIN>>
+where
+    Refinement<Type, unsigned::GreaterThan<{ MIN - B::UMAX }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GreaterThan<{ MIN - B::UMAX }>>;
+
+    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+
+impl<
+        const MIN: usize,
+        Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
+        B: Clone + UnsignedMax<Type> + Predicate<Type>,
+    > Sub<Refinement<Type, B>> for Refinement<Type, unsigned::GreaterThanEqual<MIN>>
+where
+    Refinement<Type, unsigned::GreaterThanEqual<{ MIN - B::UMAX }>>: Sized,
+{
+    type Output = Refinement<Type, unsigned::GreaterThanEqual<{ MIN - B::UMAX }>>;
+
+    fn sub(self, rhs: Refinement<Type, B>) -> Self::Output {
+        Refinement(self.0 - rhs.0, PhantomData)
+    }
+}
+impl<
+        const MIN: usize,
         const MAX: usize,
         Type: Clone + unsigned::UnsignedBoundable + Sub<Output = Type>,
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
@@ -74,6 +103,54 @@ where
 mod unsigned_tests {
     use super::*;
     use crate::prelude::*;
+
+    #[test]
+    fn test_gt_sub_lt() {
+        let a = Refinement::<u8, unsigned::GreaterThan<10>>::refine(11).unwrap();
+        let b = Refinement::<u8, unsigned::LessThan<5>>::refine(4).unwrap();
+        let c: Refinement<u8, unsigned::GreaterThan<6>> = a - b;
+        assert_eq!(*c, 7);
+    }
+
+    #[test]
+    fn test_gt_sub_lte() {
+        let a = Refinement::<u8, unsigned::GreaterThan<10>>::refine(11).unwrap();
+        let b = Refinement::<u8, unsigned::LessThanEqual<5>>::refine(5).unwrap();
+        let c: Refinement<u8, unsigned::GreaterThan<5>> = a - b;
+        assert_eq!(*c, 6);
+    }
+
+    #[test]
+    fn test_gt_sub_eq() {
+        let a = Refinement::<u8, unsigned::GreaterThan<10>>::refine(11).unwrap();
+        let b = Refinement::<u8, unsigned::Equals<5>>::refine(5).unwrap();
+        let c: Refinement<u8, unsigned::GreaterThan<5>> = a - b;
+        assert_eq!(*c, 6);
+    }
+
+    #[test]
+    fn test_gte_sub_lt() {
+        let a = Refinement::<u8, unsigned::GreaterThanEqual<10>>::refine(10).unwrap();
+        let b = Refinement::<u8, unsigned::LessThan<5>>::refine(4).unwrap();
+        let c: Refinement<u8, unsigned::GreaterThanEqual<6>> = a - b;
+        assert_eq!(*c, 6);
+    }
+
+    #[test]
+    fn test_gte_sub_lte() {
+        let a = Refinement::<u8, unsigned::GreaterThanEqual<10>>::refine(10).unwrap();
+        let b = Refinement::<u8, unsigned::LessThanEqual<5>>::refine(5).unwrap();
+        let c: Refinement<u8, unsigned::GreaterThanEqual<5>> = a - b;
+        assert_eq!(*c, 5);
+    }
+
+    #[test]
+    fn test_gte_sub_eq() {
+        let a = Refinement::<u8, unsigned::GreaterThanEqual<10>>::refine(10).unwrap();
+        let b = Refinement::<u8, unsigned::Equals<5>>::refine(5).unwrap();
+        let c: Refinement<u8, unsigned::GreaterThanEqual<5>> = a - b;
+        assert_eq!(*c, 5);
+    }
 
     #[test]
     fn test_open_closed_interval_sub() {
