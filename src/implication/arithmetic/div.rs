@@ -71,11 +71,15 @@ impl<
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
     > Div<Refinement<Type, B>> for Refinement<Type, unsigned::OpenInterval<MIN, MAX>>
 where
-    Refinement<Type, unsigned::OpenInterval<{ (MIN + 1) / B::UMAX }, { (MAX - 1) / B::UMIN }>>:
-        Sized,
+    Refinement<
+        Type,
+        unsigned::OpenInterval<{ (MIN + 1) / B::UMAX - 1 }, { (MAX - 1) / B::UMIN + 1 }>,
+    >: Sized,
 {
-    type Output =
-        Refinement<Type, unsigned::OpenInterval<{ (MIN + 1) / B::UMAX }, { (MAX - 1) / B::UMIN }>>;
+    type Output = Refinement<
+        Type,
+        unsigned::OpenInterval<{ (MIN + 1) / B::UMAX - 1 }, { (MAX - 1) / B::UMIN + 1 }>,
+    >;
 
     fn div(self, rhs: Refinement<Type, B>) -> Self::Output {
         Refinement(self.0 / rhs.0, PhantomData)
@@ -105,11 +109,13 @@ impl<
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
     > Div<Refinement<Type, B>> for Refinement<Type, unsigned::OpenClosedInterval<MIN, MAX>>
 where
-    Refinement<Type, unsigned::OpenClosedInterval<{ (MIN + 1) / B::UMAX }, { MAX / B::UMIN }>>:
+    Refinement<Type, unsigned::OpenClosedInterval<{ (MIN + 1) / B::UMAX - 1 }, { MAX / B::UMIN }>>:
         Sized,
 {
-    type Output =
-        Refinement<Type, unsigned::OpenClosedInterval<{ (MIN + 1) / B::UMAX }, { MAX / B::UMIN }>>;
+    type Output = Refinement<
+        Type,
+        unsigned::OpenClosedInterval<{ (MIN + 1) / B::UMAX - 1 }, { MAX / B::UMIN }>,
+    >;
 
     fn div(self, rhs: Refinement<Type, B>) -> Self::Output {
         Refinement(self.0 / rhs.0, PhantomData)
@@ -123,11 +129,13 @@ impl<
         B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
     > Div<Refinement<Type, B>> for Refinement<Type, unsigned::ClosedOpenInterval<MIN, MAX>>
 where
-    Refinement<Type, unsigned::ClosedOpenInterval<{ MIN / B::UMAX }, { (MAX - 1) / B::UMIN }>>:
+    Refinement<Type, unsigned::ClosedOpenInterval<{ MIN / B::UMAX }, { (MAX - 1) / B::UMIN + 1 }>>:
         Sized,
 {
-    type Output =
-        Refinement<Type, unsigned::ClosedOpenInterval<{ MIN / B::UMAX }, { (MAX - 1) / B::UMIN }>>;
+    type Output = Refinement<
+        Type,
+        unsigned::ClosedOpenInterval<{ MIN / B::UMAX }, { (MAX - 1) / B::UMIN + 1 }>,
+    >;
 
     fn div(self, rhs: Refinement<Type, B>) -> Self::Output {
         Refinement(self.0 / rhs.0, PhantomData)
@@ -197,25 +205,25 @@ mod unsigned_tests {
 
     #[test]
     fn test_open_closed_interval_div() {
-        let a = Refinement::<u8, unsigned::OpenClosedInterval<15, 20>>::refine(18).unwrap();
+        let a = Refinement::<u8, unsigned::OpenClosedInterval<15, 20>>::refine(16).unwrap();
         let b = Refinement::<u8, unsigned::OpenClosedInterval<3, 6>>::refine(6).unwrap();
-        let c: Refinement<u8, unsigned::OpenClosedInterval<2, 5>> = a / b;
-        assert_eq!(*c, 3);
+        let c: Refinement<u8, unsigned::OpenClosedInterval<1, 5>> = a / b;
+        assert_eq!(*c, 2);
     }
 
     #[test]
     fn test_closed_open_interval_div() {
-        let a = Refinement::<u8, unsigned::ClosedOpenInterval<50, 100>>::refine(50).unwrap();
-        let b = Refinement::<u8, unsigned::ClosedOpenInterval<5, 10>>::refine(9).unwrap();
-        let c: Refinement<u8, unsigned::ClosedOpenInterval<5, 19>> = a / b;
-        assert_eq!(*c, 5);
+        let a = Refinement::<u8, unsigned::ClosedOpenInterval<50, 100>>::refine(99).unwrap();
+        let b = Refinement::<u8, unsigned::ClosedOpenInterval<5, 10>>::refine(5).unwrap();
+        let c: Refinement<u8, unsigned::ClosedOpenInterval<5, 20>> = a / b;
+        assert_eq!(*c, 19);
     }
 
     #[test]
     fn test_open_interval_div() {
-        let a = Refinement::<u8, unsigned::OpenInterval<15, 30>>::refine(18).unwrap();
+        let a = Refinement::<u8, unsigned::OpenInterval<15, 30>>::refine(16).unwrap();
         let b = Refinement::<u8, unsigned::OpenInterval<3, 6>>::refine(5).unwrap();
-        let c: Refinement<u8, unsigned::OpenInterval<3, 7>> = a / b;
+        let c: Refinement<u8, unsigned::OpenInterval<2, 8>> = a / b;
         assert_eq!(*c, 3);
     }
 

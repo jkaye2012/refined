@@ -21,6 +21,7 @@ implication = []
 regex = [ "dep:regex" ]
 serde = [ "dep:serde" ]
 arithmetic = [ "implication" ]
+optimized = []
 
 [package.metadata.docs.rs]
 all-features = true

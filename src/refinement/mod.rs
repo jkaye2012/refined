@@ -25,10 +25,18 @@ impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     type T = T;
 
     fn take(self) -> T {
+        #[cfg(feature = "optimized")]
+        unsafe {
+            std::hint::assert_unchecked(P::test(&self.0));
+        }
         self.0
     }
 
     fn extract(self) -> T {
+        #[cfg(feature = "optimized")]
+        unsafe {
+            std::hint::assert_unchecked(P::test(&self.0));
+        }
         self.0
     }
 }
@@ -43,6 +51,10 @@ impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
+        #[cfg(feature = "optimized")]
+        unsafe {
+            std::hint::assert_unchecked(P::test(&self.0));
+        }
         &self.0
     }
 }
