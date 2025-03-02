@@ -12,6 +12,4 @@ jobs:
     - uses: cachix/install-nix-action@v27
       with:
         nix_path: nixpkgs=channel:nixos-24.11
-    - run: nix flake check
-    - run: nix run .#refined-example-quickstart
-    - run: nix run .#refined-example-axum
+    - run: verify.sh
