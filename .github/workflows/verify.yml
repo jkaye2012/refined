@@ -12,4 +12,4 @@ jobs:
     - uses: cachix/install-nix-action@v27
       with:
         nix_path: nixpkgs=channel:nixos-24.11
-    - run: verify.sh
+    - run: ./verify.sh
