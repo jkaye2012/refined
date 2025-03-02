@@ -59,6 +59,35 @@
 //!            "refinement violated: must be less than or equal to 100");
 //! ```
 //!
+//! ```
+//! use refined::{prelude::*, boolean::And, boundable::unsigned::{ClosedInterval, NonZero}, string::Trimmed};
+//! use serde::{Serialize, Deserialize};
+//! use serde_json::{json, from_value};
+//!
+//! type MovieRating = Refinement<u8, ClosedInterval<1, 10>>;
+//! type NonEmptyString = Refinement<String, And<Trimmed, NonZero>>;
+//!
+//! #[derive(Debug, Serialize, Deserialize)]
+//! struct Movie {
+//!   title: NonEmptyString,
+//!   director: NonEmptyString,
+//!   rating: MovieRating
+//! }
+//!
+//! let movie: Movie = from_value(json!({
+//!   "title": "V for Vendetta",
+//!   "director": "James McTeigue",
+//!   "rating": 10
+//! })).unwrap();
+//!
+//!  let malformed_movie: Result<Movie, _> = from_value(json!({
+//!    "title": "Missing a director",
+//!    "director": "",
+//!    "rating": 1
+//!  }));
+//!  assert!(malformed_movie.is_err());
+//! ```
+//!
 //! ## Stateful refinement
 //!
 //! While most type refinements can (and should) be implemented statelessly, it is possible to refine types in
