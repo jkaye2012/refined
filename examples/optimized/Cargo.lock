@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "refined-quickstart"
+name = "refined-optimized"
 version = "0.1.0"
 dependencies = [
  "refined",
