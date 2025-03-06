@@ -69,6 +69,14 @@
           };
         };
 
+        refined-example-optimized = buildExample {
+          inherit src;
+          subdir = "examples/optimized";
+          args = {
+            cargoArtifacts = refined;
+          };
+        };
+
         refined-example-axum = buildExample {
           inherit src;
           subdir = "examples/axum";
@@ -84,6 +92,7 @@
           inputsFrom = [ devenv.devShells.${system}.default ];
 
           packages = with pkgs; [
+            cargo-show-asm
             fenix'.complete.toolchain
             linuxPackages_latest.perf
             lldb
@@ -96,6 +105,7 @@
             refined-doc
             refined-example-axum
             refined-example-quickstart
+            refined-example-optimized
             ;
         };
 
@@ -105,6 +115,7 @@
             refined-doc
             refined-example-axum
             refined-example-quickstart
+            refined-example-optimized
             ;
           default = refined;
         };
