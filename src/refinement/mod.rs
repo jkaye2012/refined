@@ -1,5 +1,6 @@
 mod named;
 
+use alloc::string::String;
 use core::{fmt::Display, marker::PhantomData};
 
 pub use named::*;

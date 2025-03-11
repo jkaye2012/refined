@@ -1,3 +1,4 @@
+use alloc::string::String;
 use core::{marker::PhantomData, ops::Sub};
 
 use crate::{boundable::*, Predicate, Refinement};

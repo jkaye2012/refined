@@ -14,6 +14,8 @@
 //! assert!(not_ok.is_err());
 //! ```
 use crate::{boolean::*, Predicate};
+use alloc::format;
+use alloc::string::String;
 
 /// Types that can be reduced to a signed size so that they can be bounded.
 pub trait SignedBoundable {

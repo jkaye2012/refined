@@ -383,7 +383,11 @@
     feature(generic_const_exprs)
 )]
 #![feature(doc_cfg)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
+extern crate alloc;
+
+use alloc::string::String;
 use core::fmt::Display;
 
 use thiserror::Error;

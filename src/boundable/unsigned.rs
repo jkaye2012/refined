@@ -15,12 +15,12 @@
 //! ```
 
 use crate::{boolean::*, Predicate};
-#[cfg(not(feature = "std"))]
-extern crate alloc;
-#[cfg(not(feature = "std"))]
 use alloc::collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque};
+use alloc::format;
+use alloc::string::String;
+use alloc::vec::Vec;
 #[cfg(feature = "std")]
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
+use std::collections::{HashMap, HashSet};
 
 /// Types that can be reduced to an unsigned size so that they can be bounded.
 pub trait UnsignedBoundable {

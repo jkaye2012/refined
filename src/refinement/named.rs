@@ -1,3 +1,4 @@
+use alloc::format;
 use core::{marker::PhantomData, ops::Deref};
 
 use crate::{
@@ -178,6 +179,7 @@ pub use named_serde::*;
 mod tests {
     use super::*;
     use crate::*;
+    use alloc::format;
 
     type_string!(Test, "test");
 
