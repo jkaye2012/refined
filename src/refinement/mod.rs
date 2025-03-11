@@ -14,14 +14,29 @@ use crate::Implies;
 
 /// A refinement of a type `T` certifying that the [Predicate] `P` holds.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize),
-    serde(try_from = "Refined<T>", into = "Refined<T>")
-)]
-pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(pub(crate) T, pub(crate) PhantomData<P>);
+pub struct Refinement<T, P: Predicate<T>>(pub(crate) T, pub(crate) PhantomData<P>);
 
-impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
+#[cfg(feature = "serde")]
+impl<T: Clone + Serialize, P: Predicate<T> + Clone> Serialize for Refinement<T, P> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+            Refined::<T>::from(self.clone()).serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de, T: Clone + Deserialize<'de>, P: Predicate<T> + Clone> Deserialize<'de> for Refinement<T, P> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de> {
+            let refined = Refined::<T>::deserialize(deserializer)?;
+            Ok(Self::try_from(refined).map_err(serde::de::Error::custom)?)
+    }
+}
+
+
+impl<T, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     type T = T;
 
     fn take(self) -> T {
@@ -41,13 +56,13 @@ impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     }
 }
 
-impl<T: Clone + Display, P: Predicate<T> + Clone> Display for Refinement<T, P> {
+impl<T: Display, P: Predicate<T>> Display for Refinement<T, P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", &self.0)
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
+impl<T, P: Predicate<T>> std::ops::Deref for Refinement<T, P> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -59,13 +74,13 @@ impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
+impl<T, P: Predicate<T>> From<Refinement<T, P>> for Refined<T> {
     fn from(value: Refinement<T, P>) -> Self {
         Refined(value.0)
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P> {
+impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
     type Error = RefinementError;
 
     fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
