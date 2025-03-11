@@ -84,13 +84,13 @@ impl UnsignedBoundable for usize {
 
 impl UnsignedBoundable for std::num::Saturating<usize> {
     fn bounding_value(&self) -> usize {
-        self.0 as usize
+        self.0
     }
 }
 
 impl UnsignedBoundable for std::num::NonZeroUsize {
     fn bounding_value(&self) -> usize {
-        self.get() as usize
+        self.get()
     }
 }
 
