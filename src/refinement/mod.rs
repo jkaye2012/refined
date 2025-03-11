@@ -17,11 +17,12 @@ use crate::Implies;
 pub struct Refinement<T, P: Predicate<T>>(pub(crate) T, pub(crate) PhantomData<P>);
 
 #[cfg(feature = "serde")]
-impl<T: Serialize + Clone, P: Predicate<T> + Clone> Serialize for Refinement<T, P> {
+impl<T: Serialize, P: Predicate<T> + Clone> Serialize for Refinement<T, P> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
-            Refined::<T>::from(self.clone()).serialize(serializer)
+        S: serde::Serializer,
+    {
+        self.0.serialize(serializer)
     }
 }
 
@@ -29,12 +30,12 @@ impl<T: Serialize + Clone, P: Predicate<T> + Clone> Serialize for Refinement<T, 
 impl<'de, T: Deserialize<'de>, P: Predicate<T> + Clone> Deserialize<'de> for Refinement<T, P> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de> {
-            let refined = Refined::<T>::deserialize(deserializer)?;
-            Ok(Self::try_from(refined).map_err(serde::de::Error::custom)?)
+        D: serde::Deserializer<'de>,
+    {
+        let refined = Refined::<T>::deserialize(deserializer)?;
+        Ok(Self::try_from(refined).map_err(serde::de::Error::custom)?)
     }
 }
-
 
 impl<T, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     type T = T;
