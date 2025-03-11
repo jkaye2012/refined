@@ -17,7 +17,7 @@ use crate::Implies;
 pub struct Refinement<T, P: Predicate<T>>(pub(crate) T, pub(crate) PhantomData<P>);
 
 #[cfg(feature = "serde")]
-impl<T: Clone + Serialize, P: Predicate<T> + Clone> Serialize for Refinement<T, P> {
+impl<T: Serialize + Clone, P: Predicate<T> + Clone> Serialize for Refinement<T, P> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer {
@@ -26,7 +26,7 @@ impl<T: Clone + Serialize, P: Predicate<T> + Clone> Serialize for Refinement<T, 
 }
 
 #[cfg(feature = "serde")]
-impl<'de, T: Clone + Deserialize<'de>, P: Predicate<T> + Clone> Deserialize<'de> for Refinement<T, P> {
+impl<'de, T: Deserialize<'de>, P: Predicate<T> + Clone> Deserialize<'de> for Refinement<T, P> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de> {

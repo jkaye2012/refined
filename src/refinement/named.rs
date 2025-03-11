@@ -24,9 +24,9 @@ use crate::{
 /// assert_eq!(&ExampleBounded::refine(99).unwrap_err().to_string(), "refinement violated: example name must be greater than 100");
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Named<N: TypeString + Clone, R: Clone + RefinementOps>(R, PhantomData<N>);
+pub struct Named<N: TypeString + Clone, R: RefinementOps>(R, PhantomData<N>);
 
-impl<N: TypeString + Clone, R: Clone + RefinementOps> Deref for Named<N, R> {
+impl<N: TypeString + Clone, R: RefinementOps> Deref for Named<N, R> {
     type Target = R::T;
 
     fn deref(&self) -> &Self::Target {
@@ -34,13 +34,13 @@ impl<N: TypeString + Clone, R: Clone + RefinementOps> Deref for Named<N, R> {
     }
 }
 
-impl<N: TypeString + Clone, R: Clone + RefinementOps> AsRef<R> for Named<N, R> {
+impl<N: TypeString + Clone, R: RefinementOps> AsRef<R> for Named<N, R> {
     fn as_ref(&self) -> &R {
         &self.0
     }
 }
 
-impl<N: TypeString + Clone, R: Clone + RefinementOps> TryFrom<Refined<R::T>> for Named<N, R> {
+impl<N: TypeString + Clone, R: RefinementOps> TryFrom<Refined<R::T>> for Named<N, R> {
     type Error = RefinementError;
 
     fn try_from(value: Refined<R::T>) -> Result<Self, Self::Error> {
@@ -51,13 +51,13 @@ impl<N: TypeString + Clone, R: Clone + RefinementOps> TryFrom<Refined<R::T>> for
     }
 }
 
-impl<N: TypeString + Clone, R: Clone + RefinementOps> From<Named<N, R>> for Refined<R::T> {
+impl<N: TypeString + Clone, R: RefinementOps> From<Named<N, R>> for Refined<R::T> {
     fn from(value: Named<N, R>) -> Self {
         Refined(value.take())
     }
 }
 
-impl<N: TypeString + Clone, R: Clone + RefinementOps> RefinementOps for Named<N, R> {
+impl<N: TypeString + Clone, R: RefinementOps> RefinementOps for Named<N, R> {
     type T = R::T;
 
     fn take(self) -> Self::T {
@@ -69,7 +69,7 @@ impl<N: TypeString + Clone, R: Clone + RefinementOps> RefinementOps for Named<N,
     }
 }
 
-impl<N: TypeString + Clone, T, P: StatefulPredicate<T>, R: Clone + StatefulRefinementOps<T, P>>
+impl<N: TypeString + Clone, T, P: StatefulPredicate<T>, R: StatefulRefinementOps<T, P>>
     StatefulRefinementOps<T, P> for Named<N, R>
 {
     fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError> {
@@ -93,11 +93,11 @@ mod named_serde {
         Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize,
     )]
     #[serde(try_from = "Refined<R::T>", into = "Refined<R::T>")]
-    pub struct NamedSerde<N: TypeString + Clone, R: Clone + RefinementOps>(R, PhantomData<N>)
+    pub struct NamedSerde<N: TypeString + Clone, R: RefinementOps>(R, PhantomData<N>)
     where
         R::T: Serialize + DeserializeOwned;
 
-    impl<N: TypeString + Clone, R: Clone + RefinementOps> Deref for NamedSerde<N, R>
+    impl<N: TypeString + Clone, R: RefinementOps> Deref for NamedSerde<N, R>
     where
         R::T: Serialize + DeserializeOwned,
     {
@@ -108,7 +108,7 @@ mod named_serde {
         }
     }
 
-    impl<N: TypeString + Clone, R: Clone + RefinementOps> AsRef<R> for NamedSerde<N, R>
+    impl<N: TypeString + Clone, R: RefinementOps> AsRef<R> for NamedSerde<N, R>
     where
         R::T: Serialize + DeserializeOwned,
     {
@@ -117,7 +117,7 @@ mod named_serde {
         }
     }
 
-    impl<N: TypeString + Clone, R: Clone + RefinementOps> TryFrom<Refined<R::T>> for NamedSerde<N, R>
+    impl<N: TypeString + Clone, R: RefinementOps> TryFrom<Refined<R::T>> for NamedSerde<N, R>
     where
         R::T: Serialize + DeserializeOwned,
     {
@@ -131,7 +131,7 @@ mod named_serde {
         }
     }
 
-    impl<N: TypeString + Clone, R: Clone + RefinementOps> From<NamedSerde<N, R>> for Refined<R::T>
+    impl<N: TypeString + Clone, R: RefinementOps> From<NamedSerde<N, R>> for Refined<R::T>
     where
         R::T: Serialize + DeserializeOwned,
     {
@@ -140,7 +140,7 @@ mod named_serde {
         }
     }
 
-    impl<N: TypeString + Clone, R: Clone + RefinementOps> RefinementOps for NamedSerde<N, R>
+    impl<N: TypeString + Clone, R: RefinementOps> RefinementOps for NamedSerde<N, R>
     where
         R::T: Serialize + DeserializeOwned,
     {
@@ -159,7 +159,7 @@ mod named_serde {
             N: TypeString + Clone,
             T: Serialize + DeserializeOwned,
             P: StatefulPredicate<T>,
-            R: Clone + StatefulRefinementOps<T, P>,
+            R: StatefulRefinementOps<T, P>,
         > StatefulRefinementOps<T, P> for NamedSerde<N, R>
     {
         fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError> {
