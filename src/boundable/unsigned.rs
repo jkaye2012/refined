@@ -19,6 +19,7 @@ use crate::{boolean::*, Predicate};
 extern crate alloc;
 #[cfg(not(feature = "std"))]
 use alloc::collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque};
+#[cfg(feature = "std")]
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 
 /// Types that can be reduced to an unsigned size so that they can be bounded.
