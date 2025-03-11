@@ -7,7 +7,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
-- Remove `Clone` constraints for all impls. 
+- Remove `Clone` constraints for all impls.
+- Adds an `optimize` function to the `Predicate` and `StatefulPredicate` traits to prevent possible
+  downstream soundness problems from being unintentionally introduced
 
 ## [0.0.4] - 2025-03-02
 
