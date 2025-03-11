@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, ops::Mul};
+use core::{marker::PhantomData, ops::Mul};
 
 use crate::{boundable::*, Predicate, Refinement};
 

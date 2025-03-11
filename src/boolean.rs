@@ -17,7 +17,7 @@
 //! assert!(not_ok_string.is_err());
 //! ```
 
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 use crate::Predicate;
 

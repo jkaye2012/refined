@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, ops::Div};
+use core::{marker::PhantomData, ops::Div};
 
 use crate::{boundable::*, Predicate, Refinement};
 

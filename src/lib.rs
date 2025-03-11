@@ -328,7 +328,7 @@
 //!
 //! ## `arithmetic`
 //!
-//! Enabling arithmetic provides implementations of many of the [std::ops] traits for relevant [Refinement]
+//! Enabling arithmetic provides implementations of many of the [core::ops] traits for relevant [Refinement]
 //! types. Enabling this feature also automatically enables `implication` and correspondingly requires `generic_const_exprs`
 //! as detailed above.
 //!
@@ -338,7 +338,7 @@
 //!
 //! Following the types that implement arithmetic can be difficult. The support for bounds across different types is not perfect,
 //! and may be improved in the future. Currently, support is provided for the four primary arithmetic operations
-//! ([std::ops::Add], [std::ops::Sub], [std::ops::Mul], and [std::ops::Div]) for all meaningful combinations of both
+//! ([core::ops::Add], [core::ops::Sub], [core::ops::Mul], and [core::ops::Div]) for all meaningful combinations of both
 //! signed and unsigned boundable ranges. For unsigned ranges, this means addition, multiplication, and division operations are implemented for all range types,
 //! while subtraction is implemented only for ranges with both minimum _and_ maximum bounds. For
 //! signed ranges, addition is implemented for all range types, while subtraction, multiplication, and division are implemented
@@ -358,7 +358,7 @@
 )]
 #![feature(doc_cfg)]
 
-use std::fmt::Display;
+use core::fmt::Display;
 
 use thiserror::Error;
 
@@ -436,14 +436,14 @@ pub struct Refined<T>(T);
 pub struct RefinementError(String);
 
 impl Display for RefinementError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "refinement violated: {}", self.0)
     }
 }
 
 /// Operations that can be made available on all types of refinement.
 pub trait RefinementOps:
-    TryFrom<Refined<Self::T>, Error = RefinementError> + std::ops::Deref<Target = Self::T>
+    TryFrom<Refined<Self::T>, Error = RefinementError> + core::ops::Deref<Target = Self::T>
 {
     type T;
 
@@ -469,12 +469,12 @@ pub trait RefinementOps:
 
     /// Destructively removes the refined value from the `Refinement` wrapper.
     ///
-    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
+    /// For a non-destructive version, use the [core::ops::Deref] implementation instead.
     fn take(self) -> Self::T;
 
     /// Destructively removes the refined value from the `Refinement` wrapper.
     ///
-    /// For a non-destructive version, use the [std::ops::Deref] implementation instead.
+    /// For a non-destructive version, use the [core::ops::Deref] implementation instead.
     #[deprecated(
         since = "0.0.4",
         note = "use the more idiomatic 'take' function instead"

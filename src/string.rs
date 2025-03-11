@@ -14,7 +14,7 @@
 //! assert!(Test::refine("foobar".to_string()).is_ok());
 //! assert!(Test::refine("barfoo".to_string()).is_err());
 //! ```
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 use crate::{Predicate, TypeString};
 
