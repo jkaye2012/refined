@@ -107,6 +107,14 @@ where
 /// A stateful assertion that must hold for an instance of a type to be considered refined.
 pub trait StatefulPredicate<T>: Default + Predicate<T> {
     /// Whether a value satisfies the predicate.
+    ///
+    /// # Safety
+    ///
+    /// Implementations of this method **must** be pure functions. They must be infallible and
+    /// must always return the same result when provided the same input value. If you have a
+    /// situation that requires impurity to "materialize" a predicate, use the [Default::default]
+    /// implementation to "inject" that logic into the predicate. Even then, under no circumstance
+    /// can the `test` function itself be impure.
     fn test(&self, value: &T) -> bool;
 
     /// An error message to display when the predicate doesn't hold.

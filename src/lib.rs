@@ -421,6 +421,14 @@ macro_rules! type_string {
 /// An assertion that must hold for an instance of a type to be considered refined.
 pub trait Predicate<T> {
     /// Whether a value satisfies the predicate.
+    ///
+    /// # Safety
+    ///
+    /// Implementations of this method **must** be pure functions. They must be infallible and
+    /// must always return the same result when provided the same input value. If you have a
+    /// situation that requires impurity to "materialize" a predicate, use the [Default::default]
+    /// implementation of a [StatefulPredicate]. Even then, under no circumstance can the `test`
+    /// function itself be impure.
     fn test(value: &T) -> bool;
 
     /// An error message to display when the predicate doesn't hold.
