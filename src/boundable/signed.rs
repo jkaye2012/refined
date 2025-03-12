@@ -82,13 +82,13 @@ impl SignedBoundable for isize {
 
 impl SignedBoundable for std::num::Saturating<isize> {
     fn bounding_value(&self) -> isize {
-        self.0 as isize
+        self.0
     }
 }
 
 impl SignedBoundable for std::num::NonZeroIsize {
     fn bounding_value(&self) -> isize {
-        self.get() as isize
+        self.get()
     }
 }
 
