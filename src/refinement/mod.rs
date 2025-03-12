@@ -17,7 +17,7 @@ use crate::Implies;
 pub struct Refinement<T, P: Predicate<T>>(pub(crate) T, pub(crate) PhantomData<P>);
 
 #[cfg(feature = "serde")]
-impl<T: Serialize, P: Predicate<T> + Clone> Serialize for Refinement<T, P> {
+impl<T: Serialize, P: Predicate<T>> Serialize for Refinement<T, P> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -27,7 +27,7 @@ impl<T: Serialize, P: Predicate<T> + Clone> Serialize for Refinement<T, P> {
 }
 
 #[cfg(feature = "serde")]
-impl<'de, T: Deserialize<'de>, P: Predicate<T> + Clone> Deserialize<'de> for Refinement<T, P> {
+impl<'de, T: Deserialize<'de>, P: Predicate<T>> Deserialize<'de> for Refinement<T, P> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -37,7 +37,7 @@ impl<'de, T: Deserialize<'de>, P: Predicate<T> + Clone> Deserialize<'de> for Ref
     }
 }
 
-impl<T, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
+impl<T, P: Predicate<T>> RefinementOps for Refinement<T, P> {
     type T = T;
 
     fn take(self) -> T {
@@ -94,10 +94,10 @@ impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
 }
 
 #[cfg(feature = "implication")]
-impl<F, T, Type: Clone> Implies<Refinement<Type, T>> for Refinement<Type, F>
+impl<F, T, Type> Implies<Refinement<Type, T>> for Refinement<Type, F>
 where
-    F: Predicate<Type> + Implies<T> + Clone,
-    T: Predicate<Type> + Clone,
+    F: Predicate<Type> + Implies<T>,
+    T: Predicate<Type>,
 {
     fn imply(self) -> Refinement<Type, T> {
         Refinement(self.0, PhantomData)
@@ -115,7 +115,7 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
     }
 }
 
-impl<T: Clone, P: StatefulPredicate<T> + Clone> StatefulRefinementOps<T, P> for Refinement<T, P> {
+impl<T, P: StatefulPredicate<T>> StatefulRefinementOps<T, P> for Refinement<T, P> {
     fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError> {
         if predicate.test(&value) {
             Ok(Self(value, PhantomData))
