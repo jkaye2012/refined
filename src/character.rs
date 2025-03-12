@@ -11,6 +11,7 @@
 //! assert!(Test::refine('a').is_err());
 //! ```
 use crate::Predicate;
+use alloc::string::String;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct IsControl;

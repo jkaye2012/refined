@@ -1,4 +1,5 @@
-use std::{marker::PhantomData, ops::Deref};
+use alloc::format;
+use core::{marker::PhantomData, ops::Deref};
 
 use crate::{
     Refined, RefinementError, RefinementOps, StatefulPredicate, StatefulRefinementOps, TypeString,
@@ -178,6 +179,7 @@ pub use named_serde::*;
 mod tests {
     use super::*;
     use crate::*;
+    use alloc::format;
 
     type_string!(Test, "test");
 

@@ -15,7 +15,12 @@
 //! ```
 
 use crate::{boolean::*, Predicate};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
+use alloc::collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque};
+use alloc::format;
+use alloc::string::String;
+use alloc::vec::Vec;
+#[cfg(feature = "std")]
+use std::collections::{HashMap, HashSet};
 
 /// Types that can be reduced to an unsigned size so that they can be bounded.
 pub trait UnsignedBoundable {
@@ -28,13 +33,13 @@ impl UnsignedBoundable for u8 {
     }
 }
 
-impl UnsignedBoundable for std::num::Saturating<u8> {
+impl UnsignedBoundable for core::num::Saturating<u8> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
-impl UnsignedBoundable for std::num::NonZeroU8 {
+impl UnsignedBoundable for core::num::NonZeroU8 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
@@ -46,13 +51,13 @@ impl UnsignedBoundable for u16 {
     }
 }
 
-impl UnsignedBoundable for std::num::Saturating<u16> {
+impl UnsignedBoundable for core::num::Saturating<u16> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
-impl UnsignedBoundable for std::num::NonZeroU16 {
+impl UnsignedBoundable for core::num::NonZeroU16 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
@@ -64,13 +69,13 @@ impl UnsignedBoundable for u32 {
     }
 }
 
-impl UnsignedBoundable for std::num::Saturating<u32> {
+impl UnsignedBoundable for core::num::Saturating<u32> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
-impl UnsignedBoundable for std::num::NonZeroU32 {
+impl UnsignedBoundable for core::num::NonZeroU32 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
@@ -82,13 +87,13 @@ impl UnsignedBoundable for usize {
     }
 }
 
-impl UnsignedBoundable for std::num::Saturating<usize> {
+impl UnsignedBoundable for core::num::Saturating<usize> {
     fn bounding_value(&self) -> usize {
         self.0
     }
 }
 
-impl UnsignedBoundable for std::num::NonZeroUsize {
+impl UnsignedBoundable for core::num::NonZeroUsize {
     fn bounding_value(&self) -> usize {
         self.get()
     }
@@ -102,14 +107,14 @@ impl UnsignedBoundable for u64 {
 }
 
 #[cfg(target_pointer_width = "64")]
-impl UnsignedBoundable for std::num::Saturating<u64> {
+impl UnsignedBoundable for core::num::Saturating<u64> {
     fn bounding_value(&self) -> usize {
         self.0 as usize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl UnsignedBoundable for std::num::NonZeroU64 {
+impl UnsignedBoundable for core::num::NonZeroU64 {
     fn bounding_value(&self) -> usize {
         self.get() as usize
     }
@@ -147,11 +152,14 @@ unsigned_boundable_via_len!(String);
 unsigned_boundable_via_len!(BinaryHeap<T>);
 unsigned_boundable_via_len!(BTreeMap<K, V>);
 unsigned_boundable_via_len!(BTreeSet<T>);
-unsigned_boundable_via_len!(HashMap<K, V>);
-unsigned_boundable_via_len!(HashSet<T>);
 unsigned_boundable_via_len!(LinkedList<T>);
 unsigned_boundable_via_len!(Vec<T>);
 unsigned_boundable_via_len!(VecDeque<T>);
+
+#[cfg(feature = "std")]
+unsigned_boundable_via_len!(HashMap<K, V>);
+#[cfg(feature = "std")]
+unsigned_boundable_via_len!(HashSet<T>);
 
 impl<T> UnsignedBoundable for [T] {
     fn bounding_value(&self) -> usize {
