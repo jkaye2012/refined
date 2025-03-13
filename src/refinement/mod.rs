@@ -14,14 +14,30 @@ use crate::Implies;
 
 /// A refinement of a type `T` certifying that the [Predicate] `P` holds.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize),
-    serde(try_from = "Refined<T>", into = "Refined<T>")
-)]
-pub struct Refinement<T: Clone, P: Predicate<T> + Clone>(pub(crate) T, pub(crate) PhantomData<P>);
+pub struct Refinement<T, P: Predicate<T>>(pub(crate) T, pub(crate) PhantomData<P>);
 
-impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
+#[cfg(feature = "serde")]
+impl<T: Serialize, P: Predicate<T>> Serialize for Refinement<T, P> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de, T: Deserialize<'de>, P: Predicate<T>> Deserialize<'de> for Refinement<T, P> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let refined = Refined::<T>::deserialize(deserializer)?;
+        Ok(Self::try_from(refined).map_err(serde::de::Error::custom)?)
+    }
+}
+
+impl<T, P: Predicate<T>> RefinementOps for Refinement<T, P> {
     type T = T;
 
     fn take(self) -> T {
@@ -41,13 +57,13 @@ impl<T: Clone, P: Predicate<T> + Clone> RefinementOps for Refinement<T, P> {
     }
 }
 
-impl<T: Clone + Display, P: Predicate<T> + Clone> Display for Refinement<T, P> {
+impl<T: Display, P: Predicate<T>> Display for Refinement<T, P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", &self.0)
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
+impl<T, P: Predicate<T>> std::ops::Deref for Refinement<T, P> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -59,13 +75,13 @@ impl<T: Clone, P: Predicate<T> + Clone> std::ops::Deref for Refinement<T, P> {
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> From<Refinement<T, P>> for Refined<T> {
+impl<T, P: Predicate<T>> From<Refinement<T, P>> for Refined<T> {
     fn from(value: Refinement<T, P>) -> Self {
         Refined(value.0)
     }
 }
 
-impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P> {
+impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
     type Error = RefinementError;
 
     fn try_from(value: Refined<T>) -> Result<Self, Self::Error> {
@@ -78,10 +94,10 @@ impl<T: Clone, P: Predicate<T> + Clone> TryFrom<Refined<T>> for Refinement<T, P>
 }
 
 #[cfg(feature = "implication")]
-impl<F, T, Type: Clone> Implies<Refinement<Type, T>> for Refinement<Type, F>
+impl<F, T, Type> Implies<Refinement<Type, T>> for Refinement<Type, F>
 where
-    F: Predicate<Type> + Implies<T> + Clone,
-    T: Predicate<Type> + Clone,
+    F: Predicate<Type> + Implies<T>,
+    T: Predicate<Type>,
 {
     fn imply(self) -> Refinement<Type, T> {
         Refinement(self.0, PhantomData)
@@ -99,7 +115,7 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
     }
 }
 
-impl<T: Clone, P: StatefulPredicate<T> + Clone> StatefulRefinementOps<T, P> for Refinement<T, P> {
+impl<T, P: StatefulPredicate<T>> StatefulRefinementOps<T, P> for Refinement<T, P> {
     fn refine_with_state(predicate: &P, value: T) -> Result<Self, RefinementError> {
         if predicate.test(&value) {
             Ok(Self(value, PhantomData))

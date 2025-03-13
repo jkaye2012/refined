@@ -6,8 +6,8 @@ use super::*;
 
 impl<
         const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMax<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::LessThan<A>>
 where
     Refinement<Type, unsigned::LessThan<{ (A - 1) * B::UMAX + 1 }>>: Sized,
@@ -21,8 +21,8 @@ where
 
 impl<
         const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMax<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::LessThanEqual<A>>
 where
     Refinement<Type, unsigned::LessThanEqual<{ A * B::UMAX }>>: Sized,
@@ -36,8 +36,8 @@ where
 
 impl<
         const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMin<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMin<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::GreaterThan<A>>
 where
     Refinement<Type, unsigned::GreaterThan<{ (A + 1) * B::UMIN - 1 }>>: Sized,
@@ -51,8 +51,8 @@ where
 
 impl<
         const A: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMin<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMin<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::GreaterThanEqual<A>>
 where
     Refinement<Type, unsigned::GreaterThanEqual<{ A * B::UMIN }>>: Sized,
@@ -67,8 +67,8 @@ where
 impl<
         const MIN: usize,
         const MAX: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::OpenInterval<MIN, MAX>>
 where
     Refinement<
@@ -89,8 +89,8 @@ where
 impl<
         const MIN: usize,
         const MAX: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::ClosedInterval<MIN, MAX>>
 where
     Refinement<Type, unsigned::ClosedInterval<{ MIN * B::UMIN }, { MAX * B::UMAX }>>: Sized,
@@ -105,8 +105,8 @@ where
 impl<
         const MIN: usize,
         const MAX: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::OpenClosedInterval<MIN, MAX>>
 where
     Refinement<Type, unsigned::OpenClosedInterval<{ (MIN + 1) * B::UMIN - 1 }, { MAX * B::UMAX }>>:
@@ -125,8 +125,8 @@ where
 impl<
         const MIN: usize,
         const MAX: usize,
-        Type: Clone + unsigned::UnsignedBoundable + Mul<Output = Type>,
-        B: Clone + UnsignedMinMax<Type> + Predicate<Type>,
+        Type: unsigned::UnsignedBoundable + Mul<Output = Type>,
+        B: UnsignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, unsigned::ClosedOpenInterval<MIN, MAX>>
 where
     Refinement<Type, unsigned::ClosedOpenInterval<{ MIN * B::UMIN }, { (MAX - 1) * B::UMAX + 1 }>>:
@@ -239,8 +239,8 @@ mod unsigned_tests {
 impl<
         const MIN: isize,
         const MAX: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+        Type: signed::SignedBoundable + Mul<Output = Type>,
+        B: SignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, signed::OpenInterval<MIN, MAX>>
 where
     Refinement<
@@ -267,8 +267,8 @@ where
 impl<
         const MIN: isize,
         const MAX: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+        Type: signed::SignedBoundable + Mul<Output = Type>,
+        B: SignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, signed::ClosedInterval<MIN, MAX>>
 where
     Refinement<
@@ -295,8 +295,8 @@ where
 impl<
         const MIN: isize,
         const MAX: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+        Type: signed::SignedBoundable + Mul<Output = Type>,
+        B: SignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, signed::OpenClosedInterval<MIN, MAX>>
 where
     Refinement<
@@ -323,8 +323,8 @@ where
 impl<
         const MIN: isize,
         const MAX: isize,
-        Type: Clone + signed::SignedBoundable + Mul<Output = Type>,
-        B: Clone + SignedMinMax<Type> + Predicate<Type>,
+        Type: signed::SignedBoundable + Mul<Output = Type>,
+        B: SignedMinMax<Type> + Predicate<Type>,
     > Mul<Refinement<Type, B>> for Refinement<Type, signed::ClosedOpenInterval<MIN, MAX>>
 where
     Refinement<

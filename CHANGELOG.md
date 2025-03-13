@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+- Remove `Clone` constraints for all impls. 
+
 ## [0.0.4] - 2025-03-02
 
 - Adds the `Regex` predicate (and stateful implementation) to `string`
