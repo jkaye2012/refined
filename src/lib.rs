@@ -435,14 +435,13 @@ pub trait Predicate<T> {
     fn error() -> String;
 
     /// Applies a potentially unsafe optimization to call sites that can take advantage of
-    /// information provided by the predicate.
+    /// information provided by the predicate. This function is unused by `refined` unless
+    /// the `optimized` feature is enabled.
     ///
     /// As all predicate tests _should_ be pure, implementing this function is recommended
     /// for most predicate implementations. The most common implementation will look like:
     ///
     /// ```ignore
-    /// #[cfg(feature = "optimized")]
-    /// #[doc(cfg(feature = "optimized"))]
     /// unsafe fn optimize(value: &T) {
     ///     std::hint::assert_unchecked(Self::test(value));
     /// }
@@ -455,8 +454,6 @@ pub trait Predicate<T> {
     /// lead to undefined behavior. If you have any doubt about the purity of your test
     /// implementation, do not implement this function (and, probably, you should reconsider
     /// your approach).
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(_value: &T) {}
 }
 
@@ -479,14 +476,13 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
     }
 
     /// Applies a potentially unsafe optimization to call sites that can take advantage of
-    /// information provided by the predicate.
+    /// information provided by the predicate. This function is unused by `refined` unless
+    /// the `optimized` feature is enabled.
     ///
     /// As all predicate tests _should_ be pure, implementing this function is recommended
     /// for most predicate implementations. The most common implementation will look like:
     ///
     /// ```ignore
-    /// #[cfg(feature = "optimized")]
-    /// #[doc(cfg(feature = "optimized"))]
     /// unsafe fn optimize(value: &T) {
     ///     std::hint::assert_unchecked(Self::test(value));
     /// }
@@ -499,8 +495,6 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
     /// lead to undefined behavior. If you have any doubt about the purity of your test
     /// implementation, do not implement this function (and, probably, you should reconsider
     /// your approach).
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(_value: &T) {}
 }
 

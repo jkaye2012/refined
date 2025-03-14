@@ -34,8 +34,6 @@ impl<T> Predicate<T> for True {
         String::from("true predicate")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -54,8 +52,6 @@ impl<T> Predicate<T> for False {
         String::from("false predicate")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -74,8 +70,6 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
         format!("{} and {}", A::error(), B::error())
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -94,8 +88,6 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
         format!("{} or {}", A::error(), B::error())
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -114,8 +106,6 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
         format!("{} xor {}", A::error(), B::error())
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -134,8 +124,6 @@ impl<T, P: Predicate<T>> Predicate<T> for Not<P> {
         format!("not {}", P::error())
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }

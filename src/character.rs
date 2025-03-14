@@ -24,8 +24,6 @@ impl Predicate<char> for IsControl {
         String::from("must be a control character")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &char) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -43,8 +41,6 @@ impl Predicate<char> for IsDigit {
         String::from("must be a digit")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &char) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -62,8 +58,6 @@ impl Predicate<char> for IsLowercase {
         String::from("must be a lowercase character")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &char) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -81,8 +75,6 @@ impl Predicate<char> for IsUppercase {
         String::from("must be an uppercase character")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &char) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -100,8 +92,6 @@ impl Predicate<char> for IsNumeric {
         String::from("must be a numeric character")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &char) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -119,8 +109,6 @@ impl Predicate<char> for IsWhitespace {
         String::from("must be a whitespace character")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &char) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -138,8 +126,6 @@ impl Predicate<char> for IsHexDigit {
         String::from("must be a valid hex character")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &char) {
         std::hint::assert_unchecked(Self::test(value));
     }

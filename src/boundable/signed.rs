@@ -127,8 +127,6 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
         format!("must be greater than {}", MIN)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -148,8 +146,6 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN
         format!("must be greater than or equal to {}", MIN)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -169,8 +165,6 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
         format!("must be less than {}", MAX)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -190,8 +184,6 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
         format!("must be less than or equal to {}", MAX)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -217,8 +209,6 @@ impl<T: SignedBoundable, const DIV: isize, const MOD: isize> Predicate<T> for Mo
         format!("must be divisible by {} with a remainder of {}", DIV, MOD)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -242,8 +232,6 @@ impl<T: SignedBoundable, const VAL: isize> Predicate<T> for Equals<VAL> {
         format!("must be equal to {}", VAL)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }

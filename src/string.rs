@@ -30,8 +30,6 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
         format!("must start with '{}'", Prefix::VALUE)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -49,8 +47,6 @@ impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
         format!("must end with '{}'", Suffix::VALUE)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -68,8 +64,6 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
         format!("must contain '{}'", Substr::VALUE)
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -87,8 +81,6 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
         String::from("must not start or end with whitespace")
     }
 
-    #[cfg(feature = "optimized")]
-    #[doc(cfg(feature = "optimized"))]
     unsafe fn optimize(value: &T) {
         std::hint::assert_unchecked(Self::test(value));
     }
@@ -114,8 +106,6 @@ mod regex_pred {
             format!("must match regular expression {}", S::VALUE)
         }
 
-        #[cfg(feature = "optimized")]
-        #[doc(cfg(feature = "optimized"))]
         unsafe fn optimize(value: &T) {
             std::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
         }
@@ -135,8 +125,6 @@ mod regex_pred {
             self.0.is_match(value.as_ref())
         }
 
-        #[cfg(feature = "optimized")]
-        #[doc(cfg(feature = "optimized"))]
         unsafe fn optimize(value: &T) {
             std::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
         }
