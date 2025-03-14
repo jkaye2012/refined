@@ -447,6 +447,10 @@ pub trait Predicate<T> {
     /// }
     /// ```
     ///
+    /// Note that [std::hint::assert_unchecked] acts as an assert in debug builds, meaning that
+    /// tests should be able to detect correctness issues as well. It is only in optimized builds
+    /// that no check is performed.
+    ///
     /// # Safety
     ///
     /// Implementation of this function takes a _correctness_ property and turns it in to a
@@ -487,6 +491,10 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
     ///     std::hint::assert_unchecked(Self::test(value));
     /// }
     /// ```
+    ///
+    /// Note that [std::hint::assert_unchecked] acts as an assert in debug builds, meaning that
+    /// tests should be able to detect correctness issues as well. It is only in optimized builds
+    /// that no check is performed.
     ///
     /// # Safety
     ///
