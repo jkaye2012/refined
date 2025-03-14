@@ -171,6 +171,10 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThan<MIN> {
     fn error() -> String {
         format!("must be greater than {}", MIN)
     }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -185,6 +189,10 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThanEqual<M
 
     fn error() -> String {
         format!("must be greater than or equal to {}", MIN)
+    }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -201,6 +209,10 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
     fn error() -> String {
         format!("must be less than {}", MAX)
     }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -216,6 +228,10 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThanEqual<MAX>
     fn error() -> String {
         format!("must be less than or equal to {}", MAX)
     }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 pub type OpenInterval<const MIN: usize, const MAX: usize> = And<GT<MIN>, LT<MAX>>;
@@ -225,6 +241,7 @@ pub type OpenClosedInterval<const MIN: usize, const MAX: usize> = And<GT<MIN>, L
 pub type ClosedOpenInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LT<MAX>>;
 
 pub type ClosedInterval<const MIN: usize, const MAX: usize> = And<GTE<MIN>, LTE<MAX>>;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Modulo<const DIV: usize, const MOD: usize>;
 
@@ -236,6 +253,10 @@ impl<T: UnsignedBoundable, const DIV: usize, const MOD: usize> Predicate<T> for 
     fn error() -> String {
         format!("must be divisible by {} with a remainder of {}", DIV, MOD)
     }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 pub type Divisible<const DIV: usize> = Modulo<DIV, 0>;
@@ -243,6 +264,7 @@ pub type Divisible<const DIV: usize> = Modulo<DIV, 0>;
 pub type Even = Modulo<2, 0>;
 
 pub type Odd = Not<Even>;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Equals<const VAL: usize>;
 
@@ -253,6 +275,10 @@ impl<T: UnsignedBoundable, const VAL: usize> Predicate<T> for Equals<VAL> {
 
     fn error() -> String {
         format!("must be equal to {}", VAL)
+    }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 

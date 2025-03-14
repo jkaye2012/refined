@@ -7,7 +7,9 @@ pub use named::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Predicate, Refined, RefinementError, RefinementOps, StatefulRefinementOps};
+use crate::{
+    Predicate, Refined, RefinementError, RefinementOps, StatefulPredicate, StatefulRefinementOps,
+};
 
 #[cfg(feature = "implication")]
 use crate::Implies;
@@ -43,7 +45,7 @@ impl<T, P: Predicate<T>> RefinementOps for Refinement<T, P> {
     fn take(self) -> T {
         #[cfg(feature = "optimized")]
         unsafe {
-            std::hint::assert_unchecked(P::test(&self.0));
+            P::optimize(&self.0);
         }
         self.0
     }
@@ -51,7 +53,7 @@ impl<T, P: Predicate<T>> RefinementOps for Refinement<T, P> {
     fn extract(self) -> T {
         #[cfg(feature = "optimized")]
         unsafe {
-            std::hint::assert_unchecked(P::test(&self.0));
+            P::optimize(&self.0);
         }
         self.0
     }
@@ -69,7 +71,7 @@ impl<T, P: Predicate<T>> std::ops::Deref for Refinement<T, P> {
     fn deref(&self) -> &Self::Target {
         #[cfg(feature = "optimized")]
         unsafe {
-            std::hint::assert_unchecked(P::test(&self.0));
+            P::optimize(&self.0);
         }
         &self.0
     }
@@ -101,17 +103,6 @@ where
 {
     fn imply(self) -> Refinement<Type, T> {
         Refinement(self.0, PhantomData)
-    }
-}
-
-/// A stateful assertion that must hold for an instance of a type to be considered refined.
-pub trait StatefulPredicate<T>: Default + Predicate<T> {
-    /// Whether a value satisfies the predicate.
-    fn test(&self, value: &T) -> bool;
-
-    /// An error message to display when the predicate doesn't hold.
-    fn error(&self) -> String {
-        <Self as Predicate<T>>::error()
     }
 }
 
