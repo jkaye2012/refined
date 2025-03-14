@@ -23,6 +23,12 @@ impl Predicate<char> for IsControl {
     fn error() -> String {
         String::from("must be a control character")
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -35,6 +41,12 @@ impl Predicate<char> for IsDigit {
 
     fn error() -> String {
         String::from("must be a digit")
+    }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -49,6 +61,12 @@ impl Predicate<char> for IsLowercase {
     fn error() -> String {
         String::from("must be a lowercase character")
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -61,6 +79,12 @@ impl Predicate<char> for IsUppercase {
 
     fn error() -> String {
         String::from("must be an uppercase character")
+    }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -75,6 +99,12 @@ impl Predicate<char> for IsNumeric {
     fn error() -> String {
         String::from("must be a numeric character")
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -88,6 +118,12 @@ impl Predicate<char> for IsWhitespace {
     fn error() -> String {
         String::from("must be a whitespace character")
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -100,6 +136,12 @@ impl Predicate<char> for IsHexDigit {
 
     fn error() -> String {
         String::from("must be a valid hex character")
+    }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 

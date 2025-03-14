@@ -422,7 +422,7 @@ macro_rules! type_string {
 pub trait Predicate<T> {
     /// Whether a value satisfies the predicate.
     ///
-    /// # Safety
+    /// # Correctness
     ///
     /// Implementations of this method **must** be pure functions. They must be infallible and
     /// must always return the same result when provided the same input value. If you have a
@@ -433,6 +433,75 @@ pub trait Predicate<T> {
 
     /// An error message to display when the predicate doesn't hold.
     fn error() -> String;
+
+    /// Applies a potentially unsafe optimization to call sites that can take advantage of
+    /// information provided by the predicate.
+    ///
+    /// As all predicate tests _should_ be pure, implementing this function is recommended
+    /// for most predicate implementations. The most common implementation will look like:
+    ///
+    /// ```ignore
+    /// #[cfg(feature = "optimized")]
+    /// #[doc(cfg(feature = "optimized"))]
+    /// unsafe fn optimize(value: &T) {
+    ///     std::hint::assert_unchecked(Self::test(value));
+    /// }
+    /// ```
+    ///
+    /// # Safety
+    ///
+    /// Implementation of this function takes a _correctness_ property and turns it in to a
+    /// _soundness_ property. This means that incorrect implementation of this function can
+    /// lead to undefined behavior. If you have any doubt about the purity of your test
+    /// implementation, do not implement this function (and, probably, you should reconsider
+    /// your approach).
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(_value: &T) {}
+}
+
+/// A stateful assertion that must hold for an instance of a type to be considered refined.
+pub trait StatefulPredicate<T>: Default + Predicate<T> {
+    /// Whether a value satisfies the predicate.
+    ///
+    /// # Correctness
+    ///
+    /// Implementations of this method **must** be pure functions. They must be infallible and
+    /// must always return the same result when provided the same input value. If you have a
+    /// situation that requires impurity to "materialize" a predicate, use the [Default::default]
+    /// implementation to "inject" that logic into the predicate. Even then, under no circumstance
+    /// can the `test` function itself be impure.
+    fn test(&self, value: &T) -> bool;
+
+    /// An error message to display when the predicate doesn't hold.
+    fn error(&self) -> String {
+        <Self as Predicate<T>>::error()
+    }
+
+    /// Applies a potentially unsafe optimization to call sites that can take advantage of
+    /// information provided by the predicate.
+    ///
+    /// As all predicate tests _should_ be pure, implementing this function is recommended
+    /// for most predicate implementations. The most common implementation will look like:
+    ///
+    /// ```ignore
+    /// #[cfg(feature = "optimized")]
+    /// #[doc(cfg(feature = "optimized"))]
+    /// unsafe fn optimize(value: &T) {
+    ///     std::hint::assert_unchecked(Self::test(value));
+    /// }
+    /// ```
+    ///
+    /// # Safety
+    ///
+    /// Implementation of this function takes a _correctness_ property and turns it in to a
+    /// _soundness_ property. This means that incorrect implementation of this function can
+    /// lead to undefined behavior. If you have any doubt about the purity of your test
+    /// implementation, do not implement this function (and, probably, you should reconsider
+    /// your approach).
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(_value: &T) {}
 }
 
 /// An internal implementation detail that must be exposed publicly for proper serde support.

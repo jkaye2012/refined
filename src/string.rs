@@ -29,6 +29,12 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
     fn error() -> String {
         format!("must start with '{}'", Prefix::VALUE)
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -41,6 +47,12 @@ impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
 
     fn error() -> String {
         format!("must end with '{}'", Suffix::VALUE)
+    }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -55,6 +67,12 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
     fn error() -> String {
         format!("must contain '{}'", Substr::VALUE)
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -67,6 +85,12 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
 
     fn error() -> String {
         String::from("must not start or end with whitespace")
+    }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -89,6 +113,12 @@ mod regex_pred {
         fn error() -> String {
             format!("must match regular expression {}", S::VALUE)
         }
+
+        #[cfg(feature = "optimized")]
+        #[doc(cfg(feature = "optimized"))]
+        unsafe fn optimize(value: &T) {
+            std::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
+        }
     }
 
     impl<S: TypeString> Default for Regex<S> {
@@ -103,6 +133,12 @@ mod regex_pred {
     impl<S: TypeString, T: AsRef<str>> StatefulPredicate<T> for Regex<S> {
         fn test(&self, value: &T) -> bool {
             self.0.is_match(value.as_ref())
+        }
+
+        #[cfg(feature = "optimized")]
+        #[doc(cfg(feature = "optimized"))]
+        unsafe fn optimize(value: &T) {
+            std::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
         }
     }
 

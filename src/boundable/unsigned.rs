@@ -201,6 +201,12 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
     fn error() -> String {
         format!("must be less than {}", MAX)
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -215,6 +221,12 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThanEqual<MAX>
 
     fn error() -> String {
         format!("must be less than or equal to {}", MAX)
+    }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -236,6 +248,12 @@ impl<T: UnsignedBoundable, const DIV: usize, const MOD: usize> Predicate<T> for 
     fn error() -> String {
         format!("must be divisible by {} with a remainder of {}", DIV, MOD)
     }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 pub type Divisible<const DIV: usize> = Modulo<DIV, 0>;
@@ -243,6 +261,7 @@ pub type Divisible<const DIV: usize> = Modulo<DIV, 0>;
 pub type Even = Modulo<2, 0>;
 
 pub type Odd = Not<Even>;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Equals<const VAL: usize>;
 
@@ -253,6 +272,12 @@ impl<T: UnsignedBoundable, const VAL: usize> Predicate<T> for Equals<VAL> {
 
     fn error() -> String {
         format!("must be equal to {}", VAL)
+    }
+
+    #[cfg(feature = "optimized")]
+    #[doc(cfg(feature = "optimized"))]
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
