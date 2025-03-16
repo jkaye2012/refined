@@ -130,7 +130,7 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -149,7 +149,7 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -168,7 +168,7 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -187,7 +187,7 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -212,7 +212,7 @@ impl<T: SignedBoundable, const DIV: isize, const MOD: isize> Predicate<T> for Mo
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -235,7 +235,7 @@ impl<T: SignedBoundable, const VAL: isize> Predicate<T> for Equals<VAL> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 

@@ -12,6 +12,14 @@ A basic introduction to the library is
 For detailed information, please see the
 [documentation on docs.rs](https://docs.rs/refined/latest/refined).
 
+## Features
+
+- [Serde integration](https://docs.rs/refined/latest/refined/#serde-support)
+- [Logical implication for most predicates](https://docs.rs/refined/latest/refined/#implication)
+- [Zero-overhead arithmetic](https://docs.rs/refined/latest/refined/#arithmetic)
+- [Stateful refinement](https://docs.rs/refined/latest/refined/#stateful-refinement)
+- [Run-time performance optimization](https://docs.rs/refined/latest/refined/#optimized)
+
 ## Example
 
 ```rust

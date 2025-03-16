@@ -33,7 +33,7 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -50,7 +50,7 @@ impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -67,7 +67,7 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -84,7 +84,7 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -109,7 +109,7 @@ mod regex_pred {
         }
 
         unsafe fn optimize(value: &T) {
-            std::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
+            core::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
         }
     }
 
@@ -128,7 +128,7 @@ mod regex_pred {
         }
 
         unsafe fn optimize(value: &T) {
-            std::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
+            core::hint::assert_unchecked(<Self as Predicate<T>>::test(value));
         }
     }
 
@@ -136,6 +136,7 @@ mod regex_pred {
     mod tests {
         use super::*;
         use crate::*;
+        use alloc::string::ToString;
 
         type_string!(AllAs, "^a+$");
         type_string!(Test, "test");

@@ -55,6 +55,11 @@
           cargoTestExtraArgs = "--all-features";
         };
 
+        refined-no-std = crane'.buildPackage {
+          inherit src;
+          cargoTestExtraArgs = "--no-default-features --all-targets";
+        };
+
         refined-doc = crane'.cargoDoc {
           inherit src;
           cargoArtifacts = refined;
@@ -102,6 +107,7 @@
         checks.${system} = {
           inherit
             refined
+            refined-no-std
             refined-doc
             refined-example-axum
             refined-example-quickstart
@@ -112,6 +118,7 @@
         packages.${system} = rec {
           inherit
             refined
+            refined-no-std
             refined-doc
             refined-example-axum
             refined-example-quickstart
