@@ -26,6 +26,8 @@ within the Nix development shell):
 
 - Running a complete build: `cargo build --all-features`
 - Running all tests: `cargo test --all-features`
+- Running all tests for a specific feature in isolation:
+  `cargo test --all-targets --no-default-features --feature std`
 - Building documentation: `cargo doc --all-features`
 - Running the validation that will be run by GH actions: `nix flake check`
 

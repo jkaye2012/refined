@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.1.0] - 2025-03-16
 
-- Remove `Clone` constraints for all impls.
+- Removes `Clone` constraints for all structs and traits; thanks to
+  [yjhmelody](https://github.com/yjhmelody)
+- Adds `no_std` support; thanks to [yjhmelody](https://github.com/yjhmelody)
 - Adds an `optimize` function to the `Predicate` and `StatefulPredicate` traits to prevent possible
-  downstream soundness problems from being unintentionally introduced. Thanks to
+  downstream soundness problems from being unintentionally introduced; thanks to
   [Scott Taylor](https://github.com/scott2000) and [Nuutti Kotivuori](https://github.com/nakedible)
   for their input!
 
