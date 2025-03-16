@@ -24,6 +24,10 @@ impl Predicate<char> for IsControl {
     fn error() -> String {
         String::from("must be a control character")
     }
+
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -36,6 +40,10 @@ impl Predicate<char> for IsDigit {
 
     fn error() -> String {
         String::from("must be a digit")
+    }
+
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -50,6 +58,10 @@ impl Predicate<char> for IsLowercase {
     fn error() -> String {
         String::from("must be a lowercase character")
     }
+
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -62,6 +74,10 @@ impl Predicate<char> for IsUppercase {
 
     fn error() -> String {
         String::from("must be an uppercase character")
+    }
+
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -76,6 +92,10 @@ impl Predicate<char> for IsNumeric {
     fn error() -> String {
         String::from("must be a numeric character")
     }
+
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -89,6 +109,10 @@ impl Predicate<char> for IsWhitespace {
     fn error() -> String {
         String::from("must be a whitespace character")
     }
+
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -101,6 +125,10 @@ impl Predicate<char> for IsHexDigit {
 
     fn error() -> String {
         String::from("must be a valid hex character")
+    }
+
+    unsafe fn optimize(value: &char) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 

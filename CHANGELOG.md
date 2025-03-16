@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+- Remove `Clone` constraints for all impls.
+- Adds an `optimize` function to the `Predicate` and `StatefulPredicate` traits to prevent possible
+  downstream soundness problems from being unintentionally introduced. Thanks to
+  [Scott Taylor](https://github.com/scott2000) and [Nuutti Kotivuori](https://github.com/nakedible)
+  for their input!
+
 ## [0.0.4] - 2025-03-02
 
 - Adds the `Regex` predicate (and stateful implementation) to `string`

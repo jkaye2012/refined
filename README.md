@@ -64,10 +64,10 @@ functionality that they provide, I had three principles in mind during developme
 are not met by any other library:
 
 - Simplicity: a design that anyone should be able to look at and understand. This immediately rules
-  out any approach include proc macros
+  out any approach that relies upon proc macros
 - Maintainability: it should be simple to keep the library up to date, add functionality, fix bugs,
   etc. Other developers should be able to contribute to the project without difficulty
-- Extensbility: the ability for downstream consumers of the library to easily add their own
+- Extensbility: downstream consumers of the library should be able to easily add their own
   extensions without requiring contribution to the core `refined` library
 
 A direct comparison against some of the more popular options:

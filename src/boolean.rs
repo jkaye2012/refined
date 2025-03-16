@@ -35,6 +35,10 @@ impl<T> Predicate<T> for True {
     fn error() -> String {
         String::from("true predicate")
     }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 /// Always `false`.
@@ -48,6 +52,10 @@ impl<T> Predicate<T> for False {
 
     fn error() -> String {
         String::from("false predicate")
+    }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -63,6 +71,10 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
     fn error() -> String {
         format!("{} and {}", A::error(), B::error())
     }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 /// Logical disjunction of two [predicates](Predicate).
@@ -76,6 +88,10 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
 
     fn error() -> String {
         format!("{} or {}", A::error(), B::error())
+    }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -91,6 +107,10 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
     fn error() -> String {
         format!("{} xor {}", A::error(), B::error())
     }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
+    }
 }
 
 /// Logical negation of a [predicate](Predicate).
@@ -104,6 +124,10 @@ impl<T, P: Predicate<T>> Predicate<T> for Not<P> {
 
     fn error() -> String {
         format!("not {}", P::error())
+    }
+
+    unsafe fn optimize(value: &T) {
+        std::hint::assert_unchecked(Self::test(value));
     }
 }
 
