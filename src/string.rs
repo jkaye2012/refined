@@ -14,7 +14,9 @@
 //! assert!(Test::refine("foobar".to_string()).is_ok());
 //! assert!(Test::refine("barfoo".to_string()).is_err());
 //! ```
-use std::marker::PhantomData;
+use alloc::format;
+use alloc::string::String;
+use core::marker::PhantomData;
 
 use crate::{Predicate, TypeString};
 
@@ -215,6 +217,7 @@ pub use regex_pred::*;
 mod tests {
     use super::*;
     use crate::*;
+    use alloc::string::ToString;
 
     type_string!(Foo, "foo");
 

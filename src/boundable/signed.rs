@@ -14,6 +14,8 @@
 //! assert!(not_ok.is_err());
 //! ```
 use crate::{boolean::*, Predicate};
+use alloc::format;
+use alloc::string::String;
 
 /// Types that can be reduced to a signed size so that they can be bounded.
 pub trait SignedBoundable {
@@ -26,13 +28,13 @@ impl SignedBoundable for i8 {
     }
 }
 
-impl SignedBoundable for std::num::Saturating<i8> {
+impl SignedBoundable for core::num::Saturating<i8> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
-impl SignedBoundable for std::num::NonZeroI8 {
+impl SignedBoundable for core::num::NonZeroI8 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
@@ -44,13 +46,13 @@ impl SignedBoundable for i16 {
     }
 }
 
-impl SignedBoundable for std::num::Saturating<i16> {
+impl SignedBoundable for core::num::Saturating<i16> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
-impl SignedBoundable for std::num::NonZeroI16 {
+impl SignedBoundable for core::num::NonZeroI16 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
@@ -62,13 +64,13 @@ impl SignedBoundable for i32 {
     }
 }
 
-impl SignedBoundable for std::num::Saturating<i32> {
+impl SignedBoundable for core::num::Saturating<i32> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
-impl SignedBoundable for std::num::NonZeroI32 {
+impl SignedBoundable for core::num::NonZeroI32 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }
@@ -80,13 +82,13 @@ impl SignedBoundable for isize {
     }
 }
 
-impl SignedBoundable for std::num::Saturating<isize> {
+impl SignedBoundable for core::num::Saturating<isize> {
     fn bounding_value(&self) -> isize {
         self.0
     }
 }
 
-impl SignedBoundable for std::num::NonZeroIsize {
+impl SignedBoundable for core::num::NonZeroIsize {
     fn bounding_value(&self) -> isize {
         self.get()
     }
@@ -100,14 +102,14 @@ impl SignedBoundable for i64 {
 }
 
 #[cfg(target_pointer_width = "64")]
-impl SignedBoundable for std::num::Saturating<i64> {
+impl SignedBoundable for core::num::Saturating<i64> {
     fn bounding_value(&self) -> isize {
         self.0 as isize
     }
 }
 
 #[cfg(target_pointer_width = "64")]
-impl SignedBoundable for std::num::NonZeroI64 {
+impl SignedBoundable for core::num::NonZeroI64 {
     fn bounding_value(&self) -> isize {
         self.get() as isize
     }

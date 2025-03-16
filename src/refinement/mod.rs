@@ -1,6 +1,7 @@
 mod named;
 
-use std::{fmt::Display, marker::PhantomData};
+use alloc::string::String;
+use core::{fmt::Display, marker::PhantomData};
 
 pub use named::*;
 
@@ -60,12 +61,12 @@ impl<T, P: Predicate<T>> RefinementOps for Refinement<T, P> {
 }
 
 impl<T: Display, P: Predicate<T>> Display for Refinement<T, P> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", &self.0)
     }
 }
 
-impl<T, P: Predicate<T>> std::ops::Deref for Refinement<T, P> {
+impl<T, P: Predicate<T>> core::ops::Deref for Refinement<T, P> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {

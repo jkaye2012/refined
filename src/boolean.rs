@@ -17,7 +17,9 @@
 //! assert!(not_ok_string.is_err());
 //! ```
 
-use std::marker::PhantomData;
+use alloc::format;
+use alloc::string::String;
+use core::marker::PhantomData;
 
 use crate::Predicate;
 
@@ -139,6 +141,7 @@ pub type Nor<A, B> = Not<Or<A, B>>;
 mod tests {
     use super::*;
     use crate::*;
+    use alloc::string::ToString;
 
     #[test]
     fn test_true() {
