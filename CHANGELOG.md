@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2025-03-17
+## [0.2.0] - 2025-03-17
 
 - Removes `Clone` constraints for all structs and traits; thanks to
   [yjhmelody](https://github.com/yjhmelody)
@@ -14,6 +14,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   downstream soundness problems from being unintentionally introduced; thanks to
   [Scott Taylor](https://github.com/scott2000) and [Nuutti Kotivuori](https://github.com/nakedible)
   for their input!
+
+  _Note that v0.1.0 had to be skipped due to a mistake in the initial release in the library that
+  led to a bogus v0.1.0 being yanked._
 
 ## [0.0.4] - 2025-03-02
 
