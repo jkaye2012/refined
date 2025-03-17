@@ -24,7 +24,7 @@ fn month_name(s: &Size) -> &'static str {
 }
 
 fn main() {
-    let raw_index = core::env::args()
+    let raw_index = std::env::args()
         .next_back()
         .unwrap()
         .parse::<usize>()

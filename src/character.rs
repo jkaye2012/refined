@@ -26,7 +26,7 @@ impl Predicate<char> for IsControl {
     }
 
     unsafe fn optimize(value: &char) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -43,7 +43,7 @@ impl Predicate<char> for IsDigit {
     }
 
     unsafe fn optimize(value: &char) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -60,7 +60,7 @@ impl Predicate<char> for IsLowercase {
     }
 
     unsafe fn optimize(value: &char) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -77,7 +77,7 @@ impl Predicate<char> for IsUppercase {
     }
 
     unsafe fn optimize(value: &char) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -94,7 +94,7 @@ impl Predicate<char> for IsNumeric {
     }
 
     unsafe fn optimize(value: &char) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -111,7 +111,7 @@ impl Predicate<char> for IsWhitespace {
     }
 
     unsafe fn optimize(value: &char) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -128,7 +128,7 @@ impl Predicate<char> for IsHexDigit {
     }
 
     unsafe fn optimize(value: &char) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 

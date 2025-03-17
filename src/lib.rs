@@ -16,6 +16,8 @@
 //! You may find it easiest to import the required types using the [prelude] module. Note that the prelude does
 //! not include any predicates, only the basic type machinery required for refinement in general.
 //!
+//! Refined supports `no_std` environments when the [std feature](#std) is disabled.
+//!
 //! # Examples
 //!
 //! In addition to the examples included here, you can also refer to the
@@ -26,9 +28,7 @@
 //!
 //! This examples demonstrates the "lowest level" raw usage of `refined` for simple refinement. Note that use
 //! of the [prelude] is not required, though it will be used for brevity in most other examples.
-//! ```rust
-//! # #[cfg(feature = "full")]
-//! # {
+//! ```
 //! use refined::{Refinement, RefinementOps, RefinementError, boundable::unsigned::{LessThanEqual, ClosedInterval}};
 //!
 //! type FrobnicatorName = Refinement<String, ClosedInterval<1, 10>>;
@@ -58,12 +58,9 @@
 //!            "refinement violated: must be greater than or equal to 1 and must be less than or equal to 10");
 //! assert_eq!(Frobnicator::new("Good name".to_string(), 123).unwrap_err().to_string(),
 //!            "refinement violated: must be less than or equal to 100");
-//! # }
 //! ```
 //!
-//! ```rust
-//! # #[cfg(feature = "full")]
-//! {
+//! ```
 //! use refined::{prelude::*, boolean::And, boundable::unsigned::{ClosedInterval, NonZero}, string::Trimmed};
 //! use serde::{Serialize, Deserialize};
 //! use serde_json::{json, from_value};
@@ -90,7 +87,6 @@
 //!    "rating": 1
 //!  }));
 //!  assert!(malformed_movie.is_err());
-//! # }
 //! ```
 //!
 //! ## Stateful refinement
@@ -109,9 +105,7 @@
 //! the regular expression can be an expensive operation, often more expensive than certifying the predicate itself. We
 //! can use the same [Regex](string::Regex) predicate both statefully and statelessly as mentioned above:
 //!
-//! ```rust
-//! # #[cfg(feature = "full")]
-//! # {
+//! ```
 //! use refined::{prelude::*, string::Regex};
 //!
 //! type_string!(AllZs, "^z+$");
@@ -124,7 +118,6 @@
 //! let all_zs = Regex::<AllZs>::default();
 //! assert!(OopsAllZs::refine_with_state(&all_zs, "zzzzz".to_string()).is_ok());
 //! assert!(OopsAllZs::refine_with_state(&all_zs, "zazzy".to_string()).is_err());
-//! # }
 //! ```
 //!
 //! ## Named refinement
@@ -136,9 +129,7 @@
 //!
 //! If this is something that you need, consider using [Named], or [NamedSerde] if using `serde`.
 //!
-//! ```rust
-//! # #[cfg(feature = "full")]
-//! # {
+//! ```
 //! use refined::{prelude::*, boundable::unsigned::{LessThanEqual, ClosedInterval}};
 //!
 //! type_string!(Name, "name");
@@ -170,16 +161,13 @@
 //!            "refinement violated: name must be greater than or equal to 1 and must be less than or equal to 10");
 //! assert_eq!(Frobnicator::new("Good name".to_string(), 123).unwrap_err().to_string(),
 //!            "refinement violated: size must be less than or equal to 100");
-//! # }
 //! ```
 //!
 //! ## Serde support
 //!
 //! Support for serde is about as automatic as you can get when the `serde` feature is enabled.
 //!
-//! ```rust
-//! # #[cfg(feature = "full")]
-//! # {
+//! ```
 //! use refined::{Refinement, RefinementOps, boundable::unsigned::LessThan};
 //! use serde::{Serialize, Deserialize};
 //! use serde_json::{from_str, to_string};
@@ -195,14 +183,11 @@
 //! let bad: Result<Example, _> =  from_str(r#"{"name":"Bad example","size":123}"#);
 //! assert!(bad.is_err());
 //! assert_eq!(bad.unwrap_err().to_string(), "refinement violated: must be less than 100 at line 1 column 33");
-//! # }
 //! ```
 //!
 //! If using named refinement, only [NamedSerde] will work in serde implementations:
 //!
-//! ```rust
-//! # #[cfg(feature = "full")]
-//! # {
+//! ```
 //! use refined::{Refinement, RefinementOps, NamedSerde, boundable::unsigned::LessThan, type_string, TypeString};
 //! use serde::{Serialize, Deserialize};
 //! use serde_json::{from_str, to_string};
@@ -220,7 +205,6 @@
 //! let bad: Result<Example, _> =  from_str(r#"{"name":"Bad example","size":123}"#);
 //! assert!(bad.is_err());
 //! assert_eq!(bad.unwrap_err().to_string(), "refinement violated: john must be less than 100 at line 1 column 33");
-//! }
 //! ```
 //!
 //! ## Implication
@@ -228,11 +212,10 @@
 //! See the documentation on [Implies] for more information about the core idea behind implication.
 //! Note that enabling `incomplete_features` and `generic_const_exprs` is **required** for the [Implies] trait bounds to be met.
 //!
-//! ```rust
+//! ```
 //! #![allow(incomplete_features)]
 //! #![feature(generic_const_exprs)]
-//! # #[cfg(feature = "full")]
-//! # {
+//!
 //! use refined::{Refinement, RefinementOps, boundable::unsigned::LessThan, Implies};
 //!
 //! fn takes_lt_100(value: Refinement<u8, LessThan<100>>) -> String {
@@ -243,17 +226,15 @@
 //! let ex: Refinement<u8, LessThan<51>> = lt_50.imply();
 //! let result = takes_lt_100(lt_50.imply());
 //! assert_eq!(result, "49");
-//! # }
 //! ```
 //!
 //! This design leads to some interesting emergent properties; for example, the "compatibility" of
 //! range comparison over equality is enforced at compile time:
 //!
-//! ```rust
+//! ```
 //! #![allow(incomplete_features)]
 //! #![feature(generic_const_exprs)]
-//! # #[cfg(feature = "full")]
-//! # {
+//!
 //! use refined::{prelude::*, boundable::unsigned::OpenInterval};
 //!
 //! let bigger_range: Refinement<u8, OpenInterval<1, 100>> = Refinement::refine(50).unwrap();
@@ -262,7 +243,6 @@
 //! // assert_eq!(bigger_range, smaller_range); // Fails to compile, type mismatch
 //! // assert_eq!(bigger_range, incompatible_range) // Fails to compile, invalid implication
 //! assert_eq!(bigger_range, smaller_range.imply()); // Works!
-//! # }
 //! ```
 //!
 //! Note that the order matters here; the smaller range refinement can be implied to the larger range,
@@ -273,11 +253,9 @@
 //! With the `arithmetic` feature enabled, refinements with mutually compatible bounds can be operated on
 //! numerically without any runtime overhead. See the arithmetic feature section below for more information.
 //!
-//! ```rust
+//! ```
 //! #![allow(incomplete_features)]
 //! #![feature(generic_const_exprs)]
-//! # #[cfg(feature = "full")]
-//! # {
 //!
 //! use refined::{prelude::*, boundable::unsigned::ClosedInterval};
 //!
@@ -292,21 +270,18 @@
 //! let sally_skill = SkillLevel::refine(6).unwrap();
 //!
 //! assert_eq!(*couple_skill(tom_skill, sally_skill), 15);
-//! # }
 //! ```
 //!
-//! ```rust
+//! ```
 //! #![allow(incomplete_features)]
 //! #![feature(generic_const_exprs)]
-//! # #[cfg(feature = "full")]
-//! # {
+//!
 //! use refined::{prelude::*, boundable::signed::LessThan};
 //!
 //! type LT100 = Refinement<i16, LessThan<100>>;
 //! type LT50 = Refinement<i16, LessThan<50>>;
 //! let result: Refinement<i16, LessThan<149>> = LT100::refine(99).unwrap() + LT50::refine(49).unwrap();
 //! assert_eq!(*result, 148);
-//! # }
 //! ````
 //!
 //! # Provided refinements
@@ -330,6 +305,16 @@
 //!
 //! # Features
 //!
+//! ## `full`
+//!
+//! Enabling full turns on all features listed below other than `optimized`. Because `optimized` has a potential unsafe element
+//! involved, it must be enabled explicitly.
+//!
+//! ## `std`
+//!
+//! Enabled by default; allows the use of library functionality that relies upon the standard library.
+//! If this feature is disabled, then `refined` can be used in `no_std` environments.
+//!
 //! ## `serde`
 //!
 //! Enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
@@ -344,7 +329,8 @@
 //!
 //! Enabling optimized turns on [unsafe optimizations](https://github.com/jkaye2012/refined/issues/9) that allow the compiler
 //! to remove potentially significant runtime bounds checking. Currently, this is disabled by default, but it may be moved to
-//! a default feature in the future.
+//! a default feature in the future. See [my blog](https://jordankaye.dev/posts/refined_0_0_4/#optimized) for an example of
+//! the effect of this feature on generated assembly.
 //!
 //! ## `implication`
 //!
@@ -473,11 +459,11 @@ pub trait Predicate<T> {
     ///
     /// ```ignore
     /// unsafe fn optimize(value: &T) {
-    ///     std::hint::assert_unchecked(Self::test(value));
+    ///     core::hint::assert_unchecked(Self::test(value));
     /// }
     /// ```
     ///
-    /// Note that [std::hint::assert_unchecked] acts as an assert in debug builds, meaning that
+    /// Note that [core::hint::assert_unchecked] acts as an assert in debug builds, meaning that
     /// tests should be able to detect correctness issues as well. It is only in optimized builds
     /// that no check is performed.
     ///
@@ -518,11 +504,11 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
     ///
     /// ```ignore
     /// unsafe fn optimize(value: &T) {
-    ///     std::hint::assert_unchecked(Self::test(value));
+    ///     core::hint::assert_unchecked(Self::test(value));
     /// }
     /// ```
     ///
-    /// Note that [std::hint::assert_unchecked] acts as an assert in debug builds, meaning that
+    /// Note that [core::hint::assert_unchecked] acts as an assert in debug builds, meaning that
     /// tests should be able to detect correctness issues as well. It is only in optimized builds
     /// that no check is performed.
     ///

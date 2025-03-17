@@ -14,6 +14,7 @@ function update_single() {
   cd "$workdir"
 }
 
+cargo update
 for ex in examples/*; do
   update_single "$ex"
 done

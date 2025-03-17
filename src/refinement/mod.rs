@@ -1,6 +1,5 @@
 mod named;
 
-use alloc::string::String;
 use core::{fmt::Display, marker::PhantomData};
 
 pub use named::*;
@@ -121,6 +120,7 @@ impl<T, P: StatefulPredicate<T>> StatefulRefinementOps<T, P> for Refinement<T, P
 mod tests {
     use super::*;
     use crate::*;
+    use alloc::format;
 
     #[test]
     fn test_refinement_deserialize_success() {

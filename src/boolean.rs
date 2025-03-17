@@ -37,7 +37,7 @@ impl<T> Predicate<T> for True {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -55,7 +55,7 @@ impl<T> Predicate<T> for False {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -73,7 +73,7 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -91,7 +91,7 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -109,7 +109,7 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 
@@ -127,7 +127,7 @@ impl<T, P: Predicate<T>> Predicate<T> for Not<P> {
     }
 
     unsafe fn optimize(value: &T) {
-        std::hint::assert_unchecked(Self::test(value));
+        core::hint::assert_unchecked(Self::test(value));
     }
 }
 

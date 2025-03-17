@@ -108,18 +108,6 @@ mod named_serde {
         }
     }
 
-    // impl<'de, N: TypeString, R: RefinementOps> Deserialize for NamedSerde<N, R>
-    // where
-    //     R::T: Serialize + DeserializeOwned,
-    // {
-    //     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    //     where
-    //         S: serde::Serializer,
-    //     {
-    //         self.0.serialize(serializer)
-    //     }
-    // }
-
     impl<'de, N: TypeString, R: RefinementOps> Deserialize<'de> for NamedSerde<N, R>
     where
         R::T: Serialize + DeserializeOwned,
