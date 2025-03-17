@@ -50,6 +50,13 @@
           }
           // args;
 
+        testFeature =
+          feature:
+          crane'.buildPackage {
+            inherit src;
+            cargoTestExtraArgs = "--no-default-features --all-targets --features ${feature}";
+          };
+
         refined = crane'.buildPackage {
           inherit src;
           cargoTestExtraArgs = "--all-features";
@@ -113,12 +120,18 @@
             refined-example-quickstart
             refined-example-optimized
             ;
+          refined-test-serde = testFeature "serde";
+          refined-test-std = testFeature "std";
+          refined-test-optimized = testFeature "optimized";
+          refined-test-implication = testFeature "implication";
+          refined-test-arithmetic = testFeature "arithmetic";
+          refined-test-regex = testFeature "regex";
+          refined-test-full = testFeature "full";
         };
 
         packages.${system} = rec {
           inherit
             refined
-            refined-no-std
             refined-doc
             refined-example-axum
             refined-example-quickstart
