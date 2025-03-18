@@ -1,11 +1,16 @@
+#[cfg(feature = "alloc")]
 mod named;
 
 use core::{fmt::Display, marker::PhantomData};
 
+#[doc(cfg(feature = "alloc"))]
+#[cfg(feature = "alloc")]
 pub use named::*;
 
+#[cfg(all(feature = "serde", feature = "alloc"))]
+use serde::Deserialize;
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::{
     Predicate, Refined, RefinementError, RefinementOps, StatefulPredicate, StatefulRefinementOps,
@@ -18,6 +23,7 @@ use crate::Implies;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Refinement<T, P: Predicate<T>>(pub(crate) T, pub(crate) PhantomData<P>);
 
+#[doc(cfg(feature = "serde"))]
 #[cfg(feature = "serde")]
 impl<T: Serialize, P: Predicate<T>> Serialize for Refinement<T, P> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -28,7 +34,8 @@ impl<T: Serialize, P: Predicate<T>> Serialize for Refinement<T, P> {
     }
 }
 
-#[cfg(feature = "serde")]
+#[doc(cfg(all(feature = "serde", feature = "alloc")))]
+#[cfg(all(feature = "serde", feature = "alloc"))]
 impl<'de, T: Deserialize<'de>, P: Predicate<T>> Deserialize<'de> for Refinement<T, P> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -95,6 +102,7 @@ impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
     }
 }
 
+#[doc(cfg(feature = "implication"))]
 #[cfg(feature = "implication")]
 impl<F, T, Type> Implies<Refinement<Type, T>> for Refinement<Type, F>
 where
@@ -116,7 +124,7 @@ impl<T, P: StatefulPredicate<T>> StatefulRefinementOps<T, P> for Refinement<T, P
     }
 }
 
-#[cfg(all(test, feature = "serde"))]
+#[cfg(all(test, feature = "serde", feature = "alloc"))]
 mod tests {
     use super::*;
     use crate::*;

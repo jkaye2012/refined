@@ -13,9 +13,9 @@
 //! let not_ok = RangedI64::refine(11);
 //! assert!(not_ok.is_err());
 //! ```
-use crate::{boolean::*, Predicate};
+use crate::{boolean::*, ErrorMessage, Predicate};
+#[cfg(feature = "alloc")]
 use alloc::format;
-use alloc::string::String;
 
 /// Types that can be reduced to a signed size so that they can be bounded.
 pub trait SignedBoundable {
@@ -125,8 +125,14 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThan<MIN> {
         value.bounding_value() > MIN
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be greater than {}", MIN)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "greater than"
     }
 
     unsafe fn optimize(value: &T) {
@@ -144,8 +150,14 @@ impl<T: SignedBoundable, const MIN: isize> Predicate<T> for GreaterThanEqual<MIN
         value.bounding_value() >= MIN
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be greater than or equal to {}", MIN)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "greater than equal"
     }
 
     unsafe fn optimize(value: &T) {
@@ -163,8 +175,14 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThan<MAX> {
         value.bounding_value() < MAX
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be less than {}", MAX)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "less than"
     }
 
     unsafe fn optimize(value: &T) {
@@ -182,8 +200,14 @@ impl<T: SignedBoundable, const MAX: isize> Predicate<T> for LessThanEqual<MAX> {
         value.bounding_value() <= MAX
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be less than or equal to {}", MAX)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "less than equal"
     }
 
     unsafe fn optimize(value: &T) {
@@ -207,8 +231,14 @@ impl<T: SignedBoundable, const DIV: isize, const MOD: isize> Predicate<T> for Mo
         value.bounding_value() % DIV == MOD
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be divisible by {} with a remainder of {}", DIV, MOD)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "modulo"
     }
 
     unsafe fn optimize(value: &T) {
@@ -230,8 +260,14 @@ impl<T: SignedBoundable, const VAL: isize> Predicate<T> for Equals<VAL> {
         value.bounding_value() == VAL
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be equal to {}", VAL)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "equals"
     }
 
     unsafe fn optimize(value: &T) {

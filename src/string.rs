@@ -15,10 +15,9 @@
 //! assert!(Test::refine("barfoo".to_string()).is_err());
 //! ```
 use alloc::format;
-use alloc::string::String;
 use core::marker::PhantomData;
 
-use crate::{Predicate, TypeString};
+use crate::{ErrorMessage, Predicate, TypeString};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct StartsWith<Prefix: TypeString>(PhantomData<Prefix>);
@@ -28,7 +27,7 @@ impl<T: AsRef<str>, Prefix: TypeString> Predicate<T> for StartsWith<Prefix> {
         s.as_ref().starts_with(Prefix::VALUE)
     }
 
-    fn error() -> String {
+    fn error() -> ErrorMessage {
         format!("must start with '{}'", Prefix::VALUE)
     }
 
@@ -45,7 +44,7 @@ impl<T: AsRef<str>, Suffix: TypeString> Predicate<T> for EndsWith<Suffix> {
         s.as_ref().ends_with(Suffix::VALUE)
     }
 
-    fn error() -> String {
+    fn error() -> ErrorMessage {
         format!("must end with '{}'", Suffix::VALUE)
     }
 
@@ -62,7 +61,7 @@ impl<T: AsRef<str>, Substr: TypeString> Predicate<T> for Contains<Substr> {
         s.as_ref().contains(Substr::VALUE)
     }
 
-    fn error() -> String {
+    fn error() -> ErrorMessage {
         format!("must contain '{}'", Substr::VALUE)
     }
 
@@ -79,8 +78,8 @@ impl<T: AsRef<str>> Predicate<T> for Trimmed {
         s.as_ref().trim() == s.as_ref()
     }
 
-    fn error() -> String {
-        String::from("must not start or end with whitespace")
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must not start or end with whitespace")
     }
 
     unsafe fn optimize(value: &T) {
@@ -104,7 +103,7 @@ mod regex_pred {
                 .is_match(s.as_ref())
         }
 
-        fn error() -> String {
+        fn error() -> ErrorMessage {
             format!("must match regular expression {}", S::VALUE)
         }
 
@@ -136,7 +135,7 @@ mod regex_pred {
     mod tests {
         use super::*;
         use crate::*;
-        use alloc::string::ToString;
+        use alloc::string::{String, ToString};
 
         type_string!(AllAs, "^a+$");
         type_string!(Test, "test");
@@ -218,7 +217,7 @@ pub use regex_pred::*;
 mod tests {
     use super::*;
     use crate::*;
-    use alloc::string::ToString;
+    use alloc::string::{String, ToString};
 
     type_string!(Foo, "foo");
 
