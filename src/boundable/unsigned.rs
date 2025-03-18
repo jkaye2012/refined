@@ -14,11 +14,14 @@
 //! assert!(not_ok_string.is_err());
 //! ```
 
-use crate::{boolean::*, Predicate};
-use alloc::collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque};
-use alloc::format;
-use alloc::string::String;
-use alloc::vec::Vec;
+use crate::{boolean::*, ErrorMessage, Predicate};
+#[cfg(feature = "alloc")]
+use alloc::{
+    collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
+    format,
+    string::String,
+    vec::Vec,
+};
 #[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
 
@@ -148,18 +151,26 @@ macro_rules! unsigned_boundable_via_len {
     };
 }
 
-unsigned_boundable_via_len!(String);
-unsigned_boundable_via_len!(BinaryHeap<T>);
-unsigned_boundable_via_len!(BTreeMap<K, V>);
-unsigned_boundable_via_len!(BTreeSet<T>);
-unsigned_boundable_via_len!(LinkedList<T>);
-unsigned_boundable_via_len!(Vec<T>);
-unsigned_boundable_via_len!(VecDeque<T>);
+#[cfg(feature = "alloc")]
+mod needs_alloc {
+    use super::*;
+
+    unsigned_boundable_via_len!(String);
+    unsigned_boundable_via_len!(BinaryHeap<T>);
+    unsigned_boundable_via_len!(BTreeMap<K, V>);
+    unsigned_boundable_via_len!(BTreeSet<T>);
+    unsigned_boundable_via_len!(LinkedList<T>);
+    unsigned_boundable_via_len!(Vec<T>);
+    unsigned_boundable_via_len!(VecDeque<T>);
+}
 
 #[cfg(feature = "std")]
-unsigned_boundable_via_len!(HashMap<K, V>);
-#[cfg(feature = "std")]
-unsigned_boundable_via_len!(HashSet<T>);
+mod needs_std {
+    use super::*;
+
+    unsigned_boundable_via_len!(HashMap<K, V>);
+    unsigned_boundable_via_len!(HashSet<T>);
+}
 
 impl<T> UnsignedBoundable for [T] {
     fn bounding_value(&self) -> usize {
@@ -176,8 +187,14 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThan<MIN> {
         value.bounding_value() > MIN
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be greater than {}", MIN)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "greater than"
     }
 
     unsafe fn optimize(value: &T) {
@@ -195,8 +212,14 @@ impl<T: UnsignedBoundable, const MIN: usize> Predicate<T> for GreaterThanEqual<M
         value.bounding_value() >= MIN
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be greater than or equal to {}", MIN)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "greater than equal"
     }
 
     unsafe fn optimize(value: &T) {
@@ -214,8 +237,14 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThan<MAX> {
         value.bounding_value() < MAX
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be less than {}", MAX)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "less than"
     }
 
     unsafe fn optimize(value: &T) {
@@ -233,8 +262,14 @@ impl<T: UnsignedBoundable, const MAX: usize> Predicate<T> for LessThanEqual<MAX>
         value.bounding_value() <= MAX
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be less than or equal to {}", MAX)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "less than equal"
     }
 
     unsafe fn optimize(value: &T) {
@@ -258,8 +293,14 @@ impl<T: UnsignedBoundable, const DIV: usize, const MOD: usize> Predicate<T> for 
         value.bounding_value() % DIV == MOD
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be divisible by {} with a remainder of {}", DIV, MOD)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "modulo"
     }
 
     unsafe fn optimize(value: &T) {
@@ -281,8 +322,14 @@ impl<T: UnsignedBoundable, const VAL: usize> Predicate<T> for Equals<VAL> {
         value.bounding_value() == VAL
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("must be equal to {}", VAL)
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "equals"
     }
 
     unsafe fn optimize(value: &T) {

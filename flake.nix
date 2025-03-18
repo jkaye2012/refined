@@ -121,6 +121,7 @@
             refined-example-optimized
             ;
           refined-test-serde = testFeature "serde";
+          refined-test-alloc = testFeature "alloc";
           refined-test-std = testFeature "std";
           refined-test-optimized = testFeature "optimized";
           refined-test-implication = testFeature "implication";

@@ -319,11 +319,17 @@
 //!
 //! Enabled by default; allows [Refinement] to be serialized and deserialized using the `serde` library.
 //! This functionality was actually my main motivation for writing the crate in the first place, but technically
-//! the serde dependency is not required for the core functionality of the trait, so it can be disabled
+//! the serde dependency is not required for the core functionality of the trait, so it can be disabled.
+//!
+//! ## `alloc`
+//!
+//! Enabling alloc allows the use of allocators without requiring `std`. This flag is useful only when `std` is
+//! disabled (in `no_std` environments that require an allocator).
 //!
 //! ## `regex`
 //!
 //! Enabling regex allows the use of the [Regex](string::Regex) predicate. This carries a dependency on the [regex] crate
+//! and also requires the `alloc` feature.
 //!
 //! ## `optimized`
 //!
@@ -336,7 +342,7 @@
 //!
 //! Enabling implication allows the use of the [Implies] trait; this is behind an off-by-default
 //! feature because it requires [generic_const_exprs](https://doc.rust-lang.org/beta/unstable-book/language-features/generic-const-exprs.html),
-//! which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed
+//! which is both unstable and incomplete. The functionality is very useful, but its stability cannot be guaranteed.
 //!
 //! ## `arithmetic`
 //!
@@ -371,11 +377,13 @@
 #![feature(doc_cfg)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
-use alloc::string::String;
+#[cfg(feature = "alloc")]
 use core::fmt::Display;
 
+#[cfg(feature = "alloc")]
 use thiserror::Error;
 
 #[cfg(feature = "serde")]
@@ -385,6 +393,8 @@ pub mod boolean;
 pub mod boundable;
 pub mod character;
 pub mod prelude;
+#[doc(cfg(feature = "alloc"))]
+#[cfg(feature = "alloc")]
 pub mod string;
 
 mod refinement;
@@ -434,6 +444,12 @@ macro_rules! type_string {
     };
 }
 
+#[cfg(not(feature = "alloc"))]
+pub type ErrorMessage = &'static str;
+
+#[cfg(feature = "alloc")]
+pub type ErrorMessage = alloc::string::String;
+
 /// An assertion that must hold for an instance of a type to be considered refined.
 pub trait Predicate<T> {
     /// Whether a value satisfies the predicate.
@@ -448,7 +464,7 @@ pub trait Predicate<T> {
     fn test(value: &T) -> bool;
 
     /// An error message to display when the predicate doesn't hold.
-    fn error() -> String;
+    fn error() -> ErrorMessage;
 
     /// Applies a potentially unsafe optimization to call sites that can take advantage of
     /// information provided by the predicate. This function is unused by `refined` unless
@@ -491,7 +507,7 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
     fn test(&self, value: &T) -> bool;
 
     /// An error message to display when the predicate doesn't hold.
-    fn error(&self) -> String {
+    fn error(&self) -> ErrorMessage {
         <Self as Predicate<T>>::error()
     }
 
@@ -527,9 +543,12 @@ pub trait StatefulPredicate<T>: Default + Predicate<T> {
 pub struct Refined<T>(T);
 
 /// An [Error] that can result from failed refinement.
-#[derive(Error, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct RefinementError(String);
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "alloc", derive(Error))]
+pub struct RefinementError(ErrorMessage);
 
+#[cfg(feature = "alloc")]
+#[doc(cfg(feature = "alloc"))]
 impl Display for RefinementError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "refinement violated: {}", self.0)

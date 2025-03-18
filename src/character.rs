@@ -10,8 +10,7 @@
 //! assert!(Test::refine('0').is_ok());
 //! assert!(Test::refine('a').is_err());
 //! ```
-use crate::Predicate;
-use alloc::string::String;
+use crate::{ErrorMessage, Predicate};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct IsControl;
@@ -21,8 +20,14 @@ impl Predicate<char> for IsControl {
         value.is_control()
     }
 
-    fn error() -> String {
-        String::from("must be a control character")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must be a control character")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "must be a control character"
     }
 
     unsafe fn optimize(value: &char) {
@@ -38,8 +43,14 @@ impl Predicate<char> for IsDigit {
         value.is_ascii_digit()
     }
 
-    fn error() -> String {
-        String::from("must be a digit")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must be a digit")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "must be a digit"
     }
 
     unsafe fn optimize(value: &char) {
@@ -55,8 +66,14 @@ impl Predicate<char> for IsLowercase {
         value.is_lowercase()
     }
 
-    fn error() -> String {
-        String::from("must be a lowercase character")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must be a lowercase character")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "must be a lowercase character"
     }
 
     unsafe fn optimize(value: &char) {
@@ -72,8 +89,14 @@ impl Predicate<char> for IsUppercase {
         value.is_uppercase()
     }
 
-    fn error() -> String {
-        String::from("must be an uppercase character")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must be an uppercase character")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "must be an uppercase character"
     }
 
     unsafe fn optimize(value: &char) {
@@ -89,8 +112,14 @@ impl Predicate<char> for IsNumeric {
         value.is_numeric()
     }
 
-    fn error() -> String {
-        String::from("must be a numeric character")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must be a numeric character")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "must be a numeric character"
     }
 
     unsafe fn optimize(value: &char) {
@@ -106,8 +135,14 @@ impl Predicate<char> for IsWhitespace {
         value.is_whitespace()
     }
 
-    fn error() -> String {
-        String::from("must be a whitespace character")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must be a whitespace character")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "must be a whitespace character"
     }
 
     unsafe fn optimize(value: &char) {
@@ -123,8 +158,14 @@ impl Predicate<char> for IsHexDigit {
         value.is_ascii_hexdigit()
     }
 
-    fn error() -> String {
-        String::from("must be a valid hex character")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("must be a valid hex character")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "must be a valid hex character"
     }
 
     unsafe fn optimize(value: &char) {
