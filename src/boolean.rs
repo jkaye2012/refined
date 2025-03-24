@@ -17,11 +17,11 @@
 //! assert!(not_ok_string.is_err());
 //! ```
 
+#[cfg(feature = "alloc")]
 use alloc::format;
-use alloc::string::String;
 use core::marker::PhantomData;
 
-use crate::Predicate;
+use crate::{ErrorMessage, Predicate};
 
 /// Always `true`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -32,8 +32,14 @@ impl<T> Predicate<T> for True {
         true
     }
 
-    fn error() -> String {
-        String::from("true predicate")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("true predicate")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "true predicate"
     }
 
     unsafe fn optimize(value: &T) {
@@ -50,8 +56,14 @@ impl<T> Predicate<T> for False {
         false
     }
 
-    fn error() -> String {
-        String::from("false predicate")
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
+        ErrorMessage::from("false predicate")
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "false predicate"
     }
 
     unsafe fn optimize(value: &T) {
@@ -68,8 +80,14 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for And<A, B> {
         A::test(t) && B::test(t)
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("{} and {}", A::error(), B::error())
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "conjunction"
     }
 
     unsafe fn optimize(value: &T) {
@@ -86,8 +104,14 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Or<A, B> {
         A::test(t) || B::test(t)
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("{} or {}", A::error(), B::error())
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "disjunction"
     }
 
     unsafe fn optimize(value: &T) {
@@ -104,8 +128,14 @@ impl<T, A: Predicate<T>, B: Predicate<T>> Predicate<T> for Xor<A, B> {
         A::test(t) ^ B::test(t)
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("{} xor {}", A::error(), B::error())
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "exclusive disjunction"
     }
 
     unsafe fn optimize(value: &T) {
@@ -122,8 +152,14 @@ impl<T, P: Predicate<T>> Predicate<T> for Not<P> {
         !P::test(t)
     }
 
-    fn error() -> String {
+    #[cfg(feature = "alloc")]
+    fn error() -> ErrorMessage {
         format!("not {}", P::error())
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    fn error() -> ErrorMessage {
+        "negation"
     }
 
     unsafe fn optimize(value: &T) {
@@ -141,101 +177,100 @@ pub type Nor<A, B> = Not<Or<A, B>>;
 mod tests {
     use super::*;
     use crate::*;
-    use alloc::string::ToString;
 
     #[test]
     fn test_true() {
-        type Test = Refinement<String, True>;
-        assert!(Test::refine("Hello".to_string()).is_ok());
+        type Test = Refinement<u8, True>;
+        assert!(Test::refine(123).is_ok());
     }
 
     #[test]
     fn test_false() {
-        type Test = Refinement<String, False>;
-        assert!(Test::refine("Hello".to_string()).is_err());
+        type Test = Refinement<u8, False>;
+        assert!(Test::refine(123).is_err());
     }
 
     #[test]
     fn test_and() {
-        type TestTrueFalse = Refinement<String, And<True, False>>;
-        assert!(TestTrueFalse::refine("Hello".to_string()).is_err());
+        type TestTrueFalse = Refinement<u8, And<True, False>>;
+        assert!(TestTrueFalse::refine(123).is_err());
 
-        type TestTrueTrue = Refinement<String, And<True, True>>;
-        assert!(TestTrueTrue::refine("Hello".to_string()).is_ok());
+        type TestTrueTrue = Refinement<u8, And<True, True>>;
+        assert!(TestTrueTrue::refine(123).is_ok());
 
-        type TestFalseTrue = Refinement<String, And<False, True>>;
-        assert!(TestFalseTrue::refine("Hello".to_string()).is_err());
+        type TestFalseTrue = Refinement<u8, And<False, True>>;
+        assert!(TestFalseTrue::refine(123).is_err());
 
-        type TestFalseFalse = Refinement<String, And<False, False>>;
-        assert!(TestFalseFalse::refine("Hello".to_string()).is_err());
+        type TestFalseFalse = Refinement<u8, And<False, False>>;
+        assert!(TestFalseFalse::refine(123).is_err());
     }
 
     #[test]
     fn test_or() {
-        type TestTrueFalse = Refinement<String, Or<True, False>>;
-        assert!(TestTrueFalse::refine("Hello".to_string()).is_ok());
+        type TestTrueFalse = Refinement<u8, Or<True, False>>;
+        assert!(TestTrueFalse::refine(123).is_ok());
 
-        type TestTrueTrue = Refinement<String, Or<True, True>>;
-        assert!(TestTrueTrue::refine("Hello".to_string()).is_ok());
+        type TestTrueTrue = Refinement<u8, Or<True, True>>;
+        assert!(TestTrueTrue::refine(123).is_ok());
 
-        type TestFalseTrue = Refinement<String, Or<False, True>>;
-        assert!(TestFalseTrue::refine("Hello".to_string()).is_ok());
+        type TestFalseTrue = Refinement<u8, Or<False, True>>;
+        assert!(TestFalseTrue::refine(123).is_ok());
 
-        type TestFalseFalse = Refinement<String, Or<False, False>>;
-        assert!(TestFalseFalse::refine("Hello".to_string()).is_err());
+        type TestFalseFalse = Refinement<u8, Or<False, False>>;
+        assert!(TestFalseFalse::refine(123).is_err());
     }
 
     #[test]
     fn test_not() {
-        type TestTrue = Refinement<String, Not<True>>;
-        assert!(TestTrue::refine("Hello".to_string()).is_err());
+        type TestTrue = Refinement<u8, Not<True>>;
+        assert!(TestTrue::refine(123).is_err());
 
-        type TestFalse = Refinement<String, Not<False>>;
-        assert!(TestFalse::refine("Hello".to_string()).is_ok());
+        type TestFalse = Refinement<u8, Not<False>>;
+        assert!(TestFalse::refine(123).is_ok());
     }
 
     #[test]
     fn test_xor() {
-        type TestTrueFalse = Refinement<String, Xor<True, False>>;
-        assert!(TestTrueFalse::refine("Hello".to_string()).is_ok());
+        type TestTrueFalse = Refinement<u8, Xor<True, False>>;
+        assert!(TestTrueFalse::refine(123).is_ok());
 
-        type TestTrueTrue = Refinement<String, Xor<True, True>>;
-        assert!(TestTrueTrue::refine("Hello".to_string()).is_err());
+        type TestTrueTrue = Refinement<u8, Xor<True, True>>;
+        assert!(TestTrueTrue::refine(123).is_err());
 
-        type TestFalseTrue = Refinement<String, Xor<False, True>>;
-        assert!(TestFalseTrue::refine("Hello".to_string()).is_ok());
+        type TestFalseTrue = Refinement<u8, Xor<False, True>>;
+        assert!(TestFalseTrue::refine(123).is_ok());
 
-        type TestFalseFalse = Refinement<String, Xor<False, False>>;
-        assert!(TestFalseFalse::refine("Hello".to_string()).is_err());
+        type TestFalseFalse = Refinement<u8, Xor<False, False>>;
+        assert!(TestFalseFalse::refine(123).is_err());
     }
 
     #[test]
     fn test_nand() {
-        type TestTrueFalse = Refinement<String, Nand<True, False>>;
-        assert!(TestTrueFalse::refine("Hello".to_string()).is_ok());
+        type TestTrueFalse = Refinement<u8, Nand<True, False>>;
+        assert!(TestTrueFalse::refine(123).is_ok());
 
-        type TestTrueTrue = Refinement<String, Nand<True, True>>;
-        assert!(TestTrueTrue::refine("Hello".to_string()).is_err());
+        type TestTrueTrue = Refinement<u8, Nand<True, True>>;
+        assert!(TestTrueTrue::refine(123).is_err());
 
-        type TestFalseTrue = Refinement<String, Nand<False, True>>;
-        assert!(TestFalseTrue::refine("Hello".to_string()).is_ok());
+        type TestFalseTrue = Refinement<u8, Nand<False, True>>;
+        assert!(TestFalseTrue::refine(123).is_ok());
 
-        type TestFalseFalse = Refinement<String, Nand<False, False>>;
-        assert!(TestFalseFalse::refine("Hello".to_string()).is_ok());
+        type TestFalseFalse = Refinement<u8, Nand<False, False>>;
+        assert!(TestFalseFalse::refine(123).is_ok());
     }
 
     #[test]
     fn test_nor() {
-        type TestTrueFalse = Refinement<String, Nor<True, False>>;
-        assert!(TestTrueFalse::refine("Hello".to_string()).is_err());
+        type TestTrueFalse = Refinement<u8, Nor<True, False>>;
+        assert!(TestTrueFalse::refine(123).is_err());
 
-        type TestTrueTrue = Refinement<String, Nor<True, True>>;
-        assert!(TestTrueTrue::refine("Hello".to_string()).is_err());
+        type TestTrueTrue = Refinement<u8, Nor<True, True>>;
+        assert!(TestTrueTrue::refine(123).is_err());
 
-        type TestFalseTrue = Refinement<String, Nor<False, True>>;
-        assert!(TestFalseTrue::refine("Hello".to_string()).is_err());
+        type TestFalseTrue = Refinement<u8, Nor<False, True>>;
+        assert!(TestFalseTrue::refine(123).is_err());
 
-        type TestFalseFalse = Refinement<String, Nor<False, False>>;
-        assert!(TestFalseFalse::refine("Hello".to_string()).is_ok());
+        type TestFalseFalse = Refinement<u8, Nor<False, False>>;
+        assert!(TestFalseFalse::refine(123).is_ok());
     }
 }
