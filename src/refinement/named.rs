@@ -82,7 +82,7 @@ impl<N: TypeString, T, P: StatefulPredicate<T>, R: StatefulRefinementOps<T, P>>
 }
 
 #[cfg(feature = "serde")]
-#[doc(cfg(feature = "serde"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 mod named_serde {
     use super::*;
     use serde::{de::DeserializeOwned, Deserialize, Serialize};

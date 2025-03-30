@@ -374,7 +374,7 @@
     allow(incomplete_features),
     feature(generic_const_exprs)
 )]
-#![feature(doc_cfg)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "alloc")]
@@ -393,7 +393,7 @@ pub mod boolean;
 pub mod boundable;
 pub mod character;
 pub mod prelude;
-#[doc(cfg(feature = "alloc"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[cfg(feature = "alloc")]
 pub mod string;
 
@@ -403,10 +403,10 @@ pub use refinement::*;
 pub use boundable::signed::SignedBoundable;
 pub use boundable::unsigned::UnsignedBoundable;
 
-#[doc(cfg(feature = "implication"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "implication")))]
 #[cfg(feature = "implication")]
 pub mod implication;
-#[doc(cfg(feature = "implication"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "implication")))]
 #[cfg(feature = "implication")]
 pub use implication::*;
 
@@ -548,7 +548,7 @@ pub struct Refined<T>(T);
 pub struct RefinementError(ErrorMessage);
 
 #[cfg(feature = "alloc")]
-#[doc(cfg(feature = "alloc"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl Display for RefinementError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "refinement violated: {}", self.0)

@@ -28,6 +28,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
         fenix' = fenix.packages.${system};
         crane' = (crane.mkLib pkgs).overrideToolchain fenix'.complete.toolchain;
+        crane-stable = (crane.mkLib pkgs).overrideToolchain fenix'.stable.minimalToolchain;
         manifest = (pkgs.lib.importTOML ./Cargo.toml).package;
 
         src = crane'.cleanCargoSource ./.;
@@ -60,6 +61,11 @@
         refined = crane'.buildPackage {
           inherit src;
           cargoTestExtraArgs = "--all-features";
+        };
+
+        refined-stable = crane-stable.buildPackage {
+          inherit src;
+          cargoTestExtraArgs = "--lib";
         };
 
         refined-no-std = crane'.buildPackage {
@@ -109,11 +115,14 @@
             linuxPackages_latest.perf
             lldb
           ];
+
+          RUSTDOCFLAGS = "--cfg docsrs";
         };
 
         checks.${system} = {
           inherit
             refined
+            refined-stable
             refined-no-std
             refined-doc
             refined-example-axum

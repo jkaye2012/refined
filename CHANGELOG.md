@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [0.3.1] - 2025-03-30
+
+- Fixes an inability to build using the `stable` toolchain caused by indiscriminate usage of the
+  unstable `doc_cfg` feature
+
 ## [0.3.0] - 2025-03-25
 
 - Adds the `alloc` feature flag, providing support for `no_std` without requiring the use of an
