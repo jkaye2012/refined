@@ -50,10 +50,10 @@ impl IsTrue for Assert<true> {}
 mod boolean_imp;
 mod boundable_imp;
 
-#[doc(cfg(feature = "arithmetic"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "arithmetic")))]
 #[cfg(feature = "arithmetic")]
 mod arithmetic;
 
-#[doc(cfg(feature = "arithmetic"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "arithmetic")))]
 #[cfg(feature = "arithmetic")]
 pub use arithmetic::*;

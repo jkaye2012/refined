@@ -1,6 +1,6 @@
 [package]
 name = "refined"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 description = "Simple refinement types; parse, don't validate!"
 documentation = "https://docs.rs/refined"
@@ -30,3 +30,4 @@ optimized = []
 
 [package.metadata.docs.rs]
 all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]

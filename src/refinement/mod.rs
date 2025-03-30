@@ -3,7 +3,7 @@ mod named;
 
 use core::{fmt::Display, marker::PhantomData};
 
-#[doc(cfg(feature = "alloc"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[cfg(feature = "alloc")]
 pub use named::*;
 
@@ -23,7 +23,7 @@ use crate::Implies;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Refinement<T, P: Predicate<T>>(pub(crate) T, pub(crate) PhantomData<P>);
 
-#[doc(cfg(feature = "serde"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[cfg(feature = "serde")]
 impl<T: Serialize, P: Predicate<T>> Serialize for Refinement<T, P> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -34,7 +34,7 @@ impl<T: Serialize, P: Predicate<T>> Serialize for Refinement<T, P> {
     }
 }
 
-#[doc(cfg(all(feature = "serde", feature = "alloc")))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "serde", feature = "alloc"))))]
 #[cfg(all(feature = "serde", feature = "alloc"))]
 impl<'de, T: Deserialize<'de>, P: Predicate<T>> Deserialize<'de> for Refinement<T, P> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -102,7 +102,7 @@ impl<T, P: Predicate<T>> TryFrom<Refined<T>> for Refinement<T, P> {
     }
 }
 
-#[doc(cfg(feature = "implication"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "implication")))]
 #[cfg(feature = "implication")]
 impl<F, T, Type> Implies<Refinement<Type, T>> for Refinement<Type, F>
 where
