@@ -2,7 +2,7 @@
 
 use refined::{
     boundable::unsigned::{ClosedInterval, LessThanEqual},
-    type_string, Named, Refinement, RefinementError, RefinementOps, TypeString,
+    type_string, Named, Refinement, RefinementError, RefinementOps, 
 };
 
 type_string!(Name, "name");

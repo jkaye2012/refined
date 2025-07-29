@@ -422,9 +422,7 @@ pub trait TypeString: Default {
 ///
 /// `$name` is the name of a type to create to hold the type-level string.
 /// `$value` is the string that should be lifted into the type system.
-///
-/// Note that use of this macro requires that [TypeString] is in scope.
-///
+/// 
 /// # Example
 ///
 /// ```
@@ -438,7 +436,7 @@ macro_rules! type_string {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
         pub struct $name;
 
-        impl TypeString for $name {
+        impl $crate::TypeString for $name {
             const VALUE: &'static str = $value;
         }
     };

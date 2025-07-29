@@ -15,7 +15,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use refined::{type_string, TypeString, Named, Refinement, RefinementOps, boundable::unsigned::GreaterThan};
+/// use refined::{type_string, Named, Refinement, RefinementOps, boundable::unsigned::GreaterThan};
 ///
 /// type_string!(Example, "example name");
 ///
