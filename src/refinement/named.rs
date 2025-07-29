@@ -117,7 +117,7 @@ mod named_serde {
             D: serde::Deserializer<'de>,
         {
             let refined = Refined::<R::T>::deserialize(deserializer)?;
-            Ok(Self::try_from(refined).map_err(serde::de::Error::custom)?)
+            Self::try_from(refined).map_err(serde::de::Error::custom)
         }
     }
 
