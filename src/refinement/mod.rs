@@ -42,7 +42,7 @@ impl<'de, T: Deserialize<'de>, P: Predicate<T>> Deserialize<'de> for Refinement<
         D: serde::Deserializer<'de>,
     {
         let refined = Refined::<T>::deserialize(deserializer)?;
-        Ok(Self::try_from(refined).map_err(serde::de::Error::custom)?)
+        Self::try_from(refined).map_err(serde::de::Error::custom)
     }
 }
 
