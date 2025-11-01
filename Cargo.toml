@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 const_format = { version = "0.2.34" }
-regex = { version = "1.11.1", optional = true }
+regex = { version = "1.12.2", optional = true }
 serde = { version = "1.0.219", default-features = false, features = ["derive"], optional = true }
 thiserror = { version = "2.0.12", default-features = false, optional = true }
 
